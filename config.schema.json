@@ -1,0 +1,60 @@
+{
+    "pluginAlias": "Roomba2",
+    "pluginType": "accessory",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "name": {
+                "type": "string",
+                "title": "Name",
+                "required": true
+            },
+            "model": {
+                "type": "string",
+                "title": "Model",
+                "required": true
+            },
+            "blid": {
+                "type": "string",
+                "title": "blid",
+                "required": true
+            },
+            "robotpwd": {
+                "type": "string",
+                "title": "Robot Password",
+                "required": true
+            },
+            "ipaddress": {
+                "type": "string",
+                "title": "IP Address",
+                "required": true
+            },
+            "autoRefreshEnabled": {
+                "type": "boolean",
+                "title": "Auto Refreshe Enabled",
+                "required": false
+            },
+            "keepAliveEnabled": {
+                "type": "boolean",
+                "title": "Enable Keep Alive",
+                "required": false
+            },
+            "dockContactSensor": {
+                "type": "boolean",
+                "title": "Show docking status as a contact sensor",
+                "default": true,
+                "required": false
+            },
+            "runningContactSensor": {
+                "type": "boolean",
+                "title": "Show running status as a contact sensor",
+                "required": false
+            },
+            "cacheTTL": {
+                "type": "number",
+                "title": "TTL Cache",
+                "required": false
+            }
+        }
+    }
+}
