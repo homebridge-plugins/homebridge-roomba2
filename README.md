@@ -1,6 +1,6 @@
 <span align="center">
 
-<a href="https://github.com/iRayanKhan/Assets-Repo/blob/master/Chamberlain-Plugin-Branding.png?raw=true"><img alt="homebridge-verified" src="https://github.com/iRayanKhan/Assets-Repo/blob/master/Chamberlain-Plugin-Branding.png?raw=true" width="500px"></a>
+
 
 # Homebridge-Roomba2
 
