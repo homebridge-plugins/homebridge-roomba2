@@ -61,4 +61,5 @@
 
 ### Credits:
 STVMallen  - [Original plugin](https://github.com/stvmallen/homebridge-roomba-stv) 
+
 ncovercash - [Dock status](https://github.com/stvmallen/homebridge-roomba-stv/pull/63)
