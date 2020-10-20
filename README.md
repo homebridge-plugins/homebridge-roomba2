@@ -1,55 +1,37 @@
-# homebridge-roomba2
-homebridge-plugin for Roomba 9xx (Roomba 900 Software Version 2.x).
+<span align="center">
 
-[![npm version](https://badge.fury.io/js/homebridge-roomba-stv.svg)](https://badge.fury.io/js/homebridge-roomba-stv)
-[![dependencies Status](https://david-dm.org/esteban-mallen/homebridge-roomba-stv/status.svg)](https://david-dm.org/esteban-mallen/homebridge-roomba-stv)
+<a href="https://github.com/iRayanKhan/Assets-Repo/blob/master/Chamberlain-Plugin-Branding.png?raw=true"><img alt="homebridge-verified" src="https://github.com/iRayanKhan/Assets-Repo/blob/master/Chamberlain-Plugin-Branding.png?raw=true" width="500px"></a>
 
-### Features:
-- Roomba start on demand
-- Roomba stop and dock on demand
-- Roomba charging status
-- Roomba battery level (with low battery warning)
+# Homebridge-Roomba2
 
-### Credits to:
+<a href="https://www.npmjs.com/package/homebridge-roomba2"><img title="npm version" src="https://badgen.net/npm/v/homebridge-roomba2" ></a>
+<a href="https://www.npmjs.com/package/homebridge-roomba2"><img title="npm downloads" src="https://badgen.net/npm/dt/homebridge-roomba2" ></a>
 
-https://github.com/umesan/homebridge-roomba
 
-https://github.com/steedferns/homebridge-roomba980
+</span>
 
-https://github.com/gbro115/homebridge-roomba690
+### Automatic Installation
+1) Install Homebridge:   ```sudo npm i -g homebridge --unsafe-perm```
+2) Download this plugin: ```sudo npm i -g homebridge-roomba2```
+3) Follow Setup, to get Roomba credentials 
+4) Setup using [Config-Ui-X](https://github.com/oznu/homebridge-config-ui-x)
+5) Restart Homebridge
 
- [@matanelgabsi](https://github.com/matanelgabsi) for keepAlive feature
 
-## Installation:
+### Manual Installation 
+1) Install Homebridge:   ```sudo npm i -g homebridge --unsafe-perm```
+2) Download this plugin: ```sudo npm i -g homebridge-roomba2``` 
+3) Follow Setup, to get Roomba credentials 
+4) Enter Roomba credentials to your config.json file.
+5) Restart Homebridge
 
-### 1. Install homebridge and Roomba plugin.
-- 1.a `sudo npm install -g homebridge --unsafe-perm`
-- 1.b `sudo npm install -g homebridge-roomba-stv`
 
-### 2. Find robotpwd and blid.
-- 2.a Run `npm run getrobotpwd 192.16.xx.xx` where this plugin in installed
-- 2.b Follow instructions
-
-If successful, the following message will be displayed.
-
-Please check **blid** and **Password** of displayed message.
-
-```
-Robot Data:
-{ ver: '2',
-  hostname: 'Roomba-xxxxxxxxxxxxxxxx',
-  robotname: 'Your Roomba’s Name',
-  ip: '192.168.xx.xx',
-  mac: 'xx:xx:xx:xx:xx:xx',
-  sw: 'vx.x.x-x',
-  sku: 'R98----',
-  nc: 0,
-  proto: 'mqtt',
-  blid: '0123456789abcdef' }
-Password=> :1:2345678910:ABCDEFGHIJKLMNOP <= Yes, all this string.
-```
-
-### 4. Update homebridge configuration file.
+### Setup
+1) CD into where your plugins are installed. On a Pi it is: ```/usr/local/lib/node_modules/homebridge-roomba2```
+2) Type ```sudo npm run getrobotpwd 192.168.x.xxx```
+3) Follow the instructions
+4) Use these credentials to fill into Homebridge. 
+5) Config template:
 ```
 "accessories": [
   {
@@ -58,18 +40,25 @@ Password=> :1:2345678910:ABCDEFGHIJKLMNOP <= Yes, all this string.
     "model": "960",
     "blid": "1234567890",
     "robotpwd": "aPassword",
-    "ipaddress": "10.0.0.30",
+    "ipaddress": "192.168.x.xxx",
     "autoRefreshEnabled": true,
-    "keepAliveEnabled": true, //If you use local network mode in roomba app, consider disabling. see note below
+    "keepAliveEnabled": true, 
     "cacheTTL": 30 //in seconds
   }
 ]
 ```
 
-#### Refresh mode
-This plugins supports these refresh modes:
-- NONE (`autoRefreshEnabled` and `keepAlive` both set to false) - no auto refresh, we will connect to roomba and poll status when requested by home app. Please note that this will cause "Updating" status for all homebridge accessories.
 
-- AUTO REFRESH (`autoRefreshEnabled` set to true) - we will connect to roomba, every `pollingInterval` seconds, and store the status in cache. if `pollingInterval` = `cacheTTL` - 10 (or more), this will make sure we will always have a valid status.
+### Features
 
-- KEEP ALIVE (`keepAlive` set to true) - we will keep a connection to roomba, this will cause app to fail to connect to roomba in local network mode (cloud mode will work just fine, even in your home wifi). This will lead to better performance (status will refresh faster, and toggle will work faster as well). **Keep in mind this will increase the Roomba battery consumption**.
+- Roomba start on demand
+- Roomba stop and dock on demand
+- Roomba charging status 
+- Roomba battery level (with low battery warning)
+- Roomba docked notifcation 
+- Roomba running notification
+
+
+### Credits:
+STVMallen  - [Original plugin](https://github.com/stvmallen/homebridge-roomba-stv) 
+ncovercash - [Dock status](https://github.com/stvmallen/homebridge-roomba-stv/pull/63)
