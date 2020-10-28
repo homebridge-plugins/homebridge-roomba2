@@ -460,5 +460,5 @@ module.exports = homebridge => {
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
 
-    homebridge.registerAccessory("homebridge-roomba2", "Roomba", roombaAccessory);
+    homebridge.registerAccessory("homebridge-roomba2", "Roomba2", roombaAccessory);
 };
