@@ -56,5 +56,5 @@
   "scripts": {
     "getrobotpwd": "cd node_modules/dorita980 && npm install && node ./bin/getpassword.js"
   },
-  "version": "0.0.2"
+  "version": "1.0.0"
 }
