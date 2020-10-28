@@ -31,7 +31,7 @@
             },
             "autoRefreshEnabled": {
                 "type": "boolean",
-                "title": "Auto Refreshe Enabled",
+                "title": "Auto Refresh Enabled",
                 "required": false
             },
             "keepAliveEnabled": {
