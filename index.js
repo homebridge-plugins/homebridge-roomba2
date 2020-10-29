@@ -11,6 +11,7 @@ const roombaAccessory = function (log, config) {
     this.log = log;
     this.name = config.name;
     this.model = config.model;
+    this.serialnum = config.serialnum;
     this.blid = config.blid;
     this.robotpwd = config.robotpwd;
     this.ipaddress = config.ipaddress;
@@ -19,6 +20,7 @@ const roombaAccessory = function (log, config) {
     this.autoRefreshEnabled = config.autoRefreshEnabled;
     this.showDockAsContactSensor = config.dockContactSensor == undefined ? true : config.dockContactSensor;
     this.showRunningAsContactSensor = config.runningContactSensor;
+    this.showBinStatusAsContactSensor = config.binContactSensor;
     this.cacheTTL = config.cacheTTL || 5;
     this.disableWait = config.disableWait;
     this.roomba = null;
@@ -33,7 +35,9 @@ const roombaAccessory = function (log, config) {
     if (this.showRunningAsContactSensor) {
         this.runningService = new Service.ContactSensor(this.name + " Running", "running");
     }
-
+    if (this.showBinStatusAsContactSensor) {
+        this.binService = new Service.ContactSensor(this.name + " BinFull", "Full"); 
+    }
     this.cache = new nodeCache({
         stdTTL: this.cacheTTL,
         checkperiod: 1,
@@ -237,6 +241,8 @@ roombaAccessory.prototype = {
         });
     },
 
+    
+
     identify(callback) {
         this.log("Identify requested. Not supported yet.");
 
@@ -348,12 +354,12 @@ roombaAccessory.prototype = {
     getServices() {
         const services = [];
 
-        this.accessoryInfo.setCharacteristic(Characteristic.Manufacturer, "iRobot");
-        this.accessoryInfo.setCharacteristic(Characteristic.SerialNumber, "See iRobot App");
+        this.accessoryInfo.setCharacteristic(Characteristic.Manufacturer, "iRayanKhan");
+        this.accessoryInfo.setCharacteristic(Characteristic.SerialNumber, this.serialnum);
         this.accessoryInfo.setCharacteristic(Characteristic.Identify, false);
         this.accessoryInfo.setCharacteristic(Characteristic.Name, this.name);
         this.accessoryInfo.setCharacteristic(Characteristic.Model, this.model);
-        this.accessoryInfo.setCharacteristic(Characteristic.FirmwareRevision, this.firmware);
+        this.accessoryInfo.setCharacteristic(Characteristic.FirmwareRevision, "1.0.0");
         services.push(this.accessoryInfo);
 
         this.switchService
@@ -387,6 +393,12 @@ roombaAccessory.prototype = {
                 .getCharacteristic(Characteristic.ContactSensorState)
                 .on("get", this.getRunningStatus.bind(this));
             services.push(this.runningService);
+        }
+        if (this.showBinStatusAsContactSensor) {
+            this.binService
+            .getCharacteristic(Characteristic.ContactSensorState)
+            .on("get", this.getFilterStatus.bind(this)) ;
+            services.push(this.binService);
         }
 
         return services;
@@ -433,6 +445,11 @@ roombaAccessory.prototype = {
             this.runningService
                 .getCharacteristic(Characteristic.ContactSensorState)
                 .updateValue(status.running);
+        }
+        if (this.showBinStatusAsContactSensor) {
+            this.binService
+            .getCharacteristic(Characteristic.ContactSensorState)
+                .updateValue(status.binStatus);
         }
     },
 
