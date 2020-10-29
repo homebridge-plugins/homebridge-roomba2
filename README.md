@@ -53,7 +53,7 @@
 ```
 "accessories": [
   {
-    "accessory": "Roomba",
+    "accessory": "Roomba2",
     "name": "Roomba",
     "model": "960",
     "blid": "1234567890",
