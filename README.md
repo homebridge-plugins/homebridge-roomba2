@@ -19,6 +19,7 @@
 - Roomba battery level (with low battery warning)
 - Roomba docked notifcation 
 - Roomba running notification
+- Roomba bin full notification
 
 
 <span align="center">
