@@ -359,7 +359,7 @@ roombaAccessory.prototype = {
         this.accessoryInfo.setCharacteristic(Characteristic.Identify, false);
         this.accessoryInfo.setCharacteristic(Characteristic.Name, this.name);
         this.accessoryInfo.setCharacteristic(Characteristic.Model, this.model);
-        this.accessoryInfo.setCharacteristic(Characteristic.FirmwareRevision, "1.0.0");
+        this.accessoryInfo.setCharacteristic(Characteristic.FirmwareRevision, "1.1.0");
         services.push(this.accessoryInfo);
 
         this.switchService
