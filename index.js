@@ -22,7 +22,6 @@ const roombaAccessory = function (log, config) {
     this.showRunningAsContactSensor = config.runningContactSensor;
     this.showBinStatusAsContactSensor = config.binContactSensor;
     this.cacheTTL = config.cacheTTL || 5;
-    this.disableWait = config.disableWait;
     this.roomba = null;
 
     this.accessoryInfo = new Service.AccessoryInformation();
@@ -172,6 +171,7 @@ roombaAccessory.prototype = {
         this.log("Running status requested");
 
         this.getStatus((error, status) => {
+            this.log.debug(`Received status: ${JSON.stringify(status)} -- error: ${JSON.stringify(error)}`);
             if (error) {
                 callback(error);
             } else {
@@ -252,22 +252,26 @@ roombaAccessory.prototype = {
     getStatus(callback, silent) {
         let status = this.cache.get(STATUS);
 
+        // cache hit, shortcircuit
         if (status) {
-            callback(status.error, status);
-        } else if (!this.autoRefreshEnabled) {
-            this.getStatusFromRoomba(callback, silent);
-        } else {
-            if (!this.disableWait) {
-                setTimeout(() => this.getStatus(callback, silent), 10);
-            } else if (this.cache.get(OLD_STATUS)) {
-                this.log.warn('Using expired status');
-
-                status = this.cache.get(OLD_STATUS);
-                callback(status.error, status);
-            } else {
-                callback('Failed getting status');
-            }
+            return callback(status.error, status);
         }
+
+        // no cache hit, query status from roomba if autorefresh isn't enabled
+        // if autorefresh is enabled, this step isn't needed because it'll get handled automatically in this.enableAutoRefresh()
+        if (!this.autoRefreshEnabled) {
+            return this.getStatusFromRoomba(callback, silent);
+        }
+
+        if (this.cache.get(OLD_STATUS)) {
+            this.log.warn('Using expired status');
+
+            status = this.cache.get(OLD_STATUS);
+            callback(status.error, status);
+        }
+
+        // roomba is dead
+        return callback('Failed getting status');
     },
 
     getStatusFromRoomba(callback, silent) {
@@ -453,6 +457,11 @@ roombaAccessory.prototype = {
         }
     },
 
+    /**
+     * Enables automatic refresh
+     * This works by listening on the cache 'expired' event - when the cache expires (set by user TTL),
+     * the event triggers and automatically pulls fresh state from the robot
+     */
     enableAutoRefresh() {
         this.log("Enabling autoRefresh every %s seconds", this.cache.options.stdTTL);
 
