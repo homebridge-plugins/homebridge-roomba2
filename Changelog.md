@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file. This project uses [semantic versioning](https://semver.org/).
 
+## 1.2.0 (2020-05-12)
+* Fixes #10 (Thank you @dvcrn) [PR: #16]
+
 ## 1.1.0 (2020-10-29)
 * Added support for bin full notifications. 
 
