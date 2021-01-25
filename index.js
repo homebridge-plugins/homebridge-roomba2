@@ -385,6 +385,7 @@ roombaAccessory.prototype = {
         this.filterMaintenance
              .getCharacteristic(Characteristic.FilterChangeIndication)
              .on("get", this.getFilterStatus.bind(this));
+        services.push(this.filterMaintenance);
 
         if (this.showDockAsContactSensor) {
             this.dockService
@@ -437,7 +438,7 @@ roombaAccessory.prototype = {
         this.batteryService
             .getCharacteristic(Characteristic.StatusLowBattery)
             .updateValue(status.batteryStatus);
-            this.filterMaintenance
+        this.filterMaintenance
              .getCharacteristic(Characteristic.FilterChangeIndication)
              .updateValue(status.binStatus);
         if (this.showDockAsContactSensor) {
