@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file. This project uses [semantic versioning](https://semver.org/).
 
+## 1.2.1 (2021-02-01)
+* Fix filterMaintenance service not being published properly, thanks @m-ruhl [#24]
+
 ## 1.2.0 (2020-05-12)
 * Fixes #10 (Thank you @dvcrn) [PR: #16]
 
