@@ -48,7 +48,7 @@
 
 ### Setup
 1) CD into where your plugins are installed. On a Pi it is: ```/usr/local/lib/node_modules/homebridge-roomba2```
-2) Type ```sudo npm run getrobotpwd 192.168.x.xxx```
+2) Type ```sudo npm run getrobotpwd 192.168.x.xxx``` (find your iRobot's IP address and enter it at the end of this command replacing 192.168.x.xxx with your actual IP)
 3) Follow the instructions on screen
 4) Use the credentials from above, to fill into Homebridge. (Config template below):
 ```
