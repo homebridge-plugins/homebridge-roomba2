@@ -168,7 +168,7 @@ roombaAccessory.prototype = {
     },
 
     getRunningStatus(callback) {
-        this.log("Running status requested");
+        this.log.debug("Running status requested");
 
         this.getStatus((error, status) => {
             this.log.debug(`Received status: ${JSON.stringify(status)} -- error: ${JSON.stringify(error)}`);
@@ -181,7 +181,7 @@ roombaAccessory.prototype = {
     },
 
     getIsCharging(callback) {
-        this.log("Charging status requested");
+        this.log.debug("Charging status requested");
 
         this.getStatus((error, status) => {
             if (error) {
@@ -193,7 +193,7 @@ roombaAccessory.prototype = {
     },
 
     getDockedState(callback) {
-        this.log("Docked status requested");
+        this.log.debug("Docked status requested");
 
         this.getStatus((error, status) => {
             if (error) {
@@ -205,7 +205,7 @@ roombaAccessory.prototype = {
     },
 
     getBatteryLevel(callback) {
-        this.log("Battery level requested");
+        this.log.debug("Battery level requested");
 
         
 
@@ -218,7 +218,7 @@ roombaAccessory.prototype = {
         });
     },
     getFilterStatus(callback) {
-        this.log("Bin status requested");
+        this.log.debug("Bin status requested");
 
          this.getStatus((error, status) => {
             if (error) {
@@ -230,7 +230,7 @@ roombaAccessory.prototype = {
     },
 
     getLowBatteryStatus(callback) {
-        this.log("Battery status requested");
+        this.log.debug("Battery status requested");
 
         this.getStatus((error, status) => {
             if (error) {
@@ -244,7 +244,7 @@ roombaAccessory.prototype = {
     
 
     identify(callback) {
-        this.log("Identify requested. Not supported yet.");
+        this.log.debug("Identify requested. Not supported yet.");
 
         callback();
     },
