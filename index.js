@@ -267,7 +267,7 @@ roombaAccessory.prototype = {
             this.log.warn('Using expired status');
 
             status = this.cache.get(OLD_STATUS);
-            callback(status.error, status);
+            return callback(status.error, status);
         }
 
         // roomba is dead
