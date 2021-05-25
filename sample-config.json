@@ -7,9 +7,12 @@
   },
   "description": "Homebridge plugin for Roomba 9xx",
   "platforms": [],
+  "plugins": [
+    "homebridge-roomba2"
+  ],
   "accessories": [
     {
-      "accessory": "Roomba",
+      "accessory": "Roomba2",
       "name": "Roomba",
       "model": "960",
       "blid": "1234567890",
