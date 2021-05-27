@@ -27,6 +27,7 @@ const roombaAccessory = function (log, config) {
     this.accessoryInfo = new Service.AccessoryInformation();
     this.filterMaintenance = new Service.FilterMaintenance(this.name);
     this.switchService = new Service.Switch(this.name);
+    this.dockswitchService = new Service.Switch(this.name "Dock", "dockswitch");
     this.batteryService = new Service.BatteryService(this.name);
     if (this.showDockAsContactSensor) {
         this.dockService = new Service.ContactSensor(this.name + " Docked", "docked");
@@ -114,8 +115,8 @@ roombaAccessory.prototype = {
                     callback();
 
                     this.log("Roomba paused, returning to Dock");
-
-                    this.dockWhenStopped(roomba, 3000);
+//comment out dock when stopped
+                   // this.dockWhenStopped(roomba, 3000);
                 } catch (error) {
                     this.log("Roomba failed: %s", error.message);
 
@@ -133,6 +134,7 @@ roombaAccessory.prototype = {
         }
     },
 
+    
     async dockWhenStopped(roomba, pollingInterval) {
         try {
             const state = await roomba.getRobotState(["cleanMissionStatus"]);
@@ -372,6 +374,11 @@ roombaAccessory.prototype = {
             .on("get", this.getRunningStatus.bind(this));
         services.push(this.switchService);
 
+        this.dockswitchService
+            .getCharacteristic(Characteristic.On)
+            .on("set", this.dockWhenStopped.bind(this));
+        services.push(this.dockswitchServive);
+        
         this.batteryService
             .getCharacteristic(Characteristic.BatteryLevel)
             .on("get", this.getBatteryLevel.bind(this));
@@ -429,6 +436,9 @@ roombaAccessory.prototype = {
         this.switchService
             .getCharacteristic(Characteristic.On)
             .updateValue(status.running);
+        this.dockswitchService
+            .getCharacteristic(Characterstic.On)
+            .updateValue(status.docking);
         this.batteryService
             .getCharacteristic(Characteristic.ChargingState)
             .updateValue(status.charging);
