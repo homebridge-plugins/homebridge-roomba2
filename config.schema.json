@@ -55,7 +55,7 @@
             "title": "Show if bin is full as a contact sensor",
             "required": false
             },
-            "dockWhenStopped": {
+            "dockOnStop": {
             "type": "boolean",
             "title": "If true, Send home when stopped.",
             "required": true
