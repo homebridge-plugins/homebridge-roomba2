@@ -57,7 +57,7 @@
             },
             "dockOnStop": {
             "type": "boolean",
-            "title": "If true, Send home when stopped.",
+            "title": "If true, does not go home when stopped.",
             "required": true
             },
             "cacheTTL": {
