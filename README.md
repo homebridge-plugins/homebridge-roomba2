@@ -47,6 +47,8 @@
 
 
 ### Setup
+**NOTE**: _Before continuing, you should assign your Roomba a static IP address using your router's admin configuration. You will have to research this process on your own because every router's process for assigning a static IP address is different._
+
 1) Navigate to the Homebridge Terminal (`•••` in the top right > `Terminal`)
 1) Change directories to the `homebridge-roomba2` package is installed by running: `` cd `npm root -g` ``
 1) Type ```sudo npm run getrobotpwd 192.168.x.xxx```
