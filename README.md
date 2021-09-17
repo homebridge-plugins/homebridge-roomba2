@@ -47,10 +47,11 @@
 
 
 ### Setup
-1) CD into where your plugins are installed. You can find this by typing ```npm root -g```
-2) Type ```sudo npm run getrobotpwd 192.168.x.xxx```
-3) Follow the instructions on screen
-4) Use the credentials from above, to fill into Homebridge. (Config template below):
+1) Navigate to the Homebridge Terminal (`•••` in the top right > `Terminal`)
+1) Change directories to the `homebridge-roomba2` package is installed by running: `` cd `npm root -g` ``
+1) Type ```sudo npm run getrobotpwd 192.168.x.xxx```
+1) Follow the instructions on screen
+1) Use the output from the command (example below) to configure the plugin using the Homebridge UI for `homebridge-roomba2`
 ```
 "accessories": [
   {
