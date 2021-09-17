@@ -103,7 +103,7 @@ roombaAccessory.prototype = {
                     this.endRoombaIfNeeded(roomba);
                 }
             });
-        } else {
+} else {
             if (!this.dockOnStop) {
             this.log("Roomba pause and dock");
 
@@ -127,17 +127,28 @@ roombaAccessory.prototype = {
                 }
             });
         }
-        else {
+               else {
         this.log("Roomba Pausing");
-        
-        await roomba.pause();
-        
-        this.log("Roomba paused");
-        
-        }
-        
-        }
-    },
+        this.onConnected(roomba, async () => {
+                try {
+                    this.log("Roomba job is ending");
+
+                    await roomba.pause();
+
+                    callback();
+
+                    this.log("Roomba Stopped");
+        } catch (error) {
+                    this.log("Roomba failed: %s", error.message);
+
+                    this.endRoombaIfNeeded(roomba);
+
+                    callback(error);
+                }
+        });
+    }}
+},
+
 
     endRoombaIfNeeded(roomba) {
         if (!this.keepAliveEnabled) {
