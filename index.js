@@ -21,7 +21,7 @@ const roombaAccessory = function (log, config) {
     this.showDockAsContactSensor = config.dockContactSensor == undefined ? true : config.dockContactSensor;
     this.showRunningAsContactSensor = config.runningContactSensor;
     this.showBinStatusAsContactSensor = config.binContactSensor;
-    this.dockOnStop = config.dockOnStop;
+    this.nodockOnStop = config.dockOnStop;
     this.cacheTTL = config.cacheTTL || 5;
     this.roomba = null;
 
@@ -104,7 +104,7 @@ roombaAccessory.prototype = {
                 }
             });
 } else {
-            if (!this.dockOnStop) {
+            if (!this.nodockOnStop) {
             this.log("Roomba pause and dock");
 
             this.onConnected(roomba, async () => {
@@ -133,11 +133,13 @@ roombaAccessory.prototype = {
                 try {
                     this.log("Roomba job is ending");
 
-                    await roomba.pause();
+                    await roomba.stop();
 
                     callback();
 
+                    this.endRoombaIfNeeded(roomba);
                     this.log("Roomba Stopped");
+                    
         } catch (error) {
                     this.log("Roomba failed: %s", error.message);
 
