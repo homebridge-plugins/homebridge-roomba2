@@ -383,7 +383,7 @@ roombaAccessory.prototype = {
     getServices() {
         const services = [];
 
-        this.accessoryInfo.setCharacteristic(Characteristic.Manufacturer, "iRayanKhan");
+        this.accessoryInfo.setCharacteristic(Characteristic.Manufacturer, "iRobot");
         this.accessoryInfo.setCharacteristic(Characteristic.SerialNumber, this.serialnum);
         this.accessoryInfo.setCharacteristic(Characteristic.Identify, false);
         this.accessoryInfo.setCharacteristic(Characteristic.Name, this.name);
