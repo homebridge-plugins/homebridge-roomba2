@@ -104,7 +104,7 @@ roombaAccessory.prototype = {
                 }
             });
         } else {
-            if (!this.nodockOnStop) {
+            if (!this.noDockOnStop) {
             this.log("Roomba pause and dock");
 
             this.onConnected(roomba, async () => {
