@@ -11,7 +11,7 @@
 
 </span>
 
-### Features
+## Features
 
 - Roomba start on demand
 - Roomba stop and dock on demand
@@ -21,67 +21,85 @@
 - Roomba running notification
 - Roomba bin full notification
 
-
-<span align="center">
-
-
-
-# Installation
-</span>
-
+## Installation
 
 ### Automatic Installation
+
 1) Install Homebridge:   ```sudo npm i -g homebridge --unsafe-perm```
 2) Download this plugin: ```sudo npm i -g homebridge-roomba2```
-3) Follow [Setup](https://github.com/iRayanKhan/homebridge-roomba2#setup), to get Roomba credentials 
-4) Continue setup using [Config-Ui-X](https://github.com/oznu/homebridge-config-ui-x)
+3) Follow [Setup](#setup) to get Roomba credentials 
+4) Add an Accessory for your Roomba and configure it using [Config-Ui-X](https://github.com/oznu/homebridge-config-ui-x)
 5) Restart Homebridge
 
+### Manual Installation
 
-### Manual Installation 
 1) Install Homebridge:   ```sudo npm i -g homebridge --unsafe-perm```
 2) Download this plugin: ```sudo npm i -g homebridge-roomba2``` 
-3) Follow [Setup](https://github.com/iRayanKhan/homebridge-roomba2#setup), to get Roomba credentials 
-4) Enter Roomba credentials to your config.json file.
+3) Follow [Setup](#setup) to get Roomba credentials 
+4) Enter Roomba's credentials in your `config.json` file.
 5) Restart Homebridge
 
+## Setup
 
-### Setup
-1) CD into where your plugins are installed. You can find this by typing ```npm root -g```
-2) Type ```sudo npm run getrobotpwd 192.168.x.xxx``` (find your iRobot's IP address and enter it at the end of this command replacing 192.168.x.xxx with your actual IP)
-3) Follow the instructions on screen
-4) Use the credentials from above, to fill into Homebridge. (Config template below):
+1) `cd` into where the plugin is installed: ```cd $(npm root -g)/homebridge-roomba2```
+2) Type ```sudo npm run getrobotpwd 192.168.x.xxx``` (find your Roomba's IP address and enter it at the end of this command replacing 192.168.x.xxx with the actual IP)
+3) Follow the instructions on screen to obtain your Roomba's `blid` and password.
+
+## Configuration
+
+This plugin supports GUI-based configuration using [Config-Ui-X](https://github.com/oznu/homebridge-config-ui-x). You can also
+configure your accessory using JSON:
+
+```json
+{
+  "accessory": "Roomba2",
+  "name": "Roomba",
+  "model": "960",
+  "blid": "1234567890",
+  "robotpwd": "aPassword",
+  "ipaddress": "192.168.x.xxx",
+  "autoRefreshEnabled": true,
+  "keepAliveEnabled": false, 
+  "dockContactSensor": true,
+  "runningContactSensor": true,
+  "binContactSensor": true,
+  "cacheTTL": 30
+}
 ```
-"accessories": [
-  {
-    "accessory": "Roomba2",
-    "name": "Roomba",
-    "model": "960",
-    "blid": "1234567890",
-    "robotpwd": "aPassword",
-    "ipaddress": "192.168.x.xxx",
-    "autoRefreshEnabled": true,
-    "keepAliveEnabled": true, 
-    "dockContactSensor": true,
-    "runningContactSensor": true,
-    "cacheTTL": 30 //in seconds
-  }
-]
-```
-Refresh mode
 
-This plugins supports these refresh modes:
+|Key|Description|
+|---|-----------|
+|`accessory`|Loads this plugin. Must be set to `Roomba2`|
+|`name`|The name of your Roomb as it should appear in Homebridge and HomeKit|
+|`model`|The model of your Roomba as you'd like it to appear in HomeKit|
+|`blid`|The `blid` of your Roomba, obtained during setup|
+|`robotpwd`|The password for your Roomba, obtained during setup|
+|`ipaddress`|The IP address of your Roomba on your network|
+|`keepAliveEnabled`|See _Refresh modes_ below|
+|`autoRefreshEnabled`|See _Refresh modes_ below|
+|`dockContactSensor`|Add a contact sensor to HomeKit that's _closed_ when Roomba is docked|
+|`runningContactSensor`|Add a contact sensor to HomeKit that's _closed_ when Roomba is running|
+|`binContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba's bin is full|
+|`cacheTTL`|How long to cache Roomba's status (in seconds) before contacting Roomba again|
 
-NONE (autoRefreshEnabled and keepAlive both set to false) - no auto refresh, we will connect to roomba and poll status when requested by home app. Please note that this will cause "Updating" status for all homebridge accessories.
+### Refresh modes
 
-AUTO REFRESH (autoRefreshEnabled set to true) - we will connect to roomba, every pollingInterval seconds, and store the status in cache. if pollingInterval = cacheTTL - 10 (or more), this will make sure we will always have a valid status.
+This plugins supports three modes for refreshing the state of your Roomba:
 
-KEEP ALIVE (keepAlive set to true) - we will keep a connection to roomba, this will cause app to fail to connect to roomba in local network mode (cloud mode will work just fine, even in your home wifi). This will lead to better performance (status will refresh faster, and toggle will work faster as well). Keep in mind this will increase the Roomba battery consumption.
+#### Keep alive
 
-Source: https://github.com/stvmallen/homebridge-roomba-stv#refresh-mode
+With `keepAlive` set to `true` the plugin will keep a connection to your Roomba, which will deliver more immediate status changes and commands. However, this will cause the Roomba app to fail to connect to your Roomba in local network mode (cloud mode will work fine) and it will increase Roomba's energy consumption.
 
+#### Auto refresh
 
-### Credits:
+With `autoRefreshEnabled` set to `true` the plugin will connect to Roomba every `cacheTTL` seconds to check its status, and then cache the status so HomeKit always shows Roomba's status immediately.
+
+#### None
+
+With `autoRefreshEnabled` and `keepAlive` both set to `false` the plugin connects to Roomba when its status is requested by HomeKit. This will cause HomeKit to show an "Updating" status for your Roomba until its status is returned.
+
+## Credits
+
 STVMallen  - [Original plugin](https://github.com/stvmallen/homebridge-roomba-stv) 
 
 ncovercash - [Dock status](https://github.com/stvmallen/homebridge-roomba-stv/pull/63)
