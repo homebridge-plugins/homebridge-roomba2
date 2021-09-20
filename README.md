@@ -142,6 +142,22 @@ or
 pnpm watch
 ```
 
+## Contributing
+
+The homebridge-roomba2 plugin uses [Changesets](https://github.com/atlassian/changesets) to maintain the [CHANGELOG.md](./CHANGELOG.md) and to bump the package's version number according to [semer](https://semver.org).
+
+If you are preparing a PR, please consider using Changesets to include a summary of your change for the [CHANGELOG.md](./CHANGELOG.md), following the example of existing changelog entries (but feel free to provide more detail).
+
+To create a new changeset:
+
+```shell
+pnpm changeset
+```
+
+That will prompt you to indicate whether your change is a patch (a bug fix) or a minor or major change. If you are adding a feature it is a minor change, not a patch.
+
+Changesets will create a new file in the `.changeset` directory that you can commit as part of your PR.
+
 ## Credits
 
 STVMallen  - [Original plugin](https://github.com/stvmallen/homebridge-roomba-stv) 
