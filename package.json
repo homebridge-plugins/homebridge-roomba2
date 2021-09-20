@@ -31,5 +31,8 @@
   },
   "scripts": {
     "getrobotpwd": "cd node_modules/dorita980 && npm install && node ./bin/getpassword.js"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.17.0"
   }
 }
