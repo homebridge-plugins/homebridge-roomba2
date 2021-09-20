@@ -217,6 +217,7 @@ roombaAccessory.prototype = {
             }
         });
     },
+
     getFilterStatus(callback) {
         this.log.debug("Bin status requested");
 
@@ -240,8 +241,6 @@ roombaAccessory.prototype = {
             }
         });
     },
-
-    
 
     identify(callback) {
         this.log.debug("Identify requested. Not supported yet.");
