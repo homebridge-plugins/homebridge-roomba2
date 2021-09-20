@@ -33,12 +33,16 @@
     "build": "tsc",
     "clean": "rimraf dist",
     "getrobotpwd": "cd node_modules/dorita980 && npm install && node ./bin/getpassword.js",
-    "test": "pnpm run build && node dist/index.js",
+    "lint": "eslint src/*.ts",
+    "test": "node dist/index.js",
     "watch": "tsc --watch"
   },
   "devDependencies": {
     "@changesets/cli": "^2.17.0",
     "@types/promise-timeout": "^1.3.0",
+    "@typescript-eslint/eslint-plugin": "^4.31.2",
+    "@typescript-eslint/parser": "^4.31.2",
+    "eslint": "^7.32.0",
     "homebridge": "^1.3.4",
     "rimraf": "^3.0.2",
     "typescript": "^4.4.3"
