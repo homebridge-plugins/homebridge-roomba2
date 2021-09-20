@@ -98,6 +98,50 @@ With `autoRefreshEnabled` set to `true` the plugin will connect to Roomba every 
 
 With `autoRefreshEnabled` and `keepAlive` both set to `false` the plugin connects to Roomba when its status is requested by HomeKit. This will cause HomeKit to show an "Updating" status for your Roomba until its status is returned.
 
+## Building
+
+The homebridge-roomba2 plugin uses [TypeScript](https://www.typescriptlang.org), [`pnpm`](https://pnpm.io) and
+[`nvm`](https://github.com/nvm-sh/nvm).
+
+`nvm` is used to control the version of node used. You can skip the `nvm` step if you manage your own
+node versions.
+
+Use `nvm` to select the required node version:
+
+```shell
+nvm use
+```
+
+or, if you don't have the required node version installed:
+
+```shell
+nvm install
+```
+
+Install `pnpm`, if you haven't already:
+
+```shell
+npm -g install pnpm
+```
+
+Prepare the project:
+
+```shell
+pnpm install
+```
+
+Build the project:
+
+```shell
+pnpm build
+```
+
+or
+
+```shell
+pnpm watch
+```
+
 ## Credits
 
 STVMallen  - [Original plugin](https://github.com/stvmallen/homebridge-roomba-stv) 
