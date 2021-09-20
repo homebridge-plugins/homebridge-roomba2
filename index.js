@@ -21,7 +21,7 @@ const roombaAccessory = function (log, config) {
     this.showDockAsContactSensor = config.dockContactSensor == undefined ? true : config.dockContactSensor;
     this.showRunningAsContactSensor = config.runningContactSensor;
     this.showBinStatusAsContactSensor = config.binContactSensor;
-    this.nodockOnStop = config.dockOnStop;
+    this.noDockOnStop = config.noDockOnStop;
     this.cacheTTL = config.cacheTTL || 5;
     this.roomba = null;
 
@@ -103,7 +103,7 @@ roombaAccessory.prototype = {
                     this.endRoombaIfNeeded(roomba);
                 }
             });
-} else {
+        } else {
             if (!this.nodockOnStop) {
             this.log("Roomba pause and dock");
 
@@ -127,11 +127,11 @@ roombaAccessory.prototype = {
                 }
             });
         }
-               else {
-        this.log("Roomba Pausing");
-        this.onConnected(roomba, async () => {
+            else {
+            this.log("Roomba is stopping");
+            this.onConnected(roomba, async () => {
                 try {
-                    this.log("Roomba job is ending");
+                    this.log.debug("Roomba job is ending");
 
                     await roomba.stop();
 
@@ -140,7 +140,7 @@ roombaAccessory.prototype = {
                     this.endRoombaIfNeeded(roomba);
                     this.log("Roomba Stopped");
                     
-        } catch (error) {
+                } catch (error) {
                     this.log("Roomba failed: %s", error.message);
 
                     this.endRoombaIfNeeded(roomba);
@@ -383,7 +383,7 @@ roombaAccessory.prototype = {
     getServices() {
         const services = [];
 
-        this.accessoryInfo.setCharacteristic(Characteristic.Manufacturer, "iRobot");
+        this.accessoryInfo.setCharacteristic(Characteristic.Manufacturer, "iRayanKhan");
         this.accessoryInfo.setCharacteristic(Characteristic.SerialNumber, this.serialnum);
         this.accessoryInfo.setCharacteristic(Characteristic.Identify, false);
         this.accessoryInfo.setCharacteristic(Characteristic.Name, this.name);
