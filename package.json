@@ -4,7 +4,7 @@
   "version": "1.2.1",
   "engines": {
     "homebridge": ">=0.2.0",
-    "node": ">=0.12.0"
+    "node": ">=10"
   },
   "author": {
     "name": "RayanKhan"
