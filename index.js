@@ -35,7 +35,7 @@ const roombaAccessory = function (log, config) {
         this.runningService = new Service.ContactSensor(this.name + " Running", "running");
     }
     if (this.showBinStatusAsContactSensor) {
-        this.binService = new Service.ContactSensor(this.name + " BinFull", "Full"); 
+        this.binService = new Service.ContactSensor(this.name + " Bin Full", "Full"); 
     }
     this.cache = new nodeCache({
         stdTTL: this.cacheTTL,
