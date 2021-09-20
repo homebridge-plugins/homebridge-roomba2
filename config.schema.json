@@ -56,15 +56,15 @@
                 "required": false
             },
             "binContactSensor": {
-            "type": "boolean",
-            "title": "Show if bin is full as a contact sensor",
-            "required": false
+            	"type": "boolean",
+            	"title": "Show if bin is full as a contact sensor",
+            	"required": false
             },
-            "dockOnStop": {
-            "type": "boolean",
-            "title": "Do not send home when stopped",
-            "default": false,
-            "required": true
+            "noDockOnStop": {
+            	"type": "boolean",
+            	"title": "Do not send home when stopped",
+            	"default": false,
+            	"required": true
             },
             "cacheTTL": {
                 "type": "number",
