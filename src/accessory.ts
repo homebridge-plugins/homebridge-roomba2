@@ -142,8 +142,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                     callback(error as Error);
                 } finally {
-                    await setTimeout(() => this.log.debug('Trying to dock again...'), 2000);
-
                     this.endRoombaIfNeeded(roomba);
                 }
             });
