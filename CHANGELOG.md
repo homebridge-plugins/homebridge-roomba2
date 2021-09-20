@@ -8,8 +8,6 @@
 - 450333e: Change the logging of each status request to debug level to reduce log noise [#50]
 - 20d74fc: Fix double calling of the callback when using an expired status [#49]
 
-All notable changes to this project will be documented in this file. This project uses [semantic versioning](https://semver.org/).
-
 ## 1.2.1 (2021-02-01)
 
 - Fix filterMaintenance service not being published properly, thanks @m-ruhl [#24]
