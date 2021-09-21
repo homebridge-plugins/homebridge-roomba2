@@ -6,6 +6,12 @@ import { AccessoryConfig, AccessoryPlugin, NodeCallback, API, Logging, Service, 
  */
 const STATUS_COALLESCE_WINDOW_MILLIS = 5_000;
 
+/**
+ * Whether to output debug logging at info level. Useful during debugging to be able to
+ * see debug logs from this plugin.
+ */
+const DEBUG = false;
+
 interface Status {
     error: null
     running: boolean
@@ -62,7 +68,13 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
     public constructor(log: Logging, config: AccessoryConfig, api: API) {
         this.api = api;
-        this.log = log;
+        this.log = !DEBUG
+            ? log
+            : Object.assign(log, {
+                debug: (message: string, ...parameters: unknown[]) => {
+                    log.info(`DEBUG: ${message}`, ...parameters);
+                },
+            });
         this.name = config.name;
         this.model = config.model;
         this.serialnum = config.serialnum;
@@ -264,7 +276,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                     break;
                 case "run":
-                    this.log("Roomba is still running. Will check again in 3 seconds");
+                    this.log("Roomba is still running. Will check again in %is", pollingInterval / 1000);
 
                     await setTimeout(() => this.log.debug("Trying to dock again..."), pollingInterval);
                     this.dockWhenStopped(roomba, pollingInterval);
@@ -278,7 +290,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     break;
             }
         } catch (error) {
-            this.log.warn(`Roomba failed to dock: ${(error as Error).message}`);
+            this.log.warn("Roomba failed to dock: %s", (error as Error).message);
             this.endRoombaIfNeeded(roomba);
         }
     }
@@ -288,7 +300,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
      */
     private createCharacteristicGetter(name: string, extractValue: (status: Status) => CharacteristicValue | null): CharacteristicGetter {
         return (callback: CharacteristicGetCallback) => {
-            this.log.debug(`${name} requested`);
+            this.log.debug("%s requested", name);
 
             let timeoutResponded = false;
 
@@ -296,10 +308,10 @@ export default class RoombaAccessory implements AccessoryPlugin {
             const timeout = setTimeout(() => {
                 timeoutResponded = true;
                 if (this.cachedStatus) {
-                    this.log.debug(`${name}: timeout returning last result: ${JSON.stringify(this.cachedStatus)}`);
+                    this.log.debug("%s: timeout returning last result: %s", name, JSON.stringify(this.cachedStatus));
                     callback(this.cachedStatus.error, !this.cachedStatus.error ? extractValue(this.cachedStatus!) : undefined);
                 } else {
-                    this.log.debug(`${name}: timeout returning no result`);
+                    this.log.debug("%s: timeout returning no result", name);
                     callback(new Error("Device slow to respond"));
                 }
             }, 500);
@@ -307,7 +319,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
             this.getStatus((error, status) => {
                 if (!timeoutResponded) {
                     clearTimeout(timeout);
-                    this.log.debug(`${name}: returning result ${error} ${status}`);
+                    this.log.debug("%s: returning result %s %s", name, error, status ? JSON.stringify(status) : undefined);
                     callback(error, status ? extractValue(status) : undefined);
                 }
             });
@@ -325,6 +337,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
         const now = Date.now();
         if (this.currentGetStatusTimestamp !== undefined && now - this.currentGetStatusTimestamp < STATUS_COALLESCE_WINDOW_MILLIS) {
+            this.log.debug("Queueing status request with status request that's been running for %ims", now - this.currentGetStatusTimestamp);
             return;
         }
         this.currentGetStatusTimestamp = now;
@@ -332,10 +345,12 @@ export default class RoombaAccessory implements AccessoryPlugin {
         const roomba = this.getRoomba();
 
         this.onConnected(roomba, async() => {
+            this.log.debug("getStatus connected to Roomba in %ims", Date.now() - now);
+
             try {
                 const response = await roomba.getRobotState(["cleanMissionStatus", "batPct", "bin"]);
                 const status = this.parseState(response);
-                this.log.debug("Roomba status: %s => %s", JSON.stringify(response), JSON.stringify(status));
+                this.log.debug("getStatus got status in %ims: %s => %s", Date.now() - now, JSON.stringify(response), JSON.stringify(status));
 
                 for (const aCallback of this.pendingStatusRequests) {
                     aCallback(null, status);
@@ -343,7 +358,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                 this.setCachedStatus(status);
             } catch (error) {
-                this.log.warn(`Unable to determine state of Roomba: ${(error as Error).message}`);
+                this.log.warn("Unable to determine state of Roomba: %s", (error as Error).message);
 
                 for (const aCallback of this.pendingStatusRequests) {
                     aCallback(error as Error);
@@ -422,7 +437,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                 break;
             default:
-                this.log.info(`Unsupported phase: ${state.cleanMissionStatus!.phase}`);
+                this.log.info("Unsupported phase: %s", state.cleanMissionStatus!.phase);
 
                 status.running = false;
                 status.charging = false;
@@ -434,6 +449,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
     }
 
     private updateCharacteristics(status: Status) {
+        this.log.debug("Updating characteristics for status: %s", JSON.stringify(status));
+
         const Characteristic = this.api.hap.Characteristic;
 
         this.switchService
