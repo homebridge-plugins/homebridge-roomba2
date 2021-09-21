@@ -14,6 +14,11 @@
                 "title": "Model",
                 "required": true
             },
+            "serialnum": {
+                "type": "string",
+                "title": "Serial Number",
+                "required": false
+            },
             "blid": {
                 "type": "string",
                 "title": "blid",
