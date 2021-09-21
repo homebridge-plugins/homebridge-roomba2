@@ -27,7 +27,7 @@ const WATCH_IDLE_TIMEOUT_MILLIS = 600_000;
  * Whether to output debug logging at info level. Useful during debugging to be able to
  * see debug logs from this plugin.
  */
-const DEBUG = false;
+const DEBUG = true;
 
 interface Status {
     error: null
