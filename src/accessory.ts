@@ -191,7 +191,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     await roomba.clean();
                     await roomba.resume();
 
-                    this.mergeStatus({
+                    this.mergeCachedStatus({
                         running: true,
                         charging: false,
                         docking: false,
@@ -219,7 +219,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                     callback();
                     
-                    this.mergeStatus({
+                    this.mergeCachedStatus({
                         running: false,
                         charging: false,
                         docking: false,
@@ -256,7 +256,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                     this.log("Roomba docking");
                     
-                    this.mergeStatus({
+                    this.mergeCachedStatus({
                         running: false,
                         charging: false,
                         docking: true,
@@ -337,22 +337,19 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 const status = this.parseState(response);
                 this.log.debug("Roomba status: %s => %s", JSON.stringify(response), JSON.stringify(status));
 
-                this.cachedStatus = status;
-
                 for (const aCallback of this.pendingStatusRequests) {
                     aCallback(null, status);
                 }
 
-                /* Update all of our characteristics from the latest status */
-                this.updateCharacteristics(status);
+                this.setCachedStatus(status);
             } catch (error) {
                 this.log.warn(`Unable to determine state of Roomba: ${(error as Error).message}`);
-
-                this.cachedStatus = { error: error as Error };
 
                 for (const aCallback of this.pendingStatusRequests) {
                     aCallback(error as Error);
                 }
+
+                this.setCachedStatus({ error: error as Error });
             } finally {
                 this.currentGetStatusTimestamp = undefined;
                 this.pendingStatusRequests = [];
@@ -366,9 +363,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
      * Merge in changes to the cached status, and update our characteristics so the plugin
      * preemptively reports state back to Homebridge.
      */
-    private mergeStatus(status: Partial<Status>) {
+    private mergeCachedStatus(status: Partial<Status>) {
         if (this.cachedStatus && !this.cachedStatus.error) {
-            this.setStatus({
+            this.setCachedStatus({
                 ...this.cachedStatus,
                 ...status,
             });
@@ -379,9 +376,11 @@ export default class RoombaAccessory implements AccessoryPlugin {
      * Update the cached status and update our characteristics so the plugin preemptively
      * reports state back to Homebridge.
      */
-    private setStatus(status: Status) {
+    private setCachedStatus(status: CachedStatus) {
         this.cachedStatus = status;
-        this.updateCharacteristics(status);
+        if (!status.error) {
+            this.updateCharacteristics(status);
+        }
     }
 
     private parseState(state: RobotState) {
