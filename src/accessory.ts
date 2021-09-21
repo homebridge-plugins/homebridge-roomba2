@@ -268,7 +268,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     break;
             }
         } catch (error) {
-            this.log((error as Error).message);
+            this.log.warn(`Roomba failed to dock: ${(error as Error).message}`);
             this.endRoombaIfNeeded(roomba);
         }
     }
