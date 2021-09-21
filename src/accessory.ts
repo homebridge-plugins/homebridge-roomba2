@@ -418,7 +418,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 break;
             case "stop":
                 status.running = false;
-                status.charging = true;
+                status.charging = false;
                 status.docking = false;
 
                 break;
