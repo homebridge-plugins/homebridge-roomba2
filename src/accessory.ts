@@ -105,12 +105,14 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
         const Characteristic = this.api.hap.Characteristic;
 
+        const version: string = require("../package.json").version;
+
         this.accessoryInfo.setCharacteristic(Characteristic.Manufacturer, "iRayanKhan");
         this.accessoryInfo.setCharacteristic(Characteristic.SerialNumber, this.serialnum);
         this.accessoryInfo.setCharacteristic(Characteristic.Identify, false);
         this.accessoryInfo.setCharacteristic(Characteristic.Name, this.name);
         this.accessoryInfo.setCharacteristic(Characteristic.Model, this.model);
-        this.accessoryInfo.setCharacteristic(Characteristic.FirmwareRevision, "1.1.0");
+        this.accessoryInfo.setCharacteristic(Characteristic.FirmwareRevision, version);
         services.push(this.accessoryInfo);
 
         this.switchService
