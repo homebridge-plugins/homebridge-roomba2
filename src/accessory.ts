@@ -1,15 +1,15 @@
 import dorita980, { RobotState, Roomba } from "dorita980";
 import { AccessoryConfig, AccessoryPlugin, NodeCallback, API, Logging, Service, CharacteristicValue, CharacteristicGetCallback, CharacteristicSetCallback } from "homebridge";
-import NodeCache from "node-cache";
-import { timeout } from "promise-timeout";
 
-const STATUS = "status";
-const OLD_STATUS = "oldStatus";
+/**
+ * The window of time in which status requests to Roomba are coalesced.
+ */
+const STATUS_COALLESCE_WINDOW_MILLIS = 5_000;
 
 interface Status {
     error: null
     running: 0 | 1
-    charging: number
+    charging: 0 | 1
     batteryLevel: string | number
     batteryStatus: string | 0 | 1
     binFull: boolean
@@ -22,6 +22,15 @@ interface StatusError {
 
 type CachedStatus = Status | StatusError;
 
+type CharacteristicGetter = (callback: CharacteristicGetCallback, context: unknown, connection?: unknown) => void
+
+const runningStatus = (status: Status) => status.running;
+const chargingStatus = (status: Status) => status.charging;
+const dockedStatus = (status: Status) => status.charging;
+const batteryLevelStatus = (status: Status) => status.batteryLevel;
+const binStatus = (status: Status) => status.binStatus;
+const batteryStatus = (status: Status) => status.batteryStatus;
+
 export default class RoombaAccessory implements AccessoryPlugin {
 
     private api: API
@@ -33,13 +42,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private robotpwd: string
     private ipaddress: string
     private firmware: string
-    private keepAliveEnabled: boolean
-    private autoRefreshEnabled: boolean
     private showDockAsContactSensor: boolean
     private showRunningAsContactSensor: boolean
     private showBinStatusAsContactSensor: boolean
-    private cacheTTL: number
-    private roomba: Roomba | null
 
     private accessoryInfo: Service
     private filterMaintenance: Service
@@ -48,7 +53,22 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private dockService?: Service
     private runningService?: Service
     private binService?: Service
-    private cache: NodeCache
+
+    /**
+     * The last known state from Roomba, if any.
+     */
+    private cachedStatus?: CachedStatus
+
+    /**
+     * The epoch time in millis when the current status request to Roomba
+     * started, or undefined if there is no current status request.
+     */
+    private currentGetStatusTimestamp?: number
+
+    /**
+     * An array of the status callbacks waiting for the current status request.
+     */
+    private pendingStatusRequests: NodeCallback<Status>[]
 
     public constructor(log: Logging, config: AccessoryConfig, api: API) {
         this.api = api;
@@ -60,13 +80,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.robotpwd = config.robotpwd;
         this.ipaddress = config.ipaddress;
         this.firmware = "N/A";
-        this.keepAliveEnabled = config.keepAliveEnabled;
-        this.autoRefreshEnabled = config.autoRefreshEnabled;
         this.showDockAsContactSensor = config.dockContactSensor === undefined ? true : config.dockContactSensor;
         this.showRunningAsContactSensor = config.runningContactSensor;
         this.showBinStatusAsContactSensor = config.binContactSensor;
-        this.cacheTTL = config.cacheTTL || 5;
-        this.roomba = null;
 
         const Service = api.hap.Service;
 
@@ -84,17 +100,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
             this.binService = new Service.ContactSensor(this.name + " Bin Full", "Full"); 
         }
 
-        this.cache = new NodeCache({
-            stdTTL: this.cacheTTL,
-            checkperiod: 1,
-            useClones: false,
-        });
-
-        if (this.keepAliveEnabled) {
-            this.registerStateUpdate();
-        } else if (this.autoRefreshEnabled) {
-            this.enableAutoRefresh();
-        }
+        this.pendingStatusRequests = [];
     }
 
     public identify(): void {
@@ -118,86 +124,75 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
         this.switchService
             .getCharacteristic(Characteristic.On)
-            .on("set", this.setState.bind(this))
-            .on("get", this.getRunningStatus.bind(this));
+            .on("set", this.setRunningState.bind(this))
+            .on("get", this.createCharacteristicGetter("Running status", runningStatus));
         services.push(this.switchService);
 
         this.batteryService
             .getCharacteristic(Characteristic.BatteryLevel)
-            .on("get", this.getBatteryLevel.bind(this));
+            .on("get", this.createCharacteristicGetter("Battery level", batteryLevelStatus));
         this.batteryService
             .getCharacteristic(Characteristic.ChargingState)
-            .on("get", this.getIsCharging.bind(this));
+            .on("get", this.createCharacteristicGetter("Charging status", chargingStatus));
         this.batteryService
             .getCharacteristic(Characteristic.StatusLowBattery)
-            .on("get", this.getLowBatteryStatus.bind(this));
+            .on("get", this.createCharacteristicGetter("Low Battery status", batteryStatus));
         services.push(this.batteryService);
+
         this.filterMaintenance
             .getCharacteristic(Characteristic.FilterChangeIndication)
-            .on("get", this.getFilterStatus.bind(this));
+            .on("get", this.createCharacteristicGetter("Bin status", binStatus));
         services.push(this.filterMaintenance);
 
-        if (this.showDockAsContactSensor) {
-            this.dockService!
+        if (this.dockService) {
+            this.dockService
                 .getCharacteristic(Characteristic.ContactSensorState)
-                .on("get", this.getDockedState.bind(this));
-            services.push(this.dockService!);
+                .on("get", this.createCharacteristicGetter("Docker status", dockedStatus));
+            services.push(this.dockService);
         }
-        if (this.showRunningAsContactSensor) {
-            this.runningService!
+        if (this.runningService) {
+            this.runningService
                 .getCharacteristic(Characteristic.ContactSensorState)
-                .on("get", this.getRunningStatus.bind(this));
-            services.push(this.runningService!);
+                .on("get", this.createCharacteristicGetter("Running status", runningStatus));
+            services.push(this.runningService);
         }
-        if (this.showBinStatusAsContactSensor) {
-            this.binService!
+        if (this.binService) {
+            this.binService
                 .getCharacteristic(Characteristic.ContactSensorState)
-                .on("get", this.getFilterStatus.bind(this));
-            services.push(this.binService!);
+                .on("get", this.createCharacteristicGetter("Bin status", binStatus));
+            services.push(this.binService);
         }
 
         return services;
     }
 
     private getRoomba() {
-        if (this.keepAliveEnabled) {
-            if (this.roomba == null) {
-                this.roomba = new dorita980.Local(this.blid, this.robotpwd, this.ipaddress);
-            }
-            return this.roomba;
-        } else {
-            return new dorita980.Local(this.blid, this.robotpwd, this.ipaddress);
-        }
+        return new dorita980.Local(this.blid, this.robotpwd, this.ipaddress);
     }
 
-    private onConnected(roomba: Roomba, callback: () => void, silent = false) {
-        if (this.keepAliveEnabled && roomba.connected) {
+    private onConnected(roomba: Roomba, callback: () => void) {
+        roomba.on("connect", () => {
+            this.log.debug("Connected to Roomba");
             callback();
-        } else {
-            roomba.on("connect", () => {
-                if (!silent) {
-                    this.log("Connected to Roomba");
-                } else {
-                    this.log.debug("Connected to Roomba");
-                }
-                callback();
-            });
-        }
+        });
     }
 
-    private setState(powerOn: CharacteristicValue, callback: CharacteristicSetCallback) {
+    private setRunningState(powerOn: CharacteristicValue, callback: CharacteristicSetCallback) {
         const roomba = this.getRoomba();
-
-        this.cache.del(STATUS);
 
         if (powerOn) {
             this.log("Starting Roomba");
 
             this.onConnected(roomba, async() => {
                 try {
-                    this.log("Roomba is running");
-
                     await roomba.clean();
+
+                    this.mergeStatus({
+                        running: 1,
+                        charging: 0,
+                    });
+
+                    this.log("Roomba is running");
 
                     callback();
                 } catch (error) {
@@ -218,6 +213,11 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     await roomba.pause();
 
                     callback();
+                    
+                    this.mergeStatus({
+                        running: 0,
+                        charging: 0,
+                    });
 
                     this.log("Roomba paused, returning to Dock");
 
@@ -234,9 +234,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     }
 
     private endRoombaIfNeeded(roomba: Roomba) {
-        if (!this.keepAliveEnabled) {
-            roomba.end();
-        }
+        roomba.end();
     }
 
     private async dockWhenStopped(roomba: Roomba, pollingInterval: number) {
@@ -251,6 +249,11 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     this.endRoombaIfNeeded(roomba);
 
                     this.log("Roomba docking");
+                    
+                    this.mergeStatus({
+                        running: 0,
+                        charging: 0,
+                    });
 
                     break;
                 case "run":
@@ -272,142 +275,106 @@ export default class RoombaAccessory implements AccessoryPlugin {
             this.endRoombaIfNeeded(roomba);
         }
     }
+    
+    /**
+     * Creates as a Characteristic getter function that derives the CharacteristicValue from Roomba's status.
+     */
+    private createCharacteristicGetter(name: string, extractValue: (status: Status) => CharacteristicValue): CharacteristicGetter {
+        return (callback: CharacteristicGetCallback) => {
+            this.log.debug(`${name} requested`);
 
-    private getRunningStatus(callback: CharacteristicGetCallback) {
-        this.log.debug("Running status requested");
+            let timeoutResponded = false;
 
-        this.getStatus((error, status) => {
-            this.log.debug(`Received status: ${JSON.stringify(status)} -- error: ${JSON.stringify(error)}`);
-            if (error) {
-                callback(error);
-            } else {
-                callback(null, status!.running);
-            }
-        });
+            /* Ensure we respond to Homebridge within a short time to avoid slowing down Homebridge */
+            const timeout = setTimeout(() => {
+                timeoutResponded = true;
+                if (this.cachedStatus) {
+                    this.log.debug(`${name}: timeout returning last result: ${JSON.stringify(this.cachedStatus)}`);
+                    callback(this.cachedStatus.error, !this.cachedStatus.error ? extractValue(this.cachedStatus!) : undefined);
+                } else {
+                    this.log.debug(`${name}: timeout returning no result`);
+                    callback(new Error("Device slow to respond"));
+                }
+            }, 500);
+
+            this.getStatus((error, status) => {
+                if (!timeoutResponded) {
+                    clearTimeout(timeout);
+                    this.log.debug(`${name}: returning result ${error} ${status}`);
+                    callback(error, status ? extractValue(status) : undefined);
+                }
+            });
+        };
     }
 
-    private getIsCharging(callback: CharacteristicGetCallback) {
-        this.log.debug("Charging status requested");
+    /**
+     * Get the current status from Roomba. Coalesces status requests into one status request
+     * to Roomba at a time.
+     * @param callback 
+     * @returns 
+     */
+    private getStatus(callback: NodeCallback<Status>) {
+        this.pendingStatusRequests.push(callback);
 
-        this.getStatus((error, status) => {
-            if (error) {
-                callback(error);
-            } else {
-                callback(null, status!.charging);
-            }
-        });
-    }
-
-    private getDockedState(callback: CharacteristicGetCallback) {
-        this.log.debug("Docked status requested");
-
-        this.getStatus((error, status) => {
-            if (error) {
-                callback(error);
-            } else {
-                callback(null, status!.charging === this.api.hap.Characteristic.ChargingState.CHARGING);
-            }
-        });
-    }
-
-    private getBatteryLevel(callback: CharacteristicGetCallback) {
-        this.log.debug("Battery level requested");
-
-        this.getStatus((error, status) => {
-            if (error) {
-                callback(error);
-            } else {
-                callback(null, status!.batteryLevel);
-            }
-        });
-    }
-
-    private getFilterStatus(callback: CharacteristicGetCallback) {
-        this.log.debug("Bin status requested");
-
-        this.getStatus((error, status) => {
-            if (error) {
-                callback(error);
-            } else {
-                callback(null, status!.binStatus);
-            }
-        });
-    }
-
-    private getLowBatteryStatus(callback: CharacteristicGetCallback) {
-        this.log.debug("Battery status requested");
-
-        this.getStatus((error, status) => {
-            if (error) {
-                callback(error);
-            } else {
-                callback(null, status!.batteryStatus);
-            }
-        });
-    }
-
-    private getStatus(callback: NodeCallback<Status>, silent = false) {
-        let status: CachedStatus | undefined = this.cache.get<CachedStatus>(STATUS);
-
-        // cache hit, shortcircuit
-        if (status) {
-            return callback(status.error, status.error ? undefined : status);
+        const now = Date.now();
+        if (this.currentGetStatusTimestamp !== undefined && now - this.currentGetStatusTimestamp < STATUS_COALLESCE_WINDOW_MILLIS) {
+            return;
         }
+        this.currentGetStatusTimestamp = now;
 
-        // no cache hit, query status from roomba if autorefresh isn't enabled
-        // if autorefresh is enabled, this step isn't needed because it'll get handled automatically in this.enableAutoRefresh()
-        if (!this.autoRefreshEnabled) {
-            return this.getStatusFromRoomba(callback, silent);
-        }
-
-        if (this.cache.get(OLD_STATUS)) {
-            this.log.warn("Using expired status");
-
-            status = this.cache.get<CachedStatus>(OLD_STATUS);
-            if (status) {
-                return callback(status.error, status.error ? undefined : status);
-            }
-        }
-
-        // roomba is dead
-        return callback(new Error("Failed getting status"));
-    }
-
-    private getStatusFromRoomba(callback: NodeCallback<Status>, silent = false) {
         const roomba = this.getRoomba();
 
         this.onConnected(roomba, async() => {
             try {
-                const response = await timeout(roomba.getRobotState(["cleanMissionStatus", "batPct", "bin"]), 5000);
+                const response = await roomba.getRobotState(["cleanMissionStatus", "batPct", "bin"]);
                 const status = this.parseState(response);
+                this.log.debug("Roomba status: %s => %s", JSON.stringify(response), JSON.stringify(status));
 
-                if (this.autoRefreshEnabled) {
-                    this.cache.set(STATUS, status);
+                this.cachedStatus = status;
+
+                for (const aCallback of this.pendingStatusRequests) {
+                    aCallback(null, status);
                 }
 
-                callback(null, status);
-
-                if (!silent) {
-                    this.log("Roomba[%s]", JSON.stringify(status));
-                } else {
-                    this.log.debug("Roomba[%s]", JSON.stringify(status));
-                }
+                /* Update all of our characteristics from the latest status */
+                this.updateCharacteristics(status);
             } catch (error) {
-                if (!silent) {
-                    this.log("Unable to determine state of Roomba");
-                } else {
-                    this.log.debug("Unable to determine state of Roomba");
+                this.log.warn(`Unable to determine state of Roomba: ${(error as Error).message}`);
+
+                this.cachedStatus = { error: error as Error };
+
+                for (const aCallback of this.pendingStatusRequests) {
+                    aCallback(error as Error);
                 }
-
-                this.log.debug((error as Error).message);
-
-                callback(error as Error);
-
-                this.cache.set<CachedStatus>(STATUS, { error: error as Error });
             } finally {
+                this.currentGetStatusTimestamp = undefined;
+                this.pendingStatusRequests = [];
+
                 this.endRoombaIfNeeded(roomba);
             }
-        }, silent);
+        });
+    }
+
+    /**
+     * Merge in changes to the cached status, and update our characteristics so the plugin
+     * preemptively reports state back to Homebridge.
+     */
+    private mergeStatus(status: Partial<Status>) {
+        if (this.cachedStatus && !this.cachedStatus.error) {
+            this.setStatus({
+                ...this.cachedStatus,
+                ...status,
+            });
+        }
+    }
+
+    /**
+     * Update the cached status and update our characteristics so the plugin preemptively
+     * reports state back to Homebridge.
+     */
+    private setStatus(status: Status) {
+        this.cachedStatus = status;
+        this.updateCharacteristics(status);
     }
 
     private parseState(state: RobotState) {
@@ -458,77 +425,39 @@ export default class RoombaAccessory implements AccessoryPlugin {
         return status;
     }
 
-    private registerStateUpdate() {
-        this.log("Enabling keepAlive");
-
-        const roomba = this.getRoomba();
-
-        roomba.on("state", state => {
-            const status = this.parseState(state);
-
-            if (this.autoRefreshEnabled) {
-                this.cache.set(STATUS, status);
-            }
-
-            this.updateCharacteristics(status);
-        });
-    }
-
     private updateCharacteristics(status: Status) {
         const Characteristic = this.api.hap.Characteristic;
 
         this.switchService
             .getCharacteristic(Characteristic.On)
-            .updateValue(status.running);
+            .updateValue(runningStatus(status));
         this.batteryService
             .getCharacteristic(Characteristic.ChargingState)
-            .updateValue(status.charging);
+            .updateValue(chargingStatus(status));
         this.batteryService
             .getCharacteristic(Characteristic.BatteryLevel)
-            .updateValue(status.batteryLevel);
+            .updateValue(batteryLevelStatus(status));
         this.batteryService
             .getCharacteristic(Characteristic.StatusLowBattery)
-            .updateValue(status.batteryStatus);
+            .updateValue(batteryStatus(status));
         this.filterMaintenance
             .getCharacteristic(Characteristic.FilterChangeIndication)
-            .updateValue(status.binStatus);
-        if (this.showDockAsContactSensor) {
-            this.dockService!
+            .updateValue(binStatus(status));
+        if (this.dockService) {
+            this.dockService
                 .getCharacteristic(Characteristic.ContactSensorState)
-                .updateValue(!status.charging);
+                .updateValue(dockedStatus(status));
         }
-        if (this.showRunningAsContactSensor) {
-            this.runningService!
+        if (this.runningService) {
+            this.runningService
                 .getCharacteristic(Characteristic.ContactSensorState)
-                .updateValue(status.running);
+                .updateValue(runningStatus(status));
         }
-        if (this.showBinStatusAsContactSensor) {
-            this.binService!
+        if (this.binService) {
+            this.binService
                 .getCharacteristic(Characteristic.ContactSensorState)
-                .updateValue(status.binStatus);
+                .updateValue(binStatus(status));
         }
     }
 
-    /**
-     * Enables automatic refresh
-     * This works by listening on the cache 'expired' event - when the cache expires (set by user TTL),
-     * the event triggers and automatically pulls fresh state from the robot
-     */
-    private enableAutoRefresh() {
-        this.log("Enabling autoRefresh every %s seconds", this.cache.options.stdTTL);
-
-        this.cache.on("expired", (key, value) => {
-            this.log.debug(key + " expired");
-
-            this.cache.set<CachedStatus>(OLD_STATUS, value, 0);
-
-            this.getStatusFromRoomba((error, status) => {
-                if (!error) this.updateCharacteristics(status!);
-            }, true);
-        });
-
-        this.getStatusFromRoomba((error, status) => {
-            if (!error) this.updateCharacteristics(status!);
-        }, true);
-    }
 }

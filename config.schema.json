@@ -29,16 +29,6 @@
                 "title": "IP Address",
                 "required": true
             },
-            "autoRefreshEnabled": {
-                "type": "boolean",
-                "title": "Auto Refresh Enabled",
-                "required": false
-            },
-            "keepAliveEnabled": {
-                "type": "boolean",
-                "title": "Enable Keep Alive",
-                "required": false
-            },
             "dockContactSensor": {
                 "type": "boolean",
                 "title": "Show docking status as a contact sensor",
@@ -53,11 +43,6 @@
             "binContactSensor": {
                 "type": "boolean",
                 "title": "Show if bin is full as a contact sensor",
-                "required": false
-            },
-            "cacheTTL": {
-                "type": "number",
-                "title": "TTL Cache",
                 "required": false
             }
         }

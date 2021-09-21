@@ -21,6 +21,10 @@
 - Roomba running notification
 - Roomba bin full notification
 
+The homebridge-roomba2 plugin polls Roomba for its status when requested by HomeKit, so when you first open
+the Home app you may see an old status, or no status, until Roomba has had time to respond (which may take
+a few seconds).
+
 ## Installation
 
 ### Automatic Installation
@@ -58,12 +62,9 @@ configure your accessory using JSON:
   "blid": "1234567890",
   "robotpwd": "aPassword",
   "ipaddress": "192.168.x.xxx",
-  "autoRefreshEnabled": true,
-  "keepAliveEnabled": false, 
   "dockContactSensor": true,
   "runningContactSensor": true,
-  "binContactSensor": true,
-  "cacheTTL": 30
+  "binContactSensor": true
 }
 ```
 
@@ -75,28 +76,17 @@ configure your accessory using JSON:
 |`blid`|The `blid` of your Roomba, obtained during setup|
 |`robotpwd`|The password for your Roomba, obtained during setup|
 |`ipaddress`|The IP address of your Roomba on your network|
-|`keepAliveEnabled`|See _Refresh modes_ below|
-|`autoRefreshEnabled`|See _Refresh modes_ below|
 |`dockContactSensor`|Add a contact sensor to HomeKit that's _closed_ when Roomba is docked|
 |`runningContactSensor`|Add a contact sensor to HomeKit that's _closed_ when Roomba is running|
 |`binContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba's bin is full|
-|`cacheTTL`|How long to cache Roomba's status (in seconds) before contacting Roomba again|
 
-### Refresh modes
+### Deprecated configuration
 
-This plugins supports three modes for refreshing the state of your Roomba:
+The homebridge-roomba2 plugin used to support keep-alive and auto refresh modes for obtaining Roomba's status.
+Both of these modes required more resources from Homebridge and Roomba than were necessary.
 
-#### Keep alive
-
-With `keepAlive` set to `true` the plugin will keep a connection to your Roomba, which will deliver more immediate status changes and commands. However, this will cause the Roomba app to fail to connect to your Roomba in local network mode (cloud mode will work fine) and it will increase Roomba's energy consumption.
-
-#### Auto refresh
-
-With `autoRefreshEnabled` set to `true` the plugin will connect to Roomba every `cacheTTL` seconds to check its status, and then cache the status so HomeKit always shows Roomba's status immediately.
-
-#### None
-
-With `autoRefreshEnabled` and `keepAlive` both set to `false` the plugin connects to Roomba when its status is requested by HomeKit. This will cause HomeKit to show an "Updating" status for your Roomba until its status is returned.
+Now the plugin efficiently queries Roomba's status on demand so as not to slow down Homebridge and so
+as to provide HomeKit with Roomba's status only when it requests it.
 
 ## Building
 
