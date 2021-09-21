@@ -62,7 +62,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.firmware = "N/A";
         this.keepAliveEnabled = config.keepAliveEnabled;
         this.autoRefreshEnabled = config.autoRefreshEnabled;
-        this.showDockAsContactSensor = config.dockContactSensor == undefined ? true : config.dockContactSensor;
+        this.showDockAsContactSensor = config.dockContactSensor === undefined ? true : config.dockContactSensor;
         this.showRunningAsContactSensor = config.runningContactSensor;
         this.showBinStatusAsContactSensor = config.binContactSensor;
         this.cacheTTL = config.cacheTTL || 5;
@@ -83,6 +83,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         if (this.showBinStatusAsContactSensor) {
             this.binService = new Service.ContactSensor(this.name + " Bin Full", "Full"); 
         }
+
         this.cache = new NodeCache({
             stdTTL: this.cacheTTL,
             checkperiod: 1,
