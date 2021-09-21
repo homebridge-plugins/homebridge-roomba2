@@ -185,7 +185,11 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
             this.onConnected(roomba, async() => {
                 try {
+                    /* To start Roomba we signal both a clean and a resume, as if Roomba is paused in a clean cycle,
+                       we need to instruct it to resume instead.
+                     */
                     await roomba.clean();
+                    await roomba.resume();
 
                     this.mergeStatus({
                         running: 1,
