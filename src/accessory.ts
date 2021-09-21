@@ -80,7 +80,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.accessoryInfo = new Service.AccessoryInformation();
         this.filterMaintenance = new Service.FilterMaintenance(this.name);
         this.switchService = new Service.Switch(this.name);
-        this.batteryService = new Service.BatteryService(this.name);
+        this.batteryService = new Service.Battery(this.name);
         if (showDockAsContactSensor) {
             this.dockService = new Service.ContactSensor(this.name + " Dock", "docked");
         }
