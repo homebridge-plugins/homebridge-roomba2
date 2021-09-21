@@ -4,5 +4,21 @@
   "initialVersions": {
     "homebridge-roomba2": "1.2.2"
   },
-  "changesets": []
+  "changesets": [
+    "breezy-files-agree",
+    "clean-crabs-explain",
+    "clever-ears-move",
+    "cold-numbers-attack",
+    "lovely-otters-matter",
+    "lovely-terms-bake",
+    "mean-bugs-attack",
+    "nasty-camels-hammer",
+    "new-monkeys-pay",
+    "old-windows-buy",
+    "serious-candles-draw",
+    "stale-bobcats-march",
+    "twenty-adults-care",
+    "weak-cats-accept",
+    "wise-mayflies-sort"
+  ]
 }

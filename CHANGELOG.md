@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.3.0-beta.0
+
+### Minor Changes
+
+- ae578c0: Refactor Roomba connection handling to improve reporting of issues connecting to Roomba and to reuse
+  existing Roomba connections to avoid conflicts [#66]
+- 3e9e48b: Include a resume command when starting cleaning so we can cope with a paused Roomba
+- 44c6f8a: Actively watch Roomba's status and update HomeKit for a short period of time after being inspected
+
+  HomeKit inspects Roomba when you open the Home app, but it doesn't continously poll for changes
+  so the plugin now watches Roomba for changes and pushes them to the Home app.
+
+- b7322c0: Add docking contact sensor
+- 28eeeec: Report current plugin version as the firmware version
+- aac6159: Change state refresh approach to be on demand rather than constant polling
+  or keeping a permanent connection.
+- 6dbb668: Convert to using TypeScript and pnpm for development
+
+### Patch Changes
+
+- Enable serial number to be specified in the configuration
+- Change the manufacturer reported to HomeKit to iRobot
+- f71c085: Add source code linting
+- 032098a: Improve the log message when Roomba fails to complete a docking manoeuvre
+- e623a28: Rename Docked contact sensor to Dock
+- 1f02665: Improve the default name of the Bin Full sensor
+- e79b7a3: Update dependencies
+- 1346008: Logging more efficient and added a switch to enable easier debug logging
+
 ## 1.2.2
 
 ### Patch Changes
