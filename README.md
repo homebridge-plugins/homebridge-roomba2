@@ -94,7 +94,7 @@ as to provide HomeKit with Roomba's status only when it requests it.
 Click on any of the items below to expand the corresponding answer.
 
 <details>
-  <summary><span style="font-size: 4em;">I don't know what my Roomba's IP address is</span></summary>  
+  <summary>I don't know what my Roomba's IP address is</summary>  
 
   >In order to find your Roomba's IP address, you'll need to open up your Router Admin Panel and look for a list of devices. Once you identify the Roomba, you should see an associated IP address, however, this process will be different for each type of router.
   >
