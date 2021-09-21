@@ -42,9 +42,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private robotpwd: string
     private ipaddress: string
     private firmware: string
-    private showDockAsContactSensor: boolean
-    private showRunningAsContactSensor: boolean
-    private showBinStatusAsContactSensor: boolean
 
     private accessoryInfo: Service
     private filterMaintenance: Service
@@ -80,9 +77,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.robotpwd = config.robotpwd;
         this.ipaddress = config.ipaddress;
         this.firmware = "N/A";
-        this.showDockAsContactSensor = config.dockContactSensor === undefined ? true : config.dockContactSensor;
-        this.showRunningAsContactSensor = config.runningContactSensor;
-        this.showBinStatusAsContactSensor = config.binContactSensor;
+        const showDockAsContactSensor = config.dockContactSensor === undefined ? true : config.dockContactSensor;
+        const showRunningAsContactSensor = config.runningContactSensor;
+        const showBinStatusAsContactSensor = config.binContactSensor;
 
         const Service = api.hap.Service;
 
@@ -90,13 +87,13 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.filterMaintenance = new Service.FilterMaintenance(this.name);
         this.switchService = new Service.Switch(this.name);
         this.batteryService = new Service.BatteryService(this.name);
-        if (this.showDockAsContactSensor) {
+        if (showDockAsContactSensor) {
             this.dockService = new Service.ContactSensor(this.name + " Docked", "docked");
         }
-        if (this.showRunningAsContactSensor) {
+        if (showRunningAsContactSensor) {
             this.runningService = new Service.ContactSensor(this.name + " Running", "running");
         }
-        if (this.showBinStatusAsContactSensor) {
+        if (showBinStatusAsContactSensor) {
             this.binService = new Service.ContactSensor(this.name + " Bin Full", "Full"); 
         }
 
