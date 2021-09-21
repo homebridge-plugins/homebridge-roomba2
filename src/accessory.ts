@@ -7,6 +7,11 @@ import { AccessoryConfig, AccessoryPlugin, NodeCallback, API, Logging, Service, 
 const STATUS_COALLESCE_WINDOW_MILLIS = 5_000;
 
 /**
+ * How long to wait to connect to Roomba.
+ */
+const CONNECT_TIMEOUT = 15_000;
+
+/**
  * Whether to output debug logging at info level. Useful during debugging to be able to
  * see debug logs from this plugin.
  */
@@ -65,6 +70,16 @@ export default class RoombaAccessory implements AccessoryPlugin {
      * An array of the status callbacks waiting for the current status request.
      */
     private pendingStatusRequests: NodeCallback<Status>[]
+
+    /**
+     * The currently connected Roomba instance _only_ used in the connect() method.
+     */
+    private _currentlyConnectedRoomba?: Roomba;
+
+    /**
+     * How many requests are currently using the connected Roomba instance.
+     */
+    private _currentlyConnectedRoombaRequests = 0;
 
     public constructor(log: Logging, config: AccessoryConfig, api: API) {
         this.api = api;
@@ -178,24 +193,79 @@ export default class RoombaAccessory implements AccessoryPlugin {
         return services;
     }
 
-    private getRoomba() {
-        return new dorita980.Local(this.blid, this.robotpwd, this.ipaddress);
-    }
+    private async connect(callback: (error: Error | null, roomba?: Roomba) => Promise<void>) {
+        const getRoomba = () => {
+            if (this._currentlyConnectedRoomba) {
+                this._currentlyConnectedRoombaRequests++;
+                return this._currentlyConnectedRoomba;
+            }
 
-    private onConnected(roomba: Roomba, callback: () => void) {
-        roomba.on("connect", () => {
+            const roomba = new dorita980.Local(this.blid, this.robotpwd, this.ipaddress);
+            this._currentlyConnectedRoomba = roomba;
+            this._currentlyConnectedRoombaRequests = 1;
+            return roomba;
+        };
+        const stopUsingRoomba = async(roomba: Roomba) => {
+            if (roomba !== this._currentlyConnectedRoomba) {
+                this.log.warn("Releasing an unexpected Roomba instance");
+                await roomba.end();
+                return;
+            }
+    
+            this._currentlyConnectedRoombaRequests--;
+            if (this._currentlyConnectedRoombaRequests === 0) {
+                this.log.debug("Releasing Roomba instance");
+                await roomba.end();
+                this._currentlyConnectedRoomba = undefined;
+            } else {
+                this.log.debug("Leaving Roomba instance with %i ongoing requests", this._currentlyConnectedRoombaRequests);
+            }
+        };
+
+        const roomba = getRoomba();
+        if (roomba.connected) {
+            this.log.debug("Reusing connected Roomba");
+
+            await callback(null, roomba);
+            await stopUsingRoomba(roomba);
+            return;
+        }
+
+        let timedOut = false;
+
+        const timeout = setTimeout(async() => {
+            timedOut = true;
+
+            this.log.warn("Timed out trying to connect to Roomba");
+
+            await callback(new Error("Connect timed out"));
+            await stopUsingRoomba(roomba);
+        }, CONNECT_TIMEOUT);
+    
+        roomba.on("connect", async() => {
+            if (timedOut) {
+                this.log.debug("Connection established to Roomba after timeout");
+                return;
+            }
+
+            clearTimeout(timeout);
+
             this.log.debug("Connected to Roomba");
-            callback();
+            await callback(null, roomba);
+            await stopUsingRoomba(roomba);
         });
     }
 
     private setRunningState(powerOn: CharacteristicValue, callback: CharacteristicSetCallback) {
-        const roomba = this.getRoomba();
-
         if (powerOn) {
             this.log("Starting Roomba");
 
-            this.onConnected(roomba, async() => {
+            this.connect(async(error, roomba) => {
+                if (error || !roomba) {
+                    callback(error || new Error("Unknown error"));
+                    return;
+                }
+
                 try {
                     /* To start Roomba we signal both a clean and a resume, as if Roomba is paused in a clean cycle,
                        we need to instruct it to resume instead.
@@ -216,14 +286,17 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     this.log("Roomba failed: %s", (error as Error).message);
 
                     callback(error as Error);
-                } finally {
-                    this.endRoombaIfNeeded(roomba);
                 }
             });
         } else {
             this.log("Roomba pause and dock");
 
-            this.onConnected(roomba, async() => {
+            this.connect(async(error, roomba) => {
+                if (error || !roomba) {
+                    callback(error || new Error("Unknown error"));
+                    return;
+                }
+
                 try {
                     this.log("Roomba is pausing");
 
@@ -239,20 +312,14 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                     this.log("Roomba paused, returning to Dock");
 
-                    this.dockWhenStopped(roomba, 3000);
+                    await this.dockWhenStopped(roomba, 3000);
                 } catch (error) {
                     this.log("Roomba failed: %s", (error as Error).message);
-
-                    this.endRoombaIfNeeded(roomba);
 
                     callback(error as Error);
                 }
             });
         }
-    }
-
-    private endRoombaIfNeeded(roomba: Roomba) {
-        roomba.end();
     }
 
     private async dockWhenStopped(roomba: Roomba, pollingInterval: number) {
@@ -264,7 +331,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     this.log("Roomba has stopped, issuing dock request");
 
                     await roomba.dock();
-                    this.endRoombaIfNeeded(roomba);
 
                     this.log("Roomba docking");
                     
@@ -279,19 +345,16 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     this.log("Roomba is still running. Will check again in %is", pollingInterval / 1000);
 
                     await setTimeout(() => this.log.debug("Trying to dock again..."), pollingInterval);
-                    this.dockWhenStopped(roomba, pollingInterval);
+                    await this.dockWhenStopped(roomba, pollingInterval);
 
                     break;
                 default:
-                    this.endRoombaIfNeeded(roomba);
-
                     this.log("Roomba is not running");
 
                     break;
             }
         } catch (error) {
             this.log.warn("Roomba failed to dock: %s", (error as Error).message);
-            this.endRoombaIfNeeded(roomba);
         }
     }
     
@@ -342,9 +405,15 @@ export default class RoombaAccessory implements AccessoryPlugin {
         }
         this.currentGetStatusTimestamp = now;
 
-        const roomba = this.getRoomba();
+        this.log.debug("getStatus connecting to Roomba...");
 
-        this.onConnected(roomba, async() => {
+        this.connect(async(error, roomba) => {
+            if (error || !roomba) {
+                callback(error || new Error("Unknown error"));
+                this.setCachedStatus({ error: error as Error });
+                return;
+            }
+
             this.log.debug("getStatus connected to Roomba in %ims", Date.now() - now);
 
             try {
@@ -368,8 +437,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
             } finally {
                 this.currentGetStatusTimestamp = undefined;
                 this.pendingStatusRequests = [];
-
-                this.endRoombaIfNeeded(roomba);
             }
         });
     }
