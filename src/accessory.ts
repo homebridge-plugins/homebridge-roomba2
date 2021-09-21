@@ -9,7 +9,7 @@ const OLD_STATUS = "oldStatus";
 interface Status {
     error: null
     running: 0 | 1
-    charging: 0 | 1
+    charging: number
     batteryLevel: string | number
     batteryStatus: string | 0 | 1
     binFull: boolean
@@ -302,7 +302,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
             if (error) {
                 callback(error);
             } else {
-                callback(null, !status!.charging);
+                callback(null, status!.charging === this.api.hap.Characteristic.ChargingState.CHARGING);
             }
         });
     }
