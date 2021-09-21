@@ -51,9 +51,9 @@
                 "required": false
             },
             "binContactSensor": {
-            "type": "boolean",
-            "title": "Show if bin is full as a contact sensor",
-            "required": false
+                "type": "boolean",
+                "title": "Show if bin is full as a contact sensor",
+                "required": false
             },
             "cacheTTL": {
                 "type": "number",
