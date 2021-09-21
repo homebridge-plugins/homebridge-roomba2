@@ -484,8 +484,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
         ? this.api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
         : this.api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED;
     private dockedStatus = (status: Status) => status.charging
-        ? this.api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
-        : this.api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED;
+        ? this.api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED
+        : this.api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;
     private batteryLevelStatus = (status: Status) => status.batteryLevel;
     private binStatus = (status: Status) => status.binFull
         ? this.api.hap.Characteristic.FilterChangeIndication.CHANGE_FILTER
