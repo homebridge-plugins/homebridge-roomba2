@@ -44,6 +44,11 @@
                 "type": "boolean",
                 "title": "Show if bin is full as a contact sensor",
                 "required": false
+            },
+            "dockingContactSensor": {
+                "type": "boolean",
+                "title": "Show docking status as a contact sensor",
+                "required": false
             }
         }
     }

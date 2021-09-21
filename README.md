@@ -79,6 +79,7 @@ configure your accessory using JSON:
 |`dockContactSensor`|Add a contact sensor to HomeKit that's _closed_ when Roomba is docked|
 |`runningContactSensor`|Add a contact sensor to HomeKit that's _closed_ when Roomba is running|
 |`binContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba's bin is full|
+|`dockingContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba is docking|
 
 ### Deprecated configuration
 

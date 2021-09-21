@@ -9,6 +9,7 @@ const STATUS_COALLESCE_WINDOW_MILLIS = 5_000;
 interface Status {
     error: null
     running: boolean
+    docking: boolean
     charging: boolean
     batteryLevel: number | null
     binFull: boolean
@@ -41,6 +42,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private dockService?: Service
     private runningService?: Service
     private binService?: Service
+    private dockingService?: Service
 
     /**
      * The last known state from Roomba, if any.
@@ -71,6 +73,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         const showDockAsContactSensor = config.dockContactSensor === undefined ? true : config.dockContactSensor;
         const showRunningAsContactSensor = config.runningContactSensor;
         const showBinStatusAsContactSensor = config.binContactSensor;
+        const showDockingAsContactSensor = config.dockingContactSensor;
 
         const Service = api.hap.Service;
 
@@ -86,6 +89,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
         }
         if (showBinStatusAsContactSensor) {
             this.binService = new Service.ContactSensor(this.name + " Bin Full", "Full"); 
+        }
+        if (showDockingAsContactSensor) {
+            this.dockingService = new Service.ContactSensor(this.name + " Docking", "docking"); 
         }
 
         this.pendingStatusRequests = [];
@@ -150,6 +156,12 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 .on("get", this.createCharacteristicGetter("Bin status", this.binStatus));
             services.push(this.binService);
         }
+        if (this.dockingService) {
+            this.dockingService
+                .getCharacteristic(Characteristic.ContactSensorState)
+                .on("get", this.createCharacteristicGetter("Docking status", this.dockingStatus));
+            services.push(this.dockingService);
+        }
 
         return services;
     }
@@ -182,6 +194,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     this.mergeStatus({
                         running: true,
                         charging: false,
+                        docking: false,
                     });
 
                     this.log("Roomba is running");
@@ -209,6 +222,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     this.mergeStatus({
                         running: false,
                         charging: false,
+                        docking: false,
                     });
 
                     this.log("Roomba paused, returning to Dock");
@@ -245,6 +259,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     this.mergeStatus({
                         running: false,
                         charging: false,
+                        docking: true,
                     });
 
                     break;
@@ -373,6 +388,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         const status: Status = {
             error: null,
             running: false,
+            docking: false,
             charging: false,
             batteryLevel: null,
             binFull: false,
@@ -385,16 +401,33 @@ export default class RoombaAccessory implements AccessoryPlugin {
             case "run":
                 status.running = true;
                 status.charging = false;
+                status.docking = false;
 
                 break;
             case "charge":
                 status.running = false;
                 status.charging = true;
+                status.docking = false;
+
+                break;
+            case "hmUsrDock":
+                status.running = false;
+                status.charging = false;
+                status.docking = true;
+                
+                break;
+            case "stop":
+                status.running = false;
+                status.charging = true;
+                status.docking = false;
 
                 break;
             default:
+                this.log.info(`Unsupported phase: ${state.cleanMissionStatus!.phase}`);
+
                 status.running = false;
                 status.charging = false;
+                status.docking = false;
 
                 break;
         }
@@ -434,6 +467,11 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 .getCharacteristic(Characteristic.ContactSensorState)
                 .updateValue(this.binStatus(status));
         }
+        if (this.dockingService) {
+            this.dockingService
+                .getCharacteristic(Characteristic.ContactSensorState)
+                .updateValue(this.dockingStatus(status));
+        }
     }
 
     private runningStatus = (status: Status) => status.running
@@ -442,6 +480,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private chargingStatus = (status: Status) => status.charging
         ? this.api.hap.Characteristic.ChargingState.CHARGING
         : this.api.hap.Characteristic.ChargingState.NOT_CHARGING;
+    private dockingStatus = (status: Status) => status.docking
+        ? this.api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
+        : this.api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED;
     private dockedStatus = (status: Status) => status.charging
         ? this.api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
         : this.api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED;
