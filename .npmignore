@@ -1,0 +1,8 @@
+/*.md
+/.changeset
+/src
+/.nvmrc
+/.eslintrc.js
+/tsconfig.json
+/*.tgz
+/pnpm-lock.yaml

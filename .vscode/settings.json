@@ -1,0 +1,10 @@
+{
+	"eslint.validate": [
+	  "javascript",
+	  "typescript"
+	],
+	"window.title": "${activeEditorShort}${separator}${rootName}",
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": true
+	}
+}
