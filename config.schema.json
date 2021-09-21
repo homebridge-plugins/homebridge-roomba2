@@ -14,6 +14,11 @@
                 "title": "Model",
                 "required": true
             },
+            "serialnum": {
+                "type": "string",
+                "title": "Serial Number",
+                "required": false
+            },
             "blid": {
                 "type": "string",
                 "title": "blid",
@@ -29,16 +34,6 @@
                 "title": "IP Address",
                 "required": true
             },
-            "autoRefreshEnabled": {
-                "type": "boolean",
-                "title": "Auto Refresh Enabled",
-                "required": false
-            },
-            "keepAliveEnabled": {
-                "type": "boolean",
-                "title": "Enable Keep Alive",
-                "required": false
-            },
             "dockContactSensor": {
                 "type": "boolean",
                 "title": "Show docking status as a contact sensor",
@@ -51,13 +46,13 @@
                 "required": false
             },
             "binContactSensor": {
-            "type": "boolean",
-            "title": "Show if bin is full as a contact sensor",
-            "required": false
+                "type": "boolean",
+                "title": "Show if bin is full as a contact sensor",
+                "required": false
             },
-            "cacheTTL": {
-                "type": "number",
-                "title": "TTL Cache",
+            "dockingContactSensor": {
+                "type": "boolean",
+                "title": "Show docking status as a contact sensor",
                 "required": false
             }
         }

@@ -1,60 +1,48 @@
 {
-  "_from": "homebridge-roomba2",
-  "_id": "homebridge-roomba2@0.0.1",
-  "_inBundle": false,
-  "_integrity": "sha512-OPV3D4RtdhfcgFjw2RKDa4NFXiKsqZFAvlE8ELCknu7tCP/+UbIH8YKMvmxYWxN5S0Zni9nOTYMGt2xi6qG3MA==",
-  "_location": "/homebridge-roomba2",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "tag",
-    "registry": true,
-    "raw": "homebridge-roomba2",
-    "name": "homebridge-roomba2",
-    "escapedName": "homebridge-roomba2",
-    "rawSpec": "",
-    "saveSpec": null,
-    "fetchSpec": "latest"
+  "name": "homebridge-roomba2",
+  "description": "homebridge-plugin for Roomba devices",
+  "version": "1.2.2",
+  "engines": {
+    "homebridge": ">=0.2.0",
+    "node": ">=10"
   },
-  "_requiredBy": [
-    "#USER"
-  ],
-  "_resolved": "https://registry.npmjs.org/homebridge-roomba2/-/homebridge-roomba2-0.0.1.tgz",
-  "_shasum": "85ca571980b5b496d02feedf174013b2869717e7",
-  "_spec": "homebridge-roomba2",
-  "_where": "/Users/rayankhan",
   "author": {
     "name": "RayanKhan"
   },
   "bugs": {
-    "url": "https://github.com/iRayanKhan/homebridge-roomba2/issues"
+    "url": "https://github.com/karlvr/homebridge-roomba2/issues"
   },
-  "bundleDependencies": false,
   "dependencies": {
-    "dorita980": "^3.1.4",
-    "node-cache": "^5.1.0",
-    "promise-timeout": "^1.3.0"
+    "dorita980": "^3.1.9"
   },
-  "deprecated": false,
-  "description": "homebridge-plugin for Roomba devices",
-  "engines": {
-    "homebridge": ">=0.2.0",
-    "node": ">=0.12.0"
-  },
-  "homepage": "https://github.com/iRayanKhan/homebridge-roomba2#readme",
+  "homepage": "https://github.com/karlvr/homebridge-roomba2#readme",
   "keywords": [
     "homebridge-plugin",
     "iRobot",
     "Roomba"
   ],
   "license": "MIT",
-  "main": "",
-  "name": "homebridge-roomba2",
+  "main": "./dist/index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/iRayanKhan/homebridge-roomba2.git"
+    "url": "git://github.com/karlvr/homebridge-roomba2.git"
   },
   "scripts": {
-    "getrobotpwd": "cd node_modules/dorita980 && npm install && node ./bin/getpassword.js"
+    "build": "tsc",
+    "clean": "rimraf dist",
+    "getrobotpwd": "cd node_modules/dorita980 && npm install && node ./bin/getpassword.js",
+    "lint": "eslint src/*.ts",
+    "test": "node dist/index.js",
+    "watch": "tsc --watch"
   },
-  "version": "1.1.0"
+  "devDependencies": {
+    "@changesets/cli": "^2.17.0",
+    "@types/promise-timeout": "^1.3.0",
+    "@typescript-eslint/eslint-plugin": "^4.31.2",
+    "@typescript-eslint/parser": "^4.31.2",
+    "eslint": "^7.32.0",
+    "homebridge": "^1.3.4",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.4.3"
+  }
 }
