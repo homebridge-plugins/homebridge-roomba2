@@ -5,6 +5,7 @@ declare module "dorita980" {
         on(event: "state", callback: (state: RobotState) => void): void
         on(event: "connect", callback: () => void): void
         clean(): Promise<CommandResult>
+        resume(): Promise<CommandResult>
         pause(): Promise<CommandResult>
         end(): Promise<CommandResult>
         dock(): Promise<CommandResult>
@@ -33,6 +34,7 @@ declare module "dorita980" {
         public on(event: "state", callback: (state: RobotState) => void): void;
         public on(event: "connect", callback: () => void): void;
         public clean(): Promise<CommandResult>
+        public resume(): Promise<CommandResult>
         public pause(): Promise<CommandResult>
         public end(): Promise<CommandResult>
         public dock(): Promise<CommandResult>
