@@ -73,6 +73,7 @@ configure your accessory using JSON:
 |`accessory`|Loads this plugin. Must be set to `Roomba2`|
 |`name`|The name of your Roomb as it should appear in Homebridge and HomeKit|
 |`model`|The model of your Roomba as you'd like it to appear in HomeKit|
+|`serialnum`|The serial number as you'd like it to appear in HomeKit|
 |`blid`|The `blid` of your Roomba, obtained during setup|
 |`robotpwd`|The password for your Roomba, obtained during setup|
 |`ipaddress`|The IP address of your Roomba on your network|
