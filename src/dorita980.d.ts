@@ -7,6 +7,7 @@ declare module "dorita980" {
         clean(): Promise<CommandResult>
         resume(): Promise<CommandResult>
         pause(): Promise<CommandResult>
+        stop(): Promise<CommandResult>
         end(): Promise<CommandResult>
         dock(): Promise<CommandResult>
         getRobotState(states: string[]): Promise<RobotState>
@@ -36,6 +37,7 @@ declare module "dorita980" {
         public clean(): Promise<CommandResult>
         public resume(): Promise<CommandResult>
         public pause(): Promise<CommandResult>
+        public stop(): Promise<CommandResult>
         public end(): Promise<CommandResult>
         public dock(): Promise<CommandResult>
         public getRobotState(states: string[]): Promise<RobotState>
