@@ -12,6 +12,18 @@ const STATUS_COALLESCE_WINDOW_MILLIS = 5_000;
 const CONNECT_TIMEOUT = 15_000;
 
 /**
+ * When actively watching Roomba's status, how often to query Roomba and update HomeKit.
+ */
+const WATCH_INTERVAL_MILLIS = 10_000;
+
+/**
+ * After starting to actively watch Roomba's status, how long should we watch for after
+ * the last status enquiry from HomeKit? This lets us stop checking on Roomba when no
+ * one is interested.
+ */
+const WATCH_IDLE_TIMEOUT_MILLIS = 600_000;
+
+/**
  * Whether to output debug logging at info level. Useful during debugging to be able to
  * see debug logs from this plugin.
  */
@@ -80,6 +92,12 @@ export default class RoombaAccessory implements AccessoryPlugin {
      * How many requests are currently using the connected Roomba instance.
      */
     private _currentlyConnectedRoombaRequests = 0;
+
+    /**
+     * Whether the plugin is actively watching Roomba's state and updating HomeKit
+     */
+    private watching?: NodeJS.Timeout
+    private lastWatchingRequestTimestamp?: number
 
     public constructor(log: Logging, config: AccessoryConfig, api: API) {
         this.api = api;
@@ -282,6 +300,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     this.log("Roomba is running");
 
                     callback();
+
+                    /* After sending an action to Roomba, we start watching to ensure HomeKit has up to date status */
+                    this.startWatching();
                 } catch (error) {
                     this.log("Roomba failed: %s", (error as Error).message);
 
@@ -312,6 +333,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                     this.log("Roomba paused, returning to Dock");
 
+                    this.startWatching();
                     await this.dockWhenStopped(roomba, 3000);
                 } catch (error) {
                     this.log("Roomba failed: %s", (error as Error).message);
@@ -385,6 +407,11 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     this.log.debug("%s: returning result %s %s", name, error, status ? JSON.stringify(status) : undefined);
                     callback(error, status ? extractValue(status) : undefined);
                 }
+
+                /* After HomeKit has queried a characteristic, we start watching to keep HomeKit updated
+                   of any changes.
+                 */
+                this.startWatching();
             });
         };
     }
@@ -554,6 +581,59 @@ export default class RoombaAccessory implements AccessoryPlugin {
             this.dockingService
                 .getCharacteristic(Characteristic.ContactSensorState)
                 .updateValue(this.dockingStatus(status));
+        }
+    }
+
+    /**
+     * Start actively watching Roomba's status and reporting updates to HomeKit.
+     * We start watching whenever an event occurs, so we update HomeKit promptly
+     * when the status changes.
+     */
+    private startWatching() {
+        this.lastWatchingRequestTimestamp = Date.now();
+
+        if (this.watching !== undefined) {
+            return;
+        }
+
+        let errors = 0;
+
+        const checkStatus = () => {
+            const timeSinceLastWatchingRequest = Date.now() - (this.lastWatchingRequestTimestamp || 0);
+            if (timeSinceLastWatchingRequest > WATCH_IDLE_TIMEOUT_MILLIS) {
+                this.log.debug("Stopping watching Roomba due to idle timeout");
+                this.stopWatching();
+                return;
+            }
+            
+            this.getStatus((error, status) => {
+                if (error) {
+                    errors++;
+                    if (errors > 10) {
+                        this.log.warn("Stopped watching Roomba's status due to too many errors");
+                        this.stopWatching();
+                    }
+                } else if (status) {
+                    errors = 0;
+
+                    const timeSinceLastWatchingRequest = Date.now() - (this.lastWatchingRequestTimestamp || 0);
+                    this.log.debug(
+                        "Will check Roomba's status again in %is (idle timeout in %is)",
+                        WATCH_INTERVAL_MILLIS / 1000, 
+                        (WATCH_IDLE_TIMEOUT_MILLIS - timeSinceLastWatchingRequest) / 1000
+                    );
+                    this.watching = setTimeout(checkStatus, WATCH_INTERVAL_MILLIS);
+                }
+            });
+        };
+        
+        this.watching = setTimeout(checkStatus, WATCH_INTERVAL_MILLIS);
+    }
+
+    private stopWatching() {
+        if (this.watching !== undefined) {
+            clearTimeout(this.watching);
+            this.watching = undefined;
         }
     }
 
