@@ -82,7 +82,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.switchService = new Service.Switch(this.name);
         this.batteryService = new Service.BatteryService(this.name);
         if (showDockAsContactSensor) {
-            this.dockService = new Service.ContactSensor(this.name + " Docked", "docked");
+            this.dockService = new Service.ContactSensor(this.name + " Dock", "docked");
         }
         if (showRunningAsContactSensor) {
             this.runningService = new Service.ContactSensor(this.name + " Running", "running");
@@ -141,7 +141,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         if (this.dockService) {
             this.dockService
                 .getCharacteristic(Characteristic.ContactSensorState)
-                .on("get", this.createCharacteristicGetter("Docker status", this.dockedStatus));
+                .on("get", this.createCharacteristicGetter("Dock status", this.dockedStatus));
             services.push(this.dockService);
         }
         if (this.runningService) {
