@@ -47,7 +47,7 @@ a few seconds).
 
 1) `cd` into where the plugin is installed: ```cd $(npm root -g)/homebridge-roomba2```
 2) Type ```sudo npm run getrobotpwd 192.168.x.xxx``` (find your Roomba's IP address and enter it at the end of this command replacing 192.168.x.xxx with the actual IP)
-3) Follow the instructions on screen to obtain your Roomba's `blid` and password.
+3) Follow the instructions on screen to obtain your Roomba's `blid` and password. NB: Read the instructions carefully and ensure that you're pressing and holding the correct button on your Roomba.
 
 ## Configuration
 
