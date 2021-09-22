@@ -667,13 +667,13 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 return;
             }
             
-            this.refreshState();
-
             this.log.debug(
-                "Will check Roomba's status again in %is (idle timeout in %is)",
+                "Refreshing Roomba's status (repeating in %is, idle timeout in %is)",
                 WATCH_INTERVAL_MILLIS / 1000, 
                 (WATCH_IDLE_TIMEOUT_MILLIS - timeSinceLastWatchingRequest) / 1000
             );
+
+            this.refreshState();
             this.watching = setTimeout(checkStatus, WATCH_INTERVAL_MILLIS);
         };
         
