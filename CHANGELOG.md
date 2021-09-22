@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0-beta.1
+
+### Patch Changes
+
+- 58cba16: Improve Roomba connection handling
+
 ## 1.3.0-beta.0
 
 ### Minor Changes
