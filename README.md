@@ -45,9 +45,12 @@ a few seconds).
 
 ## Setup
 
-1) `cd` into where the plugin is installed: ```cd $(npm root -g)/homebridge-roomba2```
-2) Type ```sudo npm run getrobotpwd 192.168.x.xxx``` (find your Roomba's IP address and enter it at the end of this command replacing 192.168.x.xxx with the actual IP)
-3) Follow the instructions on screen to obtain your Roomba's `blid` and password. NB: Read the instructions carefully and ensure that you're pressing and holding the correct button on your Roomba.
+1) Find your Roomba's IP address (for help see the [troubleshooting](#troubleshooting) section); it will look like `192.168.X.XXX` or `10.X.X.XXX`, or similar.
+2) Open a terminal on your Homebridge system, either using `ssh` or by using the Homebridge Terminal located in the &vellip; menu, top-right in the Homebridge UI.
+3) Change into the directory where the plugin is installed: ```cd $(npm root -g)/homebridge-roomba2```
+4) Type ```sudo npm run getrobotpwd <IP ADDRESS>``` (replacing `<IP ADDRESS>` with the IP address you discovered above).
+5) Follow the instructions on screen to obtain your Roomba's `blid` and password. NB: Read the instructions carefully and ensure that you're pressing and holding the correct button on your Roomba.
+6) Proceed to _Configuration_.
 
 ## Configuration
 
@@ -98,7 +101,7 @@ Click on any of the items below to expand the corresponding answer.
 
   >In order to find your Roomba's IP address, you'll need to open up your Router Admin Panel and look for a list of devices. Once you identify the Roomba, you should see an associated IP address, however, this process will be different for each type of router.
   >
-  >While identifying your Roomba's IP address, you may want to consider assigning your Roomba a Static IP Address (See `Roomba cannot be found after router restart OR Roomba's IP Address changed` below).
+  >While identifying your Roomba's IP address, you may want to consider assigning your Roomba a Static IP Address (See _Roomba cannot be found after router restart OR Roomba's IP Address changed_ below).
 </details>
 
 <details>
