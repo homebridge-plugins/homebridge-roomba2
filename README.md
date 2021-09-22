@@ -90,6 +90,27 @@ Both of these modes required more resources from Homebridge and Roomba than were
 Now the plugin efficiently queries Roomba's status on demand so as not to slow down Homebridge and so
 as to provide HomeKit with Roomba's status only when it requests it.
 
+## Troubleshooting
+Click on any of the items below to expand the corresponding answer.
+
+<details>
+  <summary>I don't know what my Roomba's IP address is</summary>  
+
+  >In order to find your Roomba's IP address, you'll need to open up your Router Admin Panel and look for a list of devices. Once you identify the Roomba, you should see an associated IP address, however, this process will be different for each type of router.
+  >
+  >While identifying your Roomba's IP address, you may want to consider assigning your Roomba a Static IP Address (See `Roomba cannot be found after router restart OR Roomba's IP Address changed` below).
+</details>
+
+<details>
+  <summary>Roomba cannot be found after router restart OR Roomba's IP Address changed</summary>
+  
+  >If you experience issues with connecting to your Roomba, you might want to assign a **Static IP Address** to your Roomba. In order to do this, you'll need to navigate to your Router's Admin Portal and modify the configuration; because this process is different for each type of router, you will need to research this process on your own.
+  >
+  >
+  >**NOTE**: If you choose to set an IP address that is different than the IP address your Roomba was previously assigned, you'll need to restart your router before the Roomba will begin responding on the new IP address.
+</details>
+
+
 ## Building
 
 The homebridge-roomba2 plugin uses [TypeScript](https://www.typescriptlang.org), [`pnpm`](https://pnpm.io) and
