@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0-beta.4
+
+### Patch Changes
+
+- b3a25b0: Debug logging improvements and re-including the raw status in debug logs
+
 ## 1.3.0-beta.3
 
 ### Minor Changes
