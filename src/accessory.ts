@@ -517,6 +517,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         status.batteryLevel = state.batPct!;
         status.binFull = state.bin!.full;
 
+        /* See https://www.openhab.org/addons/bindings/irobot/ for a list of phases */
         switch (state.cleanMissionStatus!.phase) {
             case "run":
                 status.running = true;
@@ -525,18 +526,22 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                 break;
             case "charge":
+            case "recharge":
                 status.running = false;
                 status.charging = true;
                 status.docking = false;
 
                 break;
             case "hmUsrDock":
+            case "hmMidMsn":
+            case "hmPostMsn":
                 status.running = false;
                 status.charging = false;
                 status.docking = true;
                 
                 break;
             case "stop":
+            case "stuck":
                 status.running = false;
                 status.charging = false;
                 status.docking = false;

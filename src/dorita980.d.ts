@@ -22,7 +22,7 @@ declare module "dorita980" {
             full: boolean
         }
         cleanMissionStatus?: {
-            phase: "run" | "charge" | "stop" | "hmUsrDock"
+            phase: string
         }
     }
 
