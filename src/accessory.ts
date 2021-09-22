@@ -46,6 +46,12 @@ type CachedStatus = Status | StatusError;
 
 type CharacteristicGetter = (callback: CharacteristicGetCallback, context: unknown, connection?: unknown) => void
 
+async function delay(duration: number) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, duration);
+    });
+}
+
 export default class RoombaAccessory implements AccessoryPlugin {
 
     private api: API
@@ -407,7 +413,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 case "run":
                     this.log("Roomba is still running. Will check again in %is", pollingInterval / 1000);
 
-                    await setTimeout(() => this.log.debug("Trying to dock again..."), pollingInterval);
+                    await delay(pollingInterval);
+
+                    this.log.debug("Trying to dock again...");
                     await this.dockWhenStopped(roomba, pollingInterval);
 
                     break;
