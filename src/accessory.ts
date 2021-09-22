@@ -672,7 +672,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         const checkStatus = () => {
             const timeSinceLastWatchingRequest = Date.now() - (this.lastWatchingRequestTimestamp || 0);
             if (timeSinceLastWatchingRequest > WATCH_IDLE_TIMEOUT_MILLIS) {
-                this.log.debug("Stopping watching Roomba due to idle timeout");
+                this.log.debug("Stopped watching Roomba due to idle timeout");
                 this.stopWatching();
                 return;
             }
