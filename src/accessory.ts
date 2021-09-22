@@ -57,6 +57,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private robotpwd: string
     private ipaddress: string
     private firmware: string
+    private noDockOnStop: boolean
 
     private accessoryInfo: Service
     private filterMaintenance: Service
@@ -115,6 +116,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.robotpwd = config.robotpwd;
         this.ipaddress = config.ipaddress;
         this.firmware = "N/A";
+        this.noDockOnStop = config.noDockOnStop;
+
         const showDockAsContactSensor = config.dockContactSensor === undefined ? true : config.dockContactSensor;
         const showRunningAsContactSensor = config.runningContactSensor;
         const showBinStatusAsContactSensor = config.binContactSensor;
@@ -319,7 +322,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     callback(error as Error);
                 }
             });
-        } else {
+        } else if (!this.noDockOnStop) {
             this.log("Roomba pause and dock");
 
             this.connect(async(error, roomba) => {
@@ -347,6 +350,27 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     await this.dockWhenStopped(roomba, 3000);
                 } catch (error) {
                     this.log("Roomba failed: %s", (error as Error).message);
+
+                    callback(error as Error);
+                }
+            });
+        } else {
+            this.log("Roomba is pausing");
+            this.onConnected(roomba, async() => {
+                try {
+                    this.log.debug("Roomba job is pausing");
+
+                    await roomba.pause();
+
+                    callback();
+
+                    this.endRoombaIfNeeded(roomba);
+                    this.log("Roomba paused");
+
+                } catch (error) {
+                    this.log("Roomba failed: %s", (error as Error).message);
+
+                    this.endRoombaIfNeeded(roomba);
 
                     callback(error as Error);
                 }
