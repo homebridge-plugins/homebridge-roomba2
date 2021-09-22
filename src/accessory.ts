@@ -24,6 +24,11 @@ const WATCH_IDLE_TIMEOUT_MILLIS = 600_000;
 const MAX_CACHED_STATUS_AGE_MILLIS = 60_000;
 
 /**
+ * Coalesce refreshState requests into one when they're less than this many millis apart.
+ */
+const REFRESH_STATE_COALESCE_MILLIS = 10_000;
+
+/**
  * Whether to output debug logging at info level. Useful during debugging to be able to
  * see debug logs from this plugin.
  */
@@ -73,7 +78,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private ipaddress: string
     private firmware: string
     private noDockOnStop: boolean
-    private cacheTTLMillis: number
 
     private accessoryInfo: Service
     private filterMaintenance: Service
@@ -124,7 +128,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.ipaddress = config.ipaddress;
         this.firmware = "N/A";
         this.noDockOnStop = config.noDockOnStop;
-        this.cacheTTLMillis = 10 * 1000; // TODO a config item again
 
         const showDockAsContactSensor = config.dockContactSensor === undefined ? true : config.dockContactSensor;
         const showRunningAsContactSensor = config.runningContactSensor;
@@ -222,7 +225,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
     private refreshState() {
         const now = Date.now();
-        if (now - this.cachedStatus.timestamp < this.cacheTTLMillis || now - this.lastRefreshState < this.cacheTTLMillis) {
+        if (now - this.lastRefreshState < REFRESH_STATE_COALESCE_MILLIS) {
             return false;
         }
         this.lastRefreshState = now;
@@ -238,7 +241,11 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 const updateState = (state: RobotState) => {
                     if (this.receivedRobotStateIsComplete(state)) {
                         /* NB: the actual state is received and updated in the listener in connect() */
-                        this.log.debug("Refreshed Roomba's state in %ims", Date.now() - now);
+                        this.log.debug(
+                            "Refreshed Roomba's state in %ims: %s",
+                            Date.now() - now,
+                            JSON.stringify(state)
+                        );
 
                         roomba.off("state", updateState);
                         resolve();
