@@ -235,13 +235,16 @@ export default class RoombaAccessory implements AccessoryPlugin {
             
             /* Wait until we've received a state with all of the information we desire */
             return new Promise((resolve) => {
-                roomba.on("state", (state) => {
+                const updateState = (state: RobotState) => {
                     if (this.receivedRobotStateIsComplete(state)) {
                         /* NB: the actual state is received and updated in the listener in connect() */
                         this.log.debug("Refreshed Roomba's state in %ims", Date.now() - now);
+
+                        roomba.off("state", updateState);
                         resolve();
                     }
-                });
+                };
+                roomba.on("state", updateState);
                 roomba.on("close", () => resolve());
                 roomba.on("error", () => resolve());
             });

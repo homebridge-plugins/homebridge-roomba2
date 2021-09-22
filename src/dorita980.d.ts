@@ -5,6 +5,7 @@ declare module "dorita980" {
         on(event: "state", callback: (state: RobotState) => void): void
         on(event: "error", callback: (error: Error) => void): void
         on(event: string, callback: () => void): void
+        off(event: string, callback: unknown): void
         clean(): Promise<CommandResult>
         resume(): Promise<CommandResult>
         pause(): Promise<CommandResult>
@@ -36,6 +37,7 @@ declare module "dorita980" {
         public on(event: "state", callback: (state: RobotState) => void): void;
         public on(event: "error", callback: (error: Error) => void): void;
         public on(event: string, callback: () => void): void;
+        public off(event: string, callback: unknown): void;
         public clean(): Promise<CommandResult>
         public resume(): Promise<CommandResult>
         public pause(): Promise<CommandResult>
