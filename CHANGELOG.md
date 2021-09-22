@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.3.0-beta.2
+
+### Minor Changes
+
+- 721c3a6: Add a setting to control whether Roomba is sent home when stopped [#63] (thanks @rcoletti116)
+- 44c026c: Stop behaviour now checks what state Roomba is in and no longer triggers a docking if Roomba is already docked
+
+### Patch Changes
+
+- b9daed9: Recognise more Roomba phases, including more docking phases and stuck
+
 ## 1.3.0-beta.1
 
 ### Patch Changes
