@@ -322,8 +322,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     callback(error as Error);
                 }
             });
-        } else if (!this.noDockOnStop) {
-            this.log("Roomba pause and dock");
+        } else {
+            this.log("Stopping Roomba");
 
             this.connect(async(error, roomba) => {
                 if (error || !roomba) {
@@ -332,45 +332,52 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 }
 
                 try {
-                    this.log("Roomba is pausing");
+                    const response = await roomba.getRobotState(["cleanMissionStatus"]);
+                    const state = this.parseState(response);
 
-                    await roomba.pause();
+                    if (state.running) {
+                        this.log("Roomba is pausing");
 
-                    callback();
-                    
-                    this.mergeCachedStatus({
-                        running: false,
-                        charging: false,
-                        docking: false,
-                    });
+                        await roomba.pause();
 
-                    this.log("Roomba paused, returning to Dock");
+                        callback();
+                        
+                        this.mergeCachedStatus({
+                            running: false,
+                            charging: false,
+                            docking: false,
+                        });
+
+                        if (!this.noDockOnStop) {
+                            this.log("Roomba paused, returning to Dock");
+                            await this.dockWhenStopped(roomba, 3000);
+                        } else {
+                            this.log("Roomba is paused");
+                        }
+                    } else if (state.docking) {
+                        this.log("Roomba is docking");
+                        await roomba.pause();
+
+                        callback();
+
+                        this.mergeCachedStatus({
+                            running: false,
+                            charging: false,
+                            docking: false,
+                        });
+
+                        this.log("Roomba paused");
+                    } else if (state.charging) {
+                        this.log("Roomba is already docked");
+                        callback();
+                    } else {
+                        this.log("Roomba is not running");
+                        callback();
+                    }
 
                     this.startWatching();
-                    await this.dockWhenStopped(roomba, 3000);
                 } catch (error) {
                     this.log("Roomba failed: %s", (error as Error).message);
-
-                    callback(error as Error);
-                }
-            });
-        } else {
-            this.log("Roomba is pausing");
-            this.onConnected(roomba, async() => {
-                try {
-                    this.log.debug("Roomba job is pausing");
-
-                    await roomba.pause();
-
-                    callback();
-
-                    this.endRoombaIfNeeded(roomba);
-                    this.log("Roomba paused");
-
-                } catch (error) {
-                    this.log("Roomba failed: %s", (error as Error).message);
-
-                    this.endRoombaIfNeeded(roomba);
 
                     callback(error as Error);
                 }
