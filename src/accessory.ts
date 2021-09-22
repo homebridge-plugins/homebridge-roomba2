@@ -9,7 +9,7 @@ const STATUS_COALLESCE_WINDOW_MILLIS = 5_000;
 /**
  * How long to wait to connect to Roomba.
  */
-const CONNECT_TIMEOUT = 15_000;
+const CONNECT_TIMEOUT = 60_000;
 
 /**
  * When actively watching Roomba's status, how often to query Roomba and update HomeKit.
@@ -223,7 +223,13 @@ export default class RoombaAccessory implements AccessoryPlugin {
             this._currentlyConnectedRoombaRequests = 1;
             return roomba;
         };
-        const stopUsingRoomba = async(roomba: Roomba) => {
+        const stopUsingRoomba = async(roomba: Roomba, force = false) => {
+            if (force) {
+                this._currentlyConnectedRoomba = undefined;
+                await roomba.end();
+                return;
+            }
+
             if (roomba !== this._currentlyConnectedRoomba) {
                 this.log.warn("Releasing an unexpected Roomba instance");
                 await roomba.end();
@@ -232,9 +238,10 @@ export default class RoombaAccessory implements AccessoryPlugin {
     
             this._currentlyConnectedRoombaRequests--;
             if (this._currentlyConnectedRoombaRequests === 0) {
+                this._currentlyConnectedRoomba = undefined;
+
                 this.log.debug("Releasing Roomba instance");
                 await roomba.end();
-                this._currentlyConnectedRoomba = undefined;
             } else {
                 this.log.debug("Leaving Roomba instance with %i ongoing requests", this._currentlyConnectedRoombaRequests);
             }
@@ -254,12 +261,15 @@ export default class RoombaAccessory implements AccessoryPlugin {
         const timeout = setTimeout(async() => {
             timedOut = true;
 
-            this.log.warn("Timed out trying to connect to Roomba");
+            this.log.warn("Timed out after %is trying to connect to Roomba", CONNECT_TIMEOUT / 1000);
 
+            await stopUsingRoomba(roomba, true);
             await callback(new Error("Connect timed out"));
-            await stopUsingRoomba(roomba);
         }, CONNECT_TIMEOUT);
     
+        const now = Date.now();
+        this.log.debug("Connecting to Roomba…");
+
         roomba.on("connect", async() => {
             if (timedOut) {
                 this.log.debug("Connection established to Roomba after timeout");
@@ -268,7 +278,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
             clearTimeout(timeout);
 
-            this.log.debug("Connected to Roomba");
+            this.log.debug("Connected to Roomba in %ims", Date.now() - now);
             await callback(null, roomba);
             await stopUsingRoomba(roomba);
         });
@@ -432,35 +442,37 @@ export default class RoombaAccessory implements AccessoryPlugin {
         }
         this.currentGetStatusTimestamp = now;
 
-        this.log.debug("getStatus connecting to Roomba...");
-
         this.connect(async(error, roomba) => {
-            if (error || !roomba) {
-                callback(error || new Error("Unknown error"));
-                this.setCachedStatus({ error: error as Error });
-                return;
-            }
+            const handleError = (error: Error | null) => {
+                for (const aCallback of this.pendingStatusRequests) {
+                    aCallback(error || new Error("Unknown error"));
+                }
 
-            this.log.debug("getStatus connected to Roomba in %ims", Date.now() - now);
+                this.setCachedStatus({ error: error as Error });
+            };
 
             try {
-                const response = await roomba.getRobotState(["cleanMissionStatus", "batPct", "bin"]);
-                const status = this.parseState(response);
-                this.log.debug("getStatus got status in %ims: %s => %s", Date.now() - now, JSON.stringify(response), JSON.stringify(status));
-
-                for (const aCallback of this.pendingStatusRequests) {
-                    aCallback(null, status);
+                if (error || !roomba) {
+                    this.log.debug("getStatus failed to connect to Roomba after %ims", Date.now() - now);
+                    handleError(error);
+                    return;
                 }
 
-                this.setCachedStatus(status);
-            } catch (error) {
-                this.log.warn("Unable to determine state of Roomba: %s", (error as Error).message);
+                try {
+                    const response = await roomba.getRobotState(["cleanMissionStatus", "batPct", "bin"]);
+                    const status = this.parseState(response);
+                    this.log.debug("getStatus got status in %ims: %s => %s", Date.now() - now, JSON.stringify(response), JSON.stringify(status));
 
-                for (const aCallback of this.pendingStatusRequests) {
-                    aCallback(error as Error);
+                    for (const aCallback of this.pendingStatusRequests) {
+                        aCallback(null, status);
+                    }
+
+                    this.setCachedStatus(status);
+                } catch (error) {
+                    this.log.warn("Unable to determine state of Roomba: %s", (error as Error).message);
+
+                    handleError(error as Error);
                 }
-
-                this.setCachedStatus({ error: error as Error });
             } finally {
                 this.currentGetStatusTimestamp = undefined;
                 this.pendingStatusRequests = [];
@@ -607,13 +619,15 @@ export default class RoombaAccessory implements AccessoryPlugin {
             }
             
             this.getStatus((error, status) => {
-                if (error) {
+                if (error || !status) {
                     errors++;
                     if (errors > 10) {
                         this.log.warn("Stopped watching Roomba's status due to too many errors");
                         this.stopWatching();
+                    } else {
+                        this.watching = setTimeout(checkStatus, WATCH_INTERVAL_MILLIS);
                     }
-                } else if (status) {
+                } else {
                     errors = 0;
 
                     const timeSinceLastWatchingRequest = Date.now() - (this.lastWatchingRequestTimestamp || 0);
