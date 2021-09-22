@@ -341,7 +341,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
             await callback(new Error("Connect timed out"));
         }, CONNECT_TIMEOUT);
     
-        this.log.debug("Connecting to Roomba (%i others waiting)…", this._currentlyConnectedRoombaRequests - 1);
+        this.log.debug("Connecting to Roomba (%i others waiting)...", this._currentlyConnectedRoombaRequests - 1);
 
         roomba.on("connect", async() => {
             if (timedOut) {
