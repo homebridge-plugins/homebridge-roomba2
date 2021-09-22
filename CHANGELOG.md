@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.0-beta.3
+
+### Minor Changes
+
+- 853b39e: Overhauled Roomba connections and status again, status gathering is now more passive
+
+### Patch Changes
+
+- 5399dbb: Fix delay when trying to dock
+
 ## 1.3.0-beta.2
 
 ### Minor Changes
