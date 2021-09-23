@@ -57,7 +57,7 @@
             },
             "DockOnStop": {
                 "type": "boolean",
-                "title": "Send home when stopped",
+                "title": "Dock when stopped",
                 "default": true,
                 "required": false
             }
