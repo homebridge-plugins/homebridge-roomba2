@@ -76,7 +76,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private robotpwd: string
     private ipaddress: string
     private firmware: string
-    private DockOnStop: boolean
+    private noDockOnStop: boolean
 
     private accessoryInfo: Service
     private filterMaintenance: Service
@@ -128,7 +128,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.robotpwd = config.robotpwd;
         this.ipaddress = config.ipaddress;
         this.firmware = "N/A";
-        this.DockOnStop = config.DockOnStop;
+        this.noDockOnStop = config.noDockOnStop;
 
         const showDockAsContactSensor = config.dockContactSensor === undefined ? true : config.dockContactSensor;
         const showRunningAsContactSensor = config.runningContactSensor;
@@ -431,13 +431,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                     if (state.running) {
                         this.log("Roomba is pausing");
+
                         await roomba.pause();
-                        if (this.DockOnStop) {
-                            this.log("Roomba paused, returning to Dock");
-                            await this.dockWhenStopped(roomba, 3000);
-                        } else {
-                            this.log("Roomba is paused");
-                        }
 
                         callback();
                         
@@ -447,6 +442,12 @@ export default class RoombaAccessory implements AccessoryPlugin {
                             docking: false,
                         });
 
+                        if (!this.noDockOnStop) {
+                            this.log("Roomba paused, returning to Dock");
+                            await this.dockWhenStopped(roomba, 3000);
+                        } else {
+                            this.log("Roomba is paused");
+                        }
                     } else if (state.docking) {
                         this.log("Roomba is docking");
                         await roomba.pause();
