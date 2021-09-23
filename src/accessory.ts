@@ -432,12 +432,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     if (state.running) {
                         this.log("Roomba is pausing");
                         await roomba.pause();
-                        if (this.dockOnStop) {
-                            this.log("Roomba paused, returning to Dock");
-                            await this.dockWhenStopped(roomba, 3000);
-                        } else {
-                            this.log("Roomba is paused");
-                        }
 
                         callback();
                         
@@ -446,7 +440,12 @@ export default class RoombaAccessory implements AccessoryPlugin {
                             charging: false,
                             docking: false,
                         });
-
+                        if (this.dockOnStop) {
+                            this.log("Roomba paused, returning to Dock");
+                            await this.dockWhenStopped(roomba, 3000);
+                        } else {
+                            this.log("Roomba is paused");
+                        }
                     } else if (state.docking) {
                         this.log("Roomba is docking");
                         await roomba.pause();
