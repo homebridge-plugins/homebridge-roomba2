@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0-beta.5
+
+### Patch Changes
+
+- 73b02d3: Add a timeout when waiting for the full status from Roomba so we release our connection to Roomba
+- c8ce152: Only update characteristics with changes
+
 ## 1.3.0-beta.4
 
 ### Patch Changes
