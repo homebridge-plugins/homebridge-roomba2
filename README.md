@@ -98,7 +98,7 @@ as to provide HomeKit with Roomba's status only when it requests it.
 Click on any of the items below to expand the corresponding answer.
 
 <details>
-  <summary>Finding my Roomba's IP sddress</summary>  
+  <summary>Finding my Roomba's IP address</summary>  
 
   >You can find your Roomba's IP Address in the iRobot app. Open the app and choose your Robot. Scroll down to the bottom and find Robot Settings. Click Wi-Fi Settings and then Robot Wi-FI Details. You will find your IP address and various other network goodies here.
   
