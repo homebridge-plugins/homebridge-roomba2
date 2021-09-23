@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.3.0-beta.5
+
+### Patch Changes
+
+- 73b02d3: Add a timeout when waiting for the full status from Roomba so we release our connection to Roomba
+- c8ce152: Only update characteristics with changes
+
+## 1.3.0-beta.4
+
+### Patch Changes
+
+- b3a25b0: Debug logging improvements and re-including the raw status in debug logs
+
+## 1.3.0-beta.3
+
+### Minor Changes
+
+- 853b39e: Overhauled Roomba connections and status again, status gathering is now more passive
+
+### Patch Changes
+
+- 5399dbb: Fix delay when trying to dock
+
 ## 1.3.0-beta.2
 
 ### Minor Changes

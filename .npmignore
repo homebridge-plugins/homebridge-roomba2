@@ -3,6 +3,8 @@
 /src
 /.nvmrc
 /.eslintrc.js
+/.github
+/.vscode
 /tsconfig.json
 /*.tgz
 /pnpm-lock.yaml
