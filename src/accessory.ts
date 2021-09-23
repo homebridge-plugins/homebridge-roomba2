@@ -24,6 +24,11 @@ const WATCH_IDLE_TIMEOUT_MILLIS = 600_000;
 const MAX_CACHED_STATUS_AGE_MILLIS = 60_000;
 
 /**
+ * How long will we wait for the Roomba to send status before giving up?
+ */
+const MAX_WAIT_FOR_STATUS_MILLIS = 60_000;
+
+/**
  * Coalesce refreshState requests into one when they're less than this many millis apart.
  */
 const REFRESH_STATE_COALESCE_MILLIS = 10_000;
@@ -236,10 +241,27 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 return;
             }
             
+            const startedWaitingForStatus = Date.now();
+
             /* Wait until we've received a state with all of the information we desire */
             return new Promise((resolve) => {
+                let receivedState: RobotState | undefined = undefined;
+
+                const timeout = setTimeout(() => {
+                    this.log.debug(
+                        "Timeout waiting for full state from Roomba ({}ms). Last state received was: %s",
+                        Date.now() - startedWaitingForStatus,
+                        receivedState ? JSON.stringify(receivedState) : "<none>",
+                    );
+                    resolve();
+                }, MAX_WAIT_FOR_STATUS_MILLIS);
+
                 const updateState = (state: RobotState) => {
+                    receivedState = state;
+
                     if (this.receivedRobotStateIsComplete(state)) {
+                        clearTimeout(timeout);
+                        
                         /* NB: the actual state is received and updated in the listener in connect() */
                         this.log.debug(
                             "Refreshed Roomba's state in %ims: %s",
