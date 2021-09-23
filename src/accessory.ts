@@ -41,27 +41,21 @@ const DEBUG = true;
 
 interface Status {
     timestamp: number
-    error: Error | null
-    running: boolean | null
-    docking: boolean | null
-    charging: boolean | null
-    batteryLevel: number | null
-    binFull: boolean | null
+    error?: Error
+    running?: boolean
+    docking?: boolean
+    charging?: boolean
+    batteryLevel?: number
+    binFull?: boolean
 }
 
 const EMPTY_STATUS: Status = {
     timestamp: 0,
-    error: null,
-    running: null,
-    docking: null,
-    charging: null,
-    batteryLevel: null,
-    binFull: null,
 };
 
 type CharacteristicGetter = (callback: CharacteristicGetCallback, context: unknown, connection?: unknown) => void
 
-type CharacteristicValueExtractor = (status: Status) => CharacteristicValue | null
+type CharacteristicValueExtractor = (status: Status) => CharacteristicValue | undefined
 
 const NO_VALUE = new Error("No value");
 
@@ -97,6 +91,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
      * The last known state from Roomba, if any.
      */
     private cachedStatus = EMPTY_STATUS;
+
+    private lastUpdatedStatus = EMPTY_STATUS;
 
     private lastRefreshState = 0;
 
@@ -286,12 +282,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
     }
 
     private receiveRobotState(state: RobotState) {
-        if (!this.receivedRobotStateIsComplete(state)) {
-            return false;
-        }
-
         const parsed = this.parseState(state);
-        this.setCachedStatus(parsed);
+        this.mergeCachedStatus(parsed);
         return true;
     }
 
@@ -536,7 +528,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     callback(cachedStatus.error);
                 } else {
                     const value = extractValue(cachedStatus);
-                    if (value === null) {
+                    if (value === undefined) {
                         this.log("%s: Returning no value (%ims old)", name, Date.now() - cachedStatus.timestamp!);
                         callback(NO_VALUE);
                     } else {
@@ -649,34 +641,50 @@ export default class RoombaAccessory implements AccessoryPlugin {
     }
 
     private updateCharacteristics(status: Status) {
-        this.log.debug("Updating characteristics for status: %s", JSON.stringify(status));
+        // this.log.debug("Updating characteristics for status: %s", JSON.stringify(status));
 
-        function updateCharacteristic(characteristic: Characteristic, extractValue: CharacteristicValueExtractor) {
+        const updateCharacteristic = (service: Service, characteristicId: typeof Characteristic.On, extractValue: CharacteristicValueExtractor) => {
             const value = extractValue(status);
-            if (value !== null) {
-                characteristic.updateValue(value);
+            if (value !== undefined) {
+                const previousValue = extractValue(this.lastUpdatedStatus);
+                if (value !== previousValue) {
+                    const characteristic = service.getCharacteristic(characteristicId);
+                    this.log.debug(
+                        "Updating %s %s from %s to %s",
+                        service.displayName,
+                        characteristic.displayName,
+                        String(previousValue),
+                        String(value),
+                    );
+                    characteristic.updateValue(value);
+                }
             }
-        }
+        };
 
         const Characteristic = this.api.hap.Characteristic;
 
-        updateCharacteristic(this.switchService.getCharacteristic(Characteristic.On), this.runningStatus);
-        updateCharacteristic(this.batteryService.getCharacteristic(Characteristic.ChargingState), this.chargingStatus);
-        updateCharacteristic(this.batteryService.getCharacteristic(Characteristic.BatteryLevel), this.batteryLevelStatus);
-        updateCharacteristic(this.batteryService.getCharacteristic(Characteristic.StatusLowBattery), this.batteryStatus);
-        updateCharacteristic(this.filterMaintenance.getCharacteristic(Characteristic.FilterChangeIndication), this.binStatus);
+        updateCharacteristic(this.switchService, Characteristic.On, this.runningStatus);
+        updateCharacteristic(this.batteryService, Characteristic.ChargingState, this.chargingStatus);
+        updateCharacteristic(this.batteryService, Characteristic.BatteryLevel, this.batteryLevelStatus);
+        updateCharacteristic(this.batteryService, Characteristic.StatusLowBattery, this.batteryStatus);
+        updateCharacteristic(this.filterMaintenance, Characteristic.FilterChangeIndication, this.binStatus);
         if (this.dockService) {
-            updateCharacteristic(this.dockService.getCharacteristic(Characteristic.ContactSensorState), this.dockedStatus);
+            updateCharacteristic(this.dockService, Characteristic.ContactSensorState, this.dockedStatus);
         }
         if (this.runningService) {
-            updateCharacteristic(this.runningService.getCharacteristic(Characteristic.ContactSensorState), this.runningStatus);
+            updateCharacteristic(this.runningService, Characteristic.ContactSensorState, this.runningStatus);
         }
         if (this.binService) {
-            updateCharacteristic(this.binService.getCharacteristic(Characteristic.ContactSensorState), this.binStatus);
+            updateCharacteristic(this.binService, Characteristic.ContactSensorState, this.binStatus);
         }
         if (this.dockingService) {
-            updateCharacteristic(this.dockingService.getCharacteristic(Characteristic.ContactSensorState), this.dockingStatus);
+            updateCharacteristic(this.dockingService, Characteristic.ContactSensorState, this.dockingStatus);
         }
+
+        this.lastUpdatedStatus = {
+            ...this.lastUpdatedStatus,
+            ...status,
+        };
     }
 
     /**
@@ -719,36 +727,36 @@ export default class RoombaAccessory implements AccessoryPlugin {
         }
     }
 
-    private runningStatus = (status: Status) => status.running === null
-        ? null
+    private runningStatus = (status: Status) => status.running === undefined
+        ? undefined
         : status.running
             ? this.api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
             : this.api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED;
-    private chargingStatus = (status: Status) => status.charging === null
-        ? null
+    private chargingStatus = (status: Status) => status.charging === undefined
+        ? undefined
         : status.charging
             ? this.api.hap.Characteristic.ChargingState.CHARGING
             : this.api.hap.Characteristic.ChargingState.NOT_CHARGING;
-    private dockingStatus = (status: Status) => status.docking === null
-        ? null
+    private dockingStatus = (status: Status) => status.docking === undefined
+        ? undefined
         : status.docking
             ? this.api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
             : this.api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED;
-    private dockedStatus = (status: Status) => status.charging === null
-        ? null
+    private dockedStatus = (status: Status) => status.charging === undefined
+        ? undefined
         : status.charging
             ? this.api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED
             : this.api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;
-    private batteryLevelStatus = (status: Status) => status.batteryLevel === null
-        ? null
+    private batteryLevelStatus = (status: Status) => status.batteryLevel === undefined
+        ? undefined
         : status.batteryLevel;
-    private binStatus = (status: Status) => status.binFull === null
-        ? null
+    private binStatus = (status: Status) => status.binFull === undefined
+        ? undefined
         : status.binFull
             ? this.api.hap.Characteristic.FilterChangeIndication.CHANGE_FILTER
             : this.api.hap.Characteristic.FilterChangeIndication.FILTER_OK;
-    private batteryStatus = (status: Status) => status.batteryLevel === null
-        ? null
+    private batteryStatus = (status: Status) => status.batteryLevel === undefined
+        ? undefined
         : status.batteryLevel <= 20
             ? this.api.hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
             : this.api.hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
