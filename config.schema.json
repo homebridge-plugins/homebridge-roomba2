@@ -36,7 +36,7 @@
             },
             "dockContactSensor": {
                 "type": "boolean",
-                "title": "Show docking status as a contact sensor",
+                "title": "Show dock status as a contact sensor",
                 "default": true,
                 "required": false
             },
