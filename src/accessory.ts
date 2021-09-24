@@ -4,7 +4,7 @@ import { AccessoryConfig, AccessoryPlugin, API, Logging, Service, Characteristic
 /**
  * How long to wait to connect to Roomba.
  */
-const CONNECT_TIMEOUT = 60_000;
+const CONNECT_TIMEOUT_MILLIS = 60_000;
 
 /**
  * When actively watching Roomba's status, how often to query Roomba and update HomeKit.
@@ -371,7 +371,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
             await stopUsingRoomba(roomba, true);
             await callback(new Error("Connect timed out"));
-        }, CONNECT_TIMEOUT);
+        }, CONNECT_TIMEOUT_MILLIS);
     
         this.log.debug("Connecting to Roomba (%i others waiting)...", this._currentlyConnectedRoombaRequests - 1);
 
