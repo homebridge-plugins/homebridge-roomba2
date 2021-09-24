@@ -57,7 +57,7 @@
             },
             "dockOnStop": {
                 "type": "boolean",
-                "title": "Dock when stopped",
+                "title": "Send home to dock when stopped",
                 "default": true,
                 "required": false
             }

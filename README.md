@@ -71,6 +71,7 @@ configure your accessory using JSON:
 }
 ```
 
+
 |Key|Description|Default|
 |---|-----------|---|
 |`accessory`|Loads this plugin. Must be set to `Roomba2`||
@@ -100,9 +101,13 @@ Click on any of the items below to expand the corresponding answer.
 <details>
   ##<summary>Finding my Roomba's IP address</summary>  
 
-  >In order to find your Roomba's IP address, you'll need to open up your Router Admin Panel and look for a list of devices. Once you identify the Roomba, you should see an associated IP address, however, this process will be different for each type of router.
-  >
-  >While identifying your Roomba's IP address, you may want to consider assigning your Roomba a Static IP Address (See _Roomba cannot be found after router restart OR Roomba's IP Address changed_ below).
+  >You can find your Roomba's IP Address in the iRobot app. Open the app and choose your Robot. Scroll down to the bottom and find Robot Settings. Click Wi-Fi Settings and then Robot Wi-FI Details. You will find your IP address and various other network goodies here.
+  
+  ![Alt Text](https://github.com/rcoletti116/homebridge-roomba2/blob/rcoletti116-docsfiles/trim.1BD89A46-80F9-4FCB-A04B-4A610D403D4F.gif)
+
+  >Alternatively you can open up your Router Admin Panel and look for a list of devices. Once you identify the Roomba, you should see an associated IP address, however, this process will be different for each type of router.
+  
+  >While identifying your Roomba's IP address, we strongly recommend assigning your Roomba a Static IP Address (See _Roomba cannot be found after router restart OR Roomba's IP Address changed_ below).
 </details>
 
 <details>

@@ -78,6 +78,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private firmware: string
     private dockOnStop: boolean
 
+
     private accessoryInfo: Service
     private filterMaintenance: Service
     private switchService: Service
@@ -431,6 +432,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                     if (state.running) {
                         this.log("Roomba is pausing");
+
                         await roomba.pause();
 
                         callback();
@@ -440,6 +442,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                             charging: false,
                             docking: false,
                         });
+
                         if (this.dockOnStop) {
                             this.log("Roomba paused, returning to Dock");
                             await this.dockWhenStopped(roomba, 3000);
