@@ -67,7 +67,8 @@ configure your accessory using JSON:
   "ipaddress": "192.168.x.xxx",
   "dockContactSensor": true,
   "runningContactSensor": true,
-  "binContactSensor": true
+  "binContactSensor": true,
+  "dockOnStop": true
 }
 ```
 
