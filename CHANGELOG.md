@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0-beta.7
+
+### Minor Changes
+
+- 2863a49: Rename noDockOnStop to dockOnStop [#73 #74] (thanks @rcoletti116, @khad)
+
 ## 1.3.0-beta.6
 
 ### Minor Changes
