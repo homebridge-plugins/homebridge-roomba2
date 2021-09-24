@@ -72,7 +72,7 @@ configure your accessory using JSON:
 ```
 
 
-|Key|Description|Default|
+|Key|Description|Default Value|
 |---|-----------|---|
 |`accessory`|Loads this plugin. Must be set to `Roomba2`||
 |`name`|The name of your Roomb as it should appear in Homebridge and HomeKit||
