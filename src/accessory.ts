@@ -19,9 +19,14 @@ const WATCH_INTERVAL_MILLIS = 30_000;
 const WATCH_IDLE_TIMEOUT_MILLIS = 600_000;
 
 /**
+ * How often to query Roomba and update HomeKit when not actively watching Roomba's status.
+ */
+const LONG_WATCH_INTERVAL_MILLIS = 3600 * 1000; // 24 * 60 * 60 * 1000;
+
+/**
  * How old a cached status can be before we ignore it.
  */
-const MAX_CACHED_STATUS_AGE_MILLIS = 60_000;
+const MAX_CACHED_STATUS_AGE_MILLIS = LONG_WATCH_INTERVAL_MILLIS + 600_000;
 
 /**
  * How long will we wait for the Roomba to send status before giving up?
@@ -202,6 +207,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 .getCharacteristic(Characteristic.ContactSensorState)
                 .on("get", this.createCharacteristicGetter("Docking status", this.dockingStatus));
         }
+
+        this.startLongWatch();
     }
 
     public identify(): void {
@@ -715,7 +722,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
             }
             
             this.log.debug(
-                "Refreshing Roomba's status (repeating in %is, idle timeout in %is)",
+                "Watching Roomba's status (repeating in %is, idle timeout in %is)",
                 WATCH_INTERVAL_MILLIS / 1000, 
                 (WATCH_IDLE_TIMEOUT_MILLIS - timeSinceLastWatchingRequest) / 1000
             );
@@ -732,6 +739,18 @@ export default class RoombaAccessory implements AccessoryPlugin {
             clearTimeout(this.watching);
             this.watching = undefined;
         }
+    }
+
+    private startLongWatch() {
+        const checkStatus = () => {
+            this.log.info("Refreshing Roomba's status (repeating in %im)", LONG_WATCH_INTERVAL_MILLIS / 60_000);
+
+            this.refreshState();
+
+            setTimeout(checkStatus, LONG_WATCH_INTERVAL_MILLIS);
+        };
+
+        checkStatus();
     }
 
     private runningStatus = (status: Status) => status.running === undefined
