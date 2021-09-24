@@ -72,21 +72,20 @@ configure your accessory using JSON:
 }
 ```
 
-
 |Key|Description|Default Value|
 |---|-----------|---|
 |`accessory`|Loads this plugin. Must be set to `Roomba2`||
-|`name`|The name of your Roomba as it should appear in Homebridge and HomeKit||
+|`name`|The name of your Roomb as it should appear in Homebridge and HomeKit||
 |`model`|The model of your Roomba as you'd like it to appear in HomeKit||
 |`serialnum`|The serial number as you'd like it to appear in HomeKit||
 |`blid`|The `blid` of your Roomba, obtained during setup||
 |`robotpwd`|The password for your Roomba, obtained during setup||
 |`ipaddress`|The [IP address](#troubleshooting) of your Roomba on your network||
 |`dockContactSensor`|Add a contact sensor to HomeKit that's _closed_ when Roomba is docked|`true`|
-|`runningContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba is running||
-|`binContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba's bin is full||
-|`dockingContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba is docking||
-|`dockOnStop`|Sends roomba home to dock when stopped|`true`|
+|`runningContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba is running|`false`|
+|`binContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba's bin is full|`false`|
+|`dockingContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba is docking|`false`|
+|`dockOnStop`|Send home to dock when stopped|`true`|
 
 ### Deprecated configuration
 
