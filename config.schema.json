@@ -55,9 +55,10 @@
                 "title": "Show docking status as a contact sensor",
                 "required": false
             },
-            "noDockOnStop": {
+            "dockOnStop": {
                 "type": "boolean",
-                "title": "Do not send home when stopped",
+                "title": "Dock when stopped",
+                "default": true,
                 "required": false
             }
         }
