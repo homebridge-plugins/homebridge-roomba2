@@ -128,7 +128,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.robotpwd = config.robotpwd;
         this.ipaddress = config.ipaddress;
         this.firmware = "N/A";
-        this.dockOnStop = config.dockOnStop;
+        this.dockOnStop = config.dockOnStop !== undefined ? config.dockOnStop : true;
 
         const showDockAsContactSensor = config.dockContactSensor === undefined ? true : config.dockContactSensor;
         const showRunningAsContactSensor = config.runningContactSensor;
