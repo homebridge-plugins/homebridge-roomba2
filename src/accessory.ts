@@ -1,5 +1,5 @@
 import dorita980, { RobotState, Roomba } from "dorita980";
-import { AccessoryConfig, AccessoryPlugin, API, Logging, Service, Characteristic, CharacteristicValue, CharacteristicGetCallback, CharacteristicSetCallback } from "homebridge";
+import { AccessoryConfig, AccessoryPlugin, API, Logging, Service, CharacteristicValue, CharacteristicGetCallback, CharacteristicSetCallback } from "homebridge";
 
 /**
  * How long to wait to connect to Roomba.
@@ -153,14 +153,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
         if (showDockingAsContactSensor) {
             this.dockingService = new Service.ContactSensor(this.name + " Docking", "docking"); 
         }
-    }
-
-    public identify(): void {
-        this.log.debug("Identify requested. Not supported yet.");
-    }
-
-    public getServices(): Service[] {
-        const services: Service[] = [];
 
         const Characteristic = this.api.hap.Characteristic;
 
@@ -172,14 +164,11 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.accessoryInfo.setCharacteristic(Characteristic.Name, this.name);
         this.accessoryInfo.setCharacteristic(Characteristic.Model, this.model);
         this.accessoryInfo.setCharacteristic(Characteristic.FirmwareRevision, version);
-        services.push(this.accessoryInfo);
 
         this.switchService
             .getCharacteristic(Characteristic.On)
             .on("set", this.setRunningState.bind(this))
             .on("get", this.createCharacteristicGetter("Running status", this.runningStatus));
-        services.push(this.switchService);
-
         this.batteryService
             .getCharacteristic(Characteristic.BatteryLevel)
             .on("get", this.createCharacteristicGetter("Battery level", this.batteryLevelStatus));
@@ -189,35 +178,54 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.batteryService
             .getCharacteristic(Characteristic.StatusLowBattery)
             .on("get", this.createCharacteristicGetter("Low Battery status", this.batteryStatus));
-        services.push(this.batteryService);
-
         this.filterMaintenance
             .getCharacteristic(Characteristic.FilterChangeIndication)
             .on("get", this.createCharacteristicGetter("Bin status", this.binStatus));
-        services.push(this.filterMaintenance);
 
         if (this.dockService) {
             this.dockService
                 .getCharacteristic(Characteristic.ContactSensorState)
                 .on("get", this.createCharacteristicGetter("Dock status", this.dockedStatus));
-            services.push(this.dockService);
         }
         if (this.runningService) {
             this.runningService
                 .getCharacteristic(Characteristic.ContactSensorState)
                 .on("get", this.createCharacteristicGetter("Running status", this.runningStatus));
-            services.push(this.runningService);
         }
         if (this.binService) {
             this.binService
                 .getCharacteristic(Characteristic.ContactSensorState)
                 .on("get", this.createCharacteristicGetter("Bin status", this.binStatus));
-            services.push(this.binService);
         }
         if (this.dockingService) {
             this.dockingService
                 .getCharacteristic(Characteristic.ContactSensorState)
                 .on("get", this.createCharacteristicGetter("Docking status", this.dockingStatus));
+        }
+    }
+
+    public identify(): void {
+        this.log.debug("Identify requested. Not supported yet.");
+    }
+
+    public getServices(): Service[] {
+        const services: Service[] = [
+            this.accessoryInfo,
+            this.switchService,
+            this.batteryService,
+            this.filterMaintenance,
+        ];
+
+        if (this.dockService) {
+            services.push(this.dockService);
+        }
+        if (this.runningService) {
+            services.push(this.runningService);
+        }
+        if (this.binService) {
+            services.push(this.binService);
+        }
+        if (this.dockingService) {
             services.push(this.dockingService);
         }
 
@@ -648,15 +656,14 @@ export default class RoombaAccessory implements AccessoryPlugin {
             if (value !== undefined) {
                 const previousValue = extractValue(this.lastUpdatedStatus);
                 if (value !== previousValue) {
-                    const characteristic = service.getCharacteristic(characteristicId);
                     this.log.debug(
                         "Updating %s %s from %s to %s",
                         service.displayName,
-                        characteristic.displayName,
+                        service.getCharacteristic(characteristicId).displayName,
                         String(previousValue),
                         String(value),
                     );
-                    characteristic.updateValue(value);
+                    service.updateCharacteristic(characteristicId, value);
                 }
             }
         };
