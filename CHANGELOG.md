@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0-beta.6
+
+### Minor Changes
+
+- e32d078: Add a long-term slow watching of Roomba's status so we always have a status
+
 ## 1.3.0-beta.5
 
 ### Patch Changes
