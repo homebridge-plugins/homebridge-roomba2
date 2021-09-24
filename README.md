@@ -82,7 +82,7 @@ configure your accessory using JSON:
 |`blid`|The `blid` of your Roomba, obtained during setup||
 |`robotpwd`|The password for your Roomba, obtained during setup||
 |`ipaddress`|The [IP address](#troubleshooting) of your Roomba on your network||
-|`dockContactSensor`|Add a contact sensor to HomeKit that's _closed_ when Roomba is docked||
+|`dockContactSensor`|Add a contact sensor to HomeKit that's _closed_ when Roomba is docked|`true`|
 |`runningContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba is running||
 |`binContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba's bin is full||
 |`dockingContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba is docking||
