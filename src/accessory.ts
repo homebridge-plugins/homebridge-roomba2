@@ -285,8 +285,18 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     }
                 };
                 roomba.on("state", updateState);
-                roomba.on("close", () => resolve());
-                roomba.on("error", () => resolve());
+
+                const onClose = () => {
+                    roomba.off("close", onClose);
+                    resolve();
+                };
+                roomba.on("close", onClose);
+
+                const onError = () => {
+                    roomba.off("error", onError);
+                    resolve();
+                };
+                roomba.on("error", onError);
             });
         });
         return true;
@@ -313,34 +323,32 @@ export default class RoombaAccessory implements AccessoryPlugin {
             this._currentlyConnectedRoomba = roomba;
             this._currentlyConnectedRoombaRequests = 1;
 
-            roomba.on("close", () => {
-                if (roomba == this._currentlyConnectedRoomba) {
+            const onClose = () => {
+                if (roomba === this._currentlyConnectedRoomba) {
                     this.log.debug("Connection close received");
                     this._currentlyConnectedRoomba = undefined;
-                } else {
-                    this.log.debug("Connection close received from old connection");
                 }
-            });
-            roomba.on("error", (error) => {
-                if (roomba == this._currentlyConnectedRoomba) {
+                roomba.off("close", onClose);
+            };
+            roomba.on("close", onClose);
+
+            const onError = (error: Error) => {
+                if (roomba === this._currentlyConnectedRoomba) {
                     this.log.debug("Connection received error: %s", error.message);
                     this._currentlyConnectedRoomba = undefined;
                 } else {
                     this.log.debug("Old connection received error: %s", error.message);
                 }
-            });
+                roomba.off("error", onError);
+            };
+            roomba.on("error", onError);
+
             roomba.on("state", (state) => {
                 this.receiveRobotState(state);
             });
             return roomba;
         };
-        const stopUsingRoomba = async(roomba: Roomba, force = false) => {
-            if (force) {
-                this._currentlyConnectedRoomba = undefined;
-                await roomba.end();
-                return;
-            }
-
+        const stopUsingRoomba = async(roomba: Roomba) => {
             if (roomba !== this._currentlyConnectedRoomba) {
                 this.log.warn("Releasing an unexpected Roomba instance");
                 await roomba.end();
@@ -376,13 +384,15 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
             this.log.warn("Timed out after %ims trying to connect to Roomba", Date.now() - startConnecting);
 
-            await stopUsingRoomba(roomba, true);
+            await stopUsingRoomba(roomba);
             await callback(new Error("Connect timed out"));
         }, CONNECT_TIMEOUT_MILLIS);
     
         this.log.debug("Connecting to Roomba (%i others waiting)...", this._currentlyConnectedRoombaRequests - 1);
 
-        roomba.on("connect", async() => {
+        const onConnect = async() => {
+            roomba.off("connect", onConnect);
+
             if (timedOut) {
                 this.log.debug("Connection established to Roomba after timeout");
                 return;
@@ -393,7 +403,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
             this.log.debug("Connected to Roomba in %ims", Date.now() - startConnecting);
             await callback(null, roomba);
             await stopUsingRoomba(roomba);
-        });
+        };
+        roomba.on("connect", onConnect);
     }
 
     private setRunningState(powerOn: CharacteristicValue, callback: CharacteristicSetCallback) {
