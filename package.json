@@ -13,7 +13,7 @@
     "url": "https://github.com/karlvr/homebridge-roomba2/issues"
   },
   "dependencies": {
-    "dorita980": "^3.1.9"
+    "dorita980": "^3.1.10"
   },
   "homepage": "https://github.com/karlvr/homebridge-roomba2#readme",
   "keywords": [
