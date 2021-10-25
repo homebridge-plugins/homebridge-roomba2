@@ -46,7 +46,6 @@ const DEBUG = true;
 
 interface Status {
     timestamp: number
-    error?: Error
     running?: boolean
     docking?: boolean
     charging?: boolean
@@ -547,19 +546,14 @@ export default class RoombaAccessory implements AccessoryPlugin {
      */
     private createCharacteristicGetter(name: string, extractValue: CharacteristicValueExtractor): CharacteristicGetter {
         return (callback: CharacteristicGetCallback) => {
-            const returnCachedStatus = (cachedStatus: Status) => {
-                if (cachedStatus.error) {
-                    this.log("%s: Returning error %s (%ims old)", name, cachedStatus.error.message, Date.now() - cachedStatus.timestamp);
-                    callback(cachedStatus.error);
+            const returnCachedStatus = (status: Status) => {
+                const value = extractValue(status);
+                if (value === undefined) {
+                    this.log("%s: Returning no value (%ims old)", name, Date.now() - status.timestamp!);
+                    callback(NO_VALUE);
                 } else {
-                    const value = extractValue(cachedStatus);
-                    if (value === undefined) {
-                        this.log("%s: Returning no value (%ims old)", name, Date.now() - cachedStatus.timestamp!);
-                        callback(NO_VALUE);
-                    } else {
-                        this.log("%s: Returning %s (%ims old)", name, String(value), Date.now() - cachedStatus.timestamp!);
-                        callback(null, value);
-                    }
+                    this.log("%s: Returning %s (%ims old)", name, String(value), Date.now() - status.timestamp!);
+                    callback(null, value);
                 }
             };
 
@@ -587,13 +581,11 @@ export default class RoombaAccessory implements AccessoryPlugin {
      * preemptively reports state back to Homebridge.
      */
     private mergeCachedStatus(status: Partial<Status>) {
-        if (this.cachedStatus && !this.cachedStatus.error) {
-            this.setCachedStatus({
-                ...this.cachedStatus,
-                timestamp: Date.now(),
-                ...status,
-            });
-        }
+        this.setCachedStatus({
+            ...this.cachedStatus,
+            timestamp: Date.now(),
+            ...status,
+        });
     }
 
     /**
@@ -602,9 +594,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
      */
     private setCachedStatus(status: Status) {
         this.cachedStatus = status;
-        if (!status.error) {
-            this.updateCharacteristics(status);
-        }
+        this.updateCharacteristics(status);
     }
 
     private parseState(state: RobotState) {
