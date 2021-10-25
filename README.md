@@ -164,6 +164,21 @@ or
 pnpm watch
 ```
 
+### Testing
+
+The fastest way to test changes is to copy the built product directly to your Homebridge, and then to restart Homebridge.
+
+If your Homebridge is running on your local machine, you can build (as above) and then copy the `config.schema.json` file and `dist`
+folder to the `homebridge-roomba2` folder in your Homebridge's `node_modules` folder.
+
+If your Homebridge is running on another machine, you can use a remote copy tool such as `scp` to copy the files:
+
+```shell
+pnpm build && scp -r config.schema.json dist user@host.local:/usr/lib/node_modules/homebridge-roomba2/
+```
+
+Note: the destination path above is an example of what the path to `node_modules` on your Homebridge server _might be_.
+
 ## Contributing
 
 The homebridge-roomba2 plugin uses [Changesets](https://github.com/atlassian/changesets) to maintain the [CHANGELOG.md](./CHANGELOG.md) and to bump the package's version number according to [semer](https://semver.org).
