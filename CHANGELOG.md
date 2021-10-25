@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.3.0-beta.8
+
+### Minor Changes
+
+- 5ab1507: Increase the frequency of Roomba status checks in order to support automations
+
+### Patch Changes
+
+- 05ca4e6: Improve handling around connections to Roomba that timeout
+- f100e9f: Refresh Roomba's status after every action so we update our version of Roomba's state ASAP.
+
+  The previous approach of updating the state directly had a race condition with pre-existing updates of Roomba's state.
+
 ## 1.3.0-beta.7
 
 ### Minor Changes
