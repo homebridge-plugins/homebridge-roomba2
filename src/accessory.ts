@@ -575,6 +575,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
             timestamp: Date.now(),
             ...status,
         });
+        if (Object.keys(status).length > 1) {
+            this.log.debug("Merged updated state %s => %s", JSON.stringify(status), JSON.stringify(this.cachedStatus));
+        }
     }
 
     /**
