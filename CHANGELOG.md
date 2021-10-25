@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0-beta.9
+
+### Minor Changes
+
+- 8ab5243: Change docking sensor to a switch so you can trigger docking
+
 ## 1.3.0-beta.8
 
 ### Minor Changes
