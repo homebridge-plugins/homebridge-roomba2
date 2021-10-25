@@ -17,7 +17,7 @@
 - Roomba stop and dock on demand
 - Roomba charging status 
 - Roomba battery level (with low battery warning)
-- Roomba docked notifcation 
+- Roomba docked notification 
 - Roomba running notification
 - Roomba bin full notification
 
