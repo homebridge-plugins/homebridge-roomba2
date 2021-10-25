@@ -423,15 +423,12 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     await roomba.clean();
                     await roomba.resume();
 
-                    this.mergeCachedStatus({
-                        running: true,
-                        charging: false,
-                        docking: false,
-                    });
-
                     this.log("Roomba is running");
 
                     callback();
+
+                    /* Force a refresh of state so we pick up the new state quickly */
+                    this.refreshState();
 
                     /* After sending an action to Roomba, we start watching to ensure HomeKit has up to date status */
                     this.startWatching();
@@ -461,11 +458,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                         callback();
                         
-                        this.mergeCachedStatus({
-                            running: false,
-                            charging: false,
-                            docking: false,
-                        });
+                        /* Force a refresh of state so we pick up the new state quickly */
+                        this.refreshState();
+                    
                         if (this.dockOnStop) {
                             this.log("Roomba paused, returning to Dock");
                             await this.dockWhenStopped(roomba, 3000);
@@ -478,11 +473,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                         callback();
 
-                        this.mergeCachedStatus({
-                            running: false,
-                            charging: false,
-                            docking: false,
-                        });
+                        /* Force a refresh of state so we pick up the new state quickly */
+                        this.refreshState();
 
                         this.log("Roomba paused");
                     } else if (state.charging) {
@@ -515,11 +507,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                     this.log("Roomba docking");
                     
-                    this.mergeCachedStatus({
-                        running: false,
-                        charging: false,
-                        docking: true,
-                    });
+                    /* Force a refresh of state so we pick up the new state quickly */
+                    this.refreshState();
 
                     break;
                 case "run":
@@ -599,7 +588,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
     private parseState(state: RobotState) {
         const status: Status = {
-            ...EMPTY_STATUS,
             timestamp: Date.now(),
         };
 
