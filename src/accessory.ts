@@ -9,7 +9,7 @@ const CONNECT_TIMEOUT_MILLIS = 60_000;
 /**
  * When actively watching Roomba's status, how often to query Roomba and update HomeKit.
  */
-const WATCH_INTERVAL_MILLIS = 30_000;
+const WATCH_INTERVAL_MILLIS = 5_000;
 
 /**
  * After starting to actively watch Roomba's status, how long should we watch for after
@@ -21,17 +21,17 @@ const WATCH_IDLE_TIMEOUT_MILLIS = 600_000;
 /**
  * How often to query Roomba and update HomeKit when not actively watching Roomba's status.
  */
-const LONG_WATCH_INTERVAL_MILLIS = 3600 * 1000; // 24 * 60 * 60 * 1000;
-
-/**
- * How old a cached status can be before we ignore it.
- */
-const MAX_CACHED_STATUS_AGE_MILLIS = LONG_WATCH_INTERVAL_MILLIS + 600_000;
+const LONG_WATCH_INTERVAL_MILLIS = 60_000;
 
 /**
  * How long will we wait for the Roomba to send status before giving up?
  */
 const MAX_WAIT_FOR_STATUS_MILLIS = 60_000;
+
+/**
+ * How old a cached status can be before we ignore it.
+ */
+const MAX_CACHED_STATUS_AGE_MILLIS = LONG_WATCH_INTERVAL_MILLIS + MAX_WAIT_FOR_STATUS_MILLIS * 5;
 
 /**
  * Coalesce refreshState requests into one when they're less than this many millis apart.
