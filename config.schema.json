@@ -60,11 +60,15 @@
                 "title": "Home",
                 "required": false
             },
-            "dockOnStop": {
-                "type": "boolean",
-                "title": "Dock when stopped",
-                "default": true,
-                "required": false
+            "stopBehaviour": {
+                "type": "string",
+                "title": "When Roomba is turned off",
+                "required": true,
+                "default": "home",
+                "oneOf": [
+                    { "title": "Home", "enum": ["home"] },
+                    { "title": "Pause", "enum": ["pause"] }
+                ]
             }
         }
     },
@@ -72,6 +76,6 @@
         { "type": "section", "title": "Roomba Details", "items": [ "name", "model", "serialnum", "blid", "robotpwd", "ipaddress" ] },
         { "type": "section", "title": "Contact Sensors", "items": [ "dockContactSensor", "dockingContactSensor", "runningContactSensor", "binContactSensor" ] },
         { "type": "section", "title": "Switches", "items": [ "homeSwitch" ] },
-        { "type": "section", "title": "Behaviour", "items": [ "dockOnStop" ] }
+        { "type": "section", "title": "Behaviour", "items": [ "stopBehaviour" ] }
     ]
 }
