@@ -36,23 +36,23 @@
             },
             "dockContactSensor": {
                 "type": "boolean",
-                "title": "Show dock status as a contact sensor",
+                "title": "Home",
                 "default": true,
                 "required": false
             },
             "runningContactSensor": {
                 "type": "boolean",
-                "title": "Show running status as a contact sensor",
+                "title": "Running",
                 "required": false
             },
             "binContactSensor": {
                 "type": "boolean",
-                "title": "Show if bin is full as a contact sensor",
+                "title": "Bin full",
                 "required": false
             },
             "dockingContactSensor": {
                 "type": "boolean",
-                "title": "Show docking status as a contact sensor",
+                "title": "Returning Home",
                 "required": false
             },
             "dockOnStop": {
@@ -62,5 +62,10 @@
                 "required": false
             }
         }
-    }
+    },
+    "layout": [
+        { "type": "section", "title": "Roomba Details", "items": [ "name", "model", "serialnum", "blid", "robotpwd", "ipaddress" ] },
+        { "type": "section", "title": "Contact Sensors", "items": [ "dockContactSensor", "dockingContactSensor", "runningContactSensor", "binContactSensor" ] },
+        { "type": "section", "title": "Behaviour", "items": [ "dockOnStop" ] }
+    ]
 }
