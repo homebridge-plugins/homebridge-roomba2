@@ -55,6 +55,11 @@
                 "title": "Returning Home",
                 "required": false
             },
+            "homeSwitch": {
+                "type": "boolean",
+                "title": "Home",
+                "required": false
+            },
             "dockOnStop": {
                 "type": "boolean",
                 "title": "Dock when stopped",
@@ -66,6 +71,7 @@
     "layout": [
         { "type": "section", "title": "Roomba Details", "items": [ "name", "model", "serialnum", "blid", "robotpwd", "ipaddress" ] },
         { "type": "section", "title": "Contact Sensors", "items": [ "dockContactSensor", "dockingContactSensor", "runningContactSensor", "binContactSensor" ] },
+        { "type": "section", "title": "Switches", "items": [ "homeSwitch" ] },
         { "type": "section", "title": "Behaviour", "items": [ "dockOnStop" ] }
     ]
 }

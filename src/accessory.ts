@@ -90,6 +90,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private runningService?: Service
     private binService?: Service
     private dockingService?: Service
+    private homeService?: Service
 
     /**
      * The last known state from Roomba, if any.
@@ -138,6 +139,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         const showRunningAsContactSensor = config.runningContactSensor;
         const showBinStatusAsContactSensor = config.binContactSensor;
         const showDockingAsContactSensor = config.dockingContactSensor;
+        const showHomeSwitch = config.homeSwitch;
 
         const Service = api.hap.Service;
 
@@ -156,7 +158,10 @@ export default class RoombaAccessory implements AccessoryPlugin {
             this.binService = new Service.ContactSensor(this.name + " Bin Full", "Full"); 
         }
         if (showDockingAsContactSensor) {
-            this.dockingService = new Service.Switch(this.name + " Docking", "docking"); 
+            this.dockingService = new Service.ContactSensor(this.name + " Docking", "docking"); 
+        }
+        if (showHomeSwitch) {
+            this.homeService = new Service.Switch(this.name + " Home", "returning"); 
         }
 
         const Characteristic = this.api.hap.Characteristic;
@@ -204,9 +209,14 @@ export default class RoombaAccessory implements AccessoryPlugin {
         }
         if (this.dockingService) {
             this.dockingService
+                .getCharacteristic(Characteristic.ContactSensorState)
+                .on("get", this.createCharacteristicGetter("Docking status", this.dockingStatus));
+        }
+        if (this.homeService) {
+            this.homeService
                 .getCharacteristic(Characteristic.On)
                 .on("set", this.setDockingState.bind(this))
-                .on("get", this.createCharacteristicGetter("Docking status", this.dockingStatus));
+                .on("get", this.createCharacteristicGetter("Returning Home", this.dockingStatus));
         }
 
         this.startLongWatch();
@@ -235,6 +245,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
         }
         if (this.dockingService) {
             services.push(this.dockingService);
+        }
+        if (this.homeService) {
+            services.push(this.homeService);
         }
 
         return services;
@@ -720,6 +733,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
         if (this.dockingService) {
             updateCharacteristic(this.dockingService, Characteristic.ContactSensorState, this.dockingStatus);
         }
+        if (this.homeService) {
+            updateCharacteristic(this.homeService, Characteristic.On, this.dockingStatus);
+        }
 
         this.lastUpdatedStatus = {
             ...this.lastUpdatedStatus,
@@ -792,8 +808,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private dockingStatus = (status: Status) => status.docking === undefined
         ? undefined
         : status.docking
-            ? 1
-            : 0;
+            ? this.api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
+            : this.api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED;
     private dockedStatus = (status: Status) => status.charging === undefined
         ? undefined
         : status.charging
