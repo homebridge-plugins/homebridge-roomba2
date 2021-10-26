@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0-beta.10
+
+### Minor Changes
+
+- e7f574c: Organise config schema into sections and rename options
+- 0e87755: Add Home switch as separate to docking contact sensor
+
 ## 1.3.0-beta.9
 
 ### Minor Changes
