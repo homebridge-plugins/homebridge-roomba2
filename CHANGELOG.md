@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0-beta.11
+
+### Patch Changes
+
+- 477f571: Upgrade dependencies including dorita980 to address #81
+
 ## 1.3.0-beta.10
 
 ### Minor Changes
