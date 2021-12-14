@@ -9,7 +9,7 @@ const CONNECT_TIMEOUT_MILLIS = 60_000;
 /**
  * When actively watching Roomba's status, how often to query Roomba and update HomeKit.
  */
-const WATCH_INTERVAL_MILLIS = 30_000;
+const WATCH_INTERVAL_MILLIS = 5_000;
 
 /**
  * After starting to actively watch Roomba's status, how long should we watch for after
@@ -21,17 +21,17 @@ const WATCH_IDLE_TIMEOUT_MILLIS = 600_000;
 /**
  * How often to query Roomba and update HomeKit when not actively watching Roomba's status.
  */
-const LONG_WATCH_INTERVAL_MILLIS = 3600 * 1000; // 24 * 60 * 60 * 1000;
-
-/**
- * How old a cached status can be before we ignore it.
- */
-const MAX_CACHED_STATUS_AGE_MILLIS = LONG_WATCH_INTERVAL_MILLIS + 600_000;
+const LONG_WATCH_INTERVAL_MILLIS = 60_000;
 
 /**
  * How long will we wait for the Roomba to send status before giving up?
  */
 const MAX_WAIT_FOR_STATUS_MILLIS = 60_000;
+
+/**
+ * How old a cached status can be before we ignore it.
+ */
+const MAX_CACHED_STATUS_AGE_MILLIS = LONG_WATCH_INTERVAL_MILLIS + MAX_WAIT_FOR_STATUS_MILLIS * 5;
 
 /**
  * Coalesce refreshState requests into one when they're less than this many millis apart.
@@ -46,7 +46,6 @@ const DEBUG = true;
 
 interface Status {
     timestamp: number
-    error?: Error
     running?: boolean
     docking?: boolean
     charging?: boolean
@@ -81,7 +80,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private robotpwd: string
     private ipaddress: string
     private firmware: string
-    private dockOnStop: boolean
+    private stopBehaviour: "home" | "pause"
 
     private accessoryInfo: Service
     private filterMaintenance: Service
@@ -91,6 +90,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private runningService?: Service
     private binService?: Service
     private dockingService?: Service
+    private homeService?: Service
 
     /**
      * The last known state from Roomba, if any.
@@ -133,18 +133,20 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.robotpwd = config.robotpwd;
         this.ipaddress = config.ipaddress;
         this.firmware = "N/A";
-        this.dockOnStop = config.dockOnStop !== undefined ? config.dockOnStop : true;
+        this.stopBehaviour = config.stopBehaviour !== undefined ? config.stopBehaviour : "home";
 
         const showDockAsContactSensor = config.dockContactSensor === undefined ? true : config.dockContactSensor;
         const showRunningAsContactSensor = config.runningContactSensor;
         const showBinStatusAsContactSensor = config.binContactSensor;
         const showDockingAsContactSensor = config.dockingContactSensor;
+        const showHomeSwitch = config.homeSwitch;
 
         const Service = api.hap.Service;
 
         this.accessoryInfo = new Service.AccessoryInformation();
         this.filterMaintenance = new Service.FilterMaintenance(this.name);
         this.switchService = new Service.Switch(this.name);
+        this.switchService.setPrimaryService(true);
         this.batteryService = new Service.Battery(this.name);
         if (showDockAsContactSensor) {
             this.dockService = new Service.ContactSensor(this.name + " Dock", "docked");
@@ -157,6 +159,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
         }
         if (showDockingAsContactSensor) {
             this.dockingService = new Service.ContactSensor(this.name + " Docking", "docking");
+        }
+        if (showHomeSwitch) {
+            this.homeService = new Service.Switch(this.name + " Home", "returning");
         }
 
         const Characteristic = this.api.hap.Characteristic;
@@ -207,26 +212,32 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 .getCharacteristic(Characteristic.ContactSensorState)
                 .on("get", this.createCharacteristicGetter("Docking status", this.dockingStatus));
         }
+        if (this.homeService) {
+            this.homeService
+                .getCharacteristic(Characteristic.On)
+                .on("set", this.setDockingState.bind(this))
+                .on("get", this.createCharacteristicGetter("Returning Home", this.dockingStatus));
+        }
 
         this.startLongWatch();
     }
 
     public identify(callback) {
         this.log("Identify requested.");
-
         this.connect(async(error, roomba) => {
-            if (error || !roomba) {
-                callback(error || new Error("Unknown error"));
-                return;
-            }
+                if (error || !roomba) {
+                    callback(error || new Error("Unknown error"));
+                    return;
+                }
+          try {
+              await roomba.find();
+              callback();
+              } catch (error) {
+                 this.log("Roomba failed to locate: %s", (error as Error).message);
 
-            try {
-                await roomba.find();
-                callback();
-            } catch (error) {
-               this.log("Unable to Locate");
+                callback(error as Error);
             }
-            });
+        });
     }
 
     public getServices(): Service[] {
@@ -248,6 +259,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
         }
         if (this.dockingService) {
             services.push(this.dockingService);
+        }
+        if (this.homeService) {
+            services.push(this.homeService);
         }
 
         return services;
@@ -438,15 +452,12 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     await roomba.clean();
                     await roomba.resume();
 
-                    this.mergeCachedStatus({
-                        running: true,
-                        charging: false,
-                        docking: false,
-                    });
-
                     this.log("Roomba is running");
 
                     callback();
+
+                    /* Force a refresh of state so we pick up the new state quickly */
+                    this.refreshState();
 
                     /* After sending an action to Roomba, we start watching to ensure HomeKit has up to date status */
                     this.startWatching();
@@ -476,12 +487,10 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                         callback();
 
-                        this.mergeCachedStatus({
-                            running: false,
-                            charging: false,
-                            docking: false,
-                        });
-                        if (this.dockOnStop) {
+                        /* Force a refresh of state so we pick up the new state quickly */
+                        this.refreshState();
+
+                        if (this.stopBehaviour === "home") {
                             this.log("Roomba paused, returning to Dock");
                             await this.dockWhenStopped(roomba, 3000);
                         } else {
@@ -493,11 +502,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                         callback();
 
-                        this.mergeCachedStatus({
-                            running: false,
-                            charging: false,
-                            docking: false,
-                        });
+                        /* Force a refresh of state so we pick up the new state quickly */
+                        this.refreshState();
 
                         this.log("Roomba paused");
                     } else if (state.charging) {
@@ -518,6 +524,39 @@ export default class RoombaAccessory implements AccessoryPlugin {
         }
     }
 
+    private setDockingState(docking: CharacteristicValue, callback: CharacteristicSetCallback) {
+        this.log("Setting docking state to %s", JSON.stringify(docking));
+
+        this.connect(async(error, roomba) => {
+            if (error || !roomba) {
+                callback(error || new Error("Unknown error"));
+                return;
+            }
+
+            try {
+                if (docking) {
+                    await roomba.dock();
+                    this.log("Roomba is docking");
+                } else {
+                    await roomba.pause();
+                    this.log("Roomba is paused");
+                }
+
+                callback();
+
+                /* Force a refresh of state so we pick up the new state quickly */
+                this.refreshState();
+
+                /* After sending an action to Roomba, we start watching to ensure HomeKit has up to date status */
+                this.startWatching();
+            } catch (error) {
+                this.log("Roomba failed: %s", (error as Error).message);
+
+                callback(error as Error);
+            }
+        });
+    }
+
     private async dockWhenStopped(roomba: Roomba, pollingInterval: number) {
         try {
             const state = await roomba.getRobotState(["cleanMissionStatus"]);
@@ -530,11 +569,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                     this.log("Roomba docking");
 
-                    this.mergeCachedStatus({
-                        running: false,
-                        charging: false,
-                        docking: true,
-                    });
+                    /* Force a refresh of state so we pick up the new state quickly */
+                    this.refreshState();
 
                     break;
                 case "run":
@@ -561,19 +597,14 @@ export default class RoombaAccessory implements AccessoryPlugin {
      */
     private createCharacteristicGetter(name: string, extractValue: CharacteristicValueExtractor): CharacteristicGetter {
         return (callback: CharacteristicGetCallback) => {
-            const returnCachedStatus = (cachedStatus: Status) => {
-                if (cachedStatus.error) {
-                    this.log("%s: Returning error %s (%ims old)", name, cachedStatus.error.message, Date.now() - cachedStatus.timestamp);
-                    callback(cachedStatus.error);
+            const returnCachedStatus = (status: Status) => {
+                const value = extractValue(status);
+                if (value === undefined) {
+                    this.log("%s: Returning no value (%ims old)", name, Date.now() - status.timestamp!);
+                    callback(NO_VALUE);
                 } else {
-                    const value = extractValue(cachedStatus);
-                    if (value === undefined) {
-                        this.log("%s: Returning no value (%ims old)", name, Date.now() - cachedStatus.timestamp!);
-                        callback(NO_VALUE);
-                    } else {
-                        this.log("%s: Returning %s (%ims old)", name, String(value), Date.now() - cachedStatus.timestamp!);
-                        callback(null, value);
-                    }
+                    this.log("%s: Returning %s (%ims old)", name, String(value), Date.now() - status.timestamp!);
+                    callback(null, value);
                 }
             };
 
@@ -601,12 +632,13 @@ export default class RoombaAccessory implements AccessoryPlugin {
      * preemptively reports state back to Homebridge.
      */
     private mergeCachedStatus(status: Partial<Status>) {
-        if (this.cachedStatus && !this.cachedStatus.error) {
-            this.setCachedStatus({
-                ...this.cachedStatus,
-                timestamp: Date.now(),
-                ...status,
-            });
+        this.setCachedStatus({
+            ...this.cachedStatus,
+            timestamp: Date.now(),
+            ...status,
+        });
+        if (Object.keys(status).length > 1) {
+            this.log.debug("Merged updated state %s => %s", JSON.stringify(status), JSON.stringify(this.cachedStatus));
         }
     }
 
@@ -616,14 +648,11 @@ export default class RoombaAccessory implements AccessoryPlugin {
      */
     private setCachedStatus(status: Status) {
         this.cachedStatus = status;
-        if (!status.error) {
-            this.updateCharacteristics(status);
-        }
+        this.updateCharacteristics(status);
     }
 
     private parseState(state: RobotState) {
         const status: Status = {
-            ...EMPTY_STATUS,
             timestamp: Date.now(),
         };
 
@@ -718,6 +747,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
         if (this.dockingService) {
             updateCharacteristic(this.dockingService, Characteristic.ContactSensorState, this.dockingStatus);
         }
+        if (this.homeService) {
+            updateCharacteristic(this.homeService, Characteristic.On, this.dockingStatus);
+        }
 
         this.lastUpdatedStatus = {
             ...this.lastUpdatedStatus,
@@ -780,8 +812,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private runningStatus = (status: Status) => status.running === undefined
         ? undefined
         : status.running
-            ? this.api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
-            : this.api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED;
+            ? 1
+            : 0;
     private chargingStatus = (status: Status) => status.charging === undefined
         ? undefined
         : status.charging

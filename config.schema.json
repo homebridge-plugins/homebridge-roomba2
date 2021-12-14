@@ -36,31 +36,46 @@
             },
             "dockContactSensor": {
                 "type": "boolean",
-                "title": "Show dock status as a contact sensor",
+                "title": "Home",
                 "default": true,
                 "required": false
             },
             "runningContactSensor": {
                 "type": "boolean",
-                "title": "Show running status as a contact sensor",
+                "title": "Running",
                 "required": false
             },
             "binContactSensor": {
                 "type": "boolean",
-                "title": "Show if bin is full as a contact sensor",
+                "title": "Bin full",
                 "required": false
             },
             "dockingContactSensor": {
                 "type": "boolean",
-                "title": "Show docking status as a contact sensor",
+                "title": "Returning Home",
                 "required": false
             },
-            "dockOnStop": {
+            "homeSwitch": {
                 "type": "boolean",
-                "title": "Dock when stopped",
-                "default": true,
+                "title": "Home",
                 "required": false
+            },
+            "stopBehaviour": {
+                "type": "string",
+                "title": "When Roomba is turned off",
+                "required": true,
+                "default": "home",
+                "oneOf": [
+                    { "title": "Home", "enum": ["home"] },
+                    { "title": "Pause", "enum": ["pause"] }
+                ]
             }
         }
-    }
+    },
+    "layout": [
+        { "type": "section", "title": "Roomba Details", "items": [ "name", "model", "serialnum", "blid", "robotpwd", "ipaddress" ] },
+        { "type": "section", "title": "Contact Sensors", "items": [ "dockContactSensor", "dockingContactSensor", "runningContactSensor", "binContactSensor" ] },
+        { "type": "section", "title": "Switches", "items": [ "homeSwitch" ] },
+        { "type": "section", "title": "Behaviour", "items": [ "stopBehaviour" ] }
+    ]
 }

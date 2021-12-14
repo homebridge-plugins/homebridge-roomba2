@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.3.0-beta.11
+
+### Patch Changes
+
+- 477f571: Upgrade dependencies including dorita980 to address #81
+
+## 1.3.0-beta.10
+
+### Minor Changes
+
+- e7f574c: Organise config schema into sections and rename options
+- 0e87755: Add Home switch as separate to docking contact sensor
+
+## 1.3.0-beta.9
+
+### Minor Changes
+
+- 8ab5243: Change docking sensor to a switch so you can trigger docking
+
+## 1.3.0-beta.8
+
+### Minor Changes
+
+- 5ab1507: Increase the frequency of Roomba status checks in order to support automations
+
+### Patch Changes
+
+- 05ca4e6: Improve handling around connections to Roomba that timeout
+- f100e9f: Refresh Roomba's status after every action so we update our version of Roomba's state ASAP.
+
+  The previous approach of updating the state directly had a race condition with pre-existing updates of Roomba's state.
+
 ## 1.3.0-beta.7
 
 ### Minor Changes
