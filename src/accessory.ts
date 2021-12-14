@@ -155,13 +155,13 @@ export default class RoombaAccessory implements AccessoryPlugin {
             this.runningService = new Service.ContactSensor(this.name + " Running", "running");
         }
         if (showBinStatusAsContactSensor) {
-            this.binService = new Service.ContactSensor(this.name + " Bin Full", "Full"); 
+            this.binService = new Service.ContactSensor(this.name + " Bin Full", "Full");
         }
         if (showDockingAsContactSensor) {
-            this.dockingService = new Service.ContactSensor(this.name + " Docking", "docking"); 
+            this.dockingService = new Service.ContactSensor(this.name + " Docking", "docking");
         }
         if (showHomeSwitch) {
-            this.homeService = new Service.Switch(this.name + " Home", "returning"); 
+            this.homeService = new Service.Switch(this.name + " Home", "returning");
         }
 
         const Characteristic = this.api.hap.Characteristic;
@@ -259,13 +259,13 @@ export default class RoombaAccessory implements AccessoryPlugin {
             return false;
         }
         this.lastRefreshState = now;
-        
+
         this.connect(async(error, roomba) => {
             if (error || !roomba) {
                 this.log("Failed to connect to Roomba to refresh state: %s", error ? error.message : "Unknown");
                 return;
             }
-            
+
             const startedWaitingForStatus = Date.now();
 
             /* Wait until we've received a state with all of the information we desire */
@@ -286,7 +286,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                     if (this.receivedRobotStateIsComplete(state)) {
                         clearTimeout(timeout);
-                        
+
                         /* NB: the actual state is received and updated in the listener in connect() */
                         this.log.debug(
                             "Refreshed Roomba's state in %ims: %s",
@@ -368,7 +368,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 await roomba.end();
                 return;
             }
-    
+
             this._currentlyConnectedRoombaRequests--;
             if (this._currentlyConnectedRoombaRequests === 0) {
                 this._currentlyConnectedRoomba = undefined;
@@ -401,7 +401,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
             await stopUsingRoomba(roomba);
             await callback(new Error("Connect timed out"));
         }, CONNECT_TIMEOUT_MILLIS);
-    
+
         this.log.debug("Connecting to Roomba (%i others waiting)...", this._currentlyConnectedRoombaRequests - 1);
 
         const onConnect = async() => {
@@ -472,10 +472,10 @@ export default class RoombaAccessory implements AccessoryPlugin {
                         await roomba.pause();
 
                         callback();
-                        
+
                         /* Force a refresh of state so we pick up the new state quickly */
                         this.refreshState();
-                    
+
                         if (this.stopBehaviour === "home") {
                             this.log("Roomba paused, returning to Dock");
                             await this.dockWhenStopped(roomba, 3000);
@@ -512,7 +512,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
     private setDockingState(docking: CharacteristicValue, callback: CharacteristicSetCallback) {
         this.log("Setting docking state to %s", JSON.stringify(docking));
-        
+
         this.connect(async(error, roomba) => {
             if (error || !roomba) {
                 callback(error || new Error("Unknown error"));
@@ -554,7 +554,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     await roomba.dock();
 
                     this.log("Roomba docking");
-                    
+
                     /* Force a refresh of state so we pick up the new state quickly */
                     this.refreshState();
 
@@ -577,7 +577,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
             this.log.warn("Roomba failed to dock: %s", (error as Error).message);
         }
     }
-    
+
     /**
      * Creates as a Characteristic getter function that derives the CharacteristicValue from Roomba's status.
      */
@@ -671,7 +671,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     status.running = false;
                     status.charging = false;
                     status.docking = true;
-                    
+
                     break;
                 case "stop":
                 case "stuck":
@@ -762,17 +762,17 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 this.stopWatching();
                 return;
             }
-            
+
             this.log.debug(
                 "Watching Roomba's status (repeating in %is, idle timeout in %is)",
-                WATCH_INTERVAL_MILLIS / 1000, 
+                WATCH_INTERVAL_MILLIS / 1000,
                 (WATCH_IDLE_TIMEOUT_MILLIS - timeSinceLastWatchingRequest) / 1000
             );
 
             this.refreshState();
             this.watching = setTimeout(checkStatus, WATCH_INTERVAL_MILLIS);
         };
-        
+
         this.watching = setTimeout(checkStatus, WATCH_INTERVAL_MILLIS);
     }
 
