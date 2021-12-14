@@ -15,9 +15,9 @@
 
 - Roomba start on demand
 - Roomba stop and dock on demand
-- Roomba charging status 
+- Roomba charging status
 - Roomba battery level (with low battery warning)
-- Roomba docked notification 
+- Roomba docked notification
 - Roomba running notification
 - Roomba bin full notification
 
@@ -31,15 +31,15 @@ a few seconds).
 
 1) Install Homebridge:   ```sudo npm i -g homebridge --unsafe-perm```
 2) Download this plugin: ```sudo npm i -g homebridge-roomba2```
-3) Follow [Setup](#setup) to get Roomba credentials 
+3) Follow [Setup](#setup) to get Roomba credentials
 4) Add an Accessory for your Roomba and configure it using [Config-Ui-X](https://github.com/oznu/homebridge-config-ui-x)
 5) Restart Homebridge
 
 ### Manual Installation
 
 1) Install Homebridge:   ```sudo npm i -g homebridge --unsafe-perm```
-2) Download this plugin: ```sudo npm i -g homebridge-roomba2``` 
-3) Follow [Setup](#setup) to get Roomba credentials 
+2) Download this plugin: ```sudo npm i -g homebridge-roomba2```
+3) Follow [Setup](#setup) to get Roomba credentials
 4) Enter Roomba's credentials in your `config.json` file.
 5) Restart Homebridge
 
@@ -99,20 +99,20 @@ as to provide HomeKit with Roomba's status only when it requests it.
 Click on any of the items below to expand the corresponding answer.
 
 <details>
-  <summary>Finding my Roomba's IP address</summary>  
+  <summary>Finding my Roomba's IP address</summary>
 
   >You can find your Roomba's IP Address in the iRobot app. Open the app and choose your Robot. Scroll down to the bottom and find Robot Settings. Click Wi-Fi Settings and then Robot Wi-FI Details. You will find your IP address and various other network goodies here.
-  
+
   ![Alt Text](https://github.com/rcoletti116/homebridge-roomba2/blob/rcoletti116-docsfiles/trim.1BD89A46-80F9-4FCB-A04B-4A610D403D4F.gif)
 
   >Alternatively you can open up your Router Admin Panel and look for a list of devices. Once you identify the Roomba, you should see an associated IP address, however, this process will be different for each type of router.
-  
+
   >While identifying your Roomba's IP address, we strongly recommend assigning your Roomba a Static IP Address (See _Roomba cannot be found after router restart OR Roomba's IP Address changed_ below).
 </details>
 
 <details>
   <summary>Roomba cannot be found after router restart OR Roomba's IP Address changed</summary>
-  
+
   >If you experience issues with connecting to your Roomba, you might want to assign a **Static IP Address** to your Roomba. In order to do this, you'll need to navigate to your Router's Admin Portal and modify the configuration; because this process is different for each type of router, you will need to research this process on your own.
   >
   >
@@ -197,6 +197,6 @@ Changesets will create a new file in the `.changeset` directory that you can com
 
 ## Credits
 
-STVMallen  - [Original plugin](https://github.com/stvmallen/homebridge-roomba-stv) 
+STVMallen  - [Original plugin](https://github.com/stvmallen/homebridge-roomba-stv)
 
 ncovercash - [Dock status](https://github.com/stvmallen/homebridge-roomba-stv/pull/63)
