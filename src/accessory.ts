@@ -170,7 +170,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
         this.accessoryInfo.setCharacteristic(Characteristic.Manufacturer, "iRobot");
         this.accessoryInfo.setCharacteristic(Characteristic.SerialNumber, this.serialnum);
-        this.accessoryInfo.setCharacteristic(Characteristic.Identify, false);
+        this.accessoryInfo.setCharacteristic(Characteristic.Identify, true);
         this.accessoryInfo.setCharacteristic(Characteristic.Name, this.name);
         this.accessoryInfo.setCharacteristic(Characteristic.Model, this.model);
         this.accessoryInfo.setCharacteristic(Characteristic.FirmwareRevision, version);
@@ -222,8 +222,22 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.startLongWatch();
     }
 
-    public identify(): void {
-        this.log.debug("Identify requested. Not supported yet.");
+    public identify(callback) {
+        this.log("Identify requested.");
+        this.connect(async(error, roomba) => {
+                if (error || !roomba) {
+                    callback(error || new Error("Unknown error"));
+                    return;
+                }
+          try {
+              await roomba.find();
+              callback();
+              } catch (error) {
+                 this.log("Roomba failed to locate: %s", (error as Error).message);
+
+                callback(error as Error);
+            }
+        });
     }
 
     public getServices(): Service[] {
