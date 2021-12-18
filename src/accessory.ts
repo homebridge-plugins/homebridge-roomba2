@@ -38,12 +38,6 @@ const MAX_CACHED_STATUS_AGE_MILLIS = LONG_WATCH_INTERVAL_MILLIS + MAX_WAIT_FOR_S
  */
 const REFRESH_STATE_COALESCE_MILLIS = 10_000;
 
-/**
- * Whether to output debug logging at info level. Useful during debugging to be able to
- * see debug logs from this plugin.
- */
-const DEBUG = true;
-
 interface Status {
     timestamp: number
     running?: boolean
@@ -81,6 +75,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private ipaddress: string
     private firmware: string
     private stopBehaviour: "home" | "pause"
+    private debug: boolean
 
     private accessoryInfo: Service
     private filterMaintenance: Service
@@ -119,7 +114,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
     public constructor(log: Logging, config: AccessoryConfig, api: API) {
         this.api = api;
-        this.log = !DEBUG
+        this.debug = config.debug;
+
+        this.log = !this.debug
             ? log
             : Object.assign(log, {
                 debug: (message: string, ...parameters: unknown[]) => {
