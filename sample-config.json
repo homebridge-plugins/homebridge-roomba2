@@ -22,5 +22,6 @@
       "keepAliveEnabled": true,
       "cacheTTL": 30
     }
-  ]
+  ],
+  "debug": false
 }
