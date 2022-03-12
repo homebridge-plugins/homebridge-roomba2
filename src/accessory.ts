@@ -65,27 +65,27 @@ async function delay(duration: number) {
 
 export default class RoombaAccessory implements AccessoryPlugin {
 
-    private api: API
-    private log: Logging
-    private name: string
-    private model: string
-    private serialnum: string
-    private blid: string
-    private robotpwd: string
-    private ipaddress: string
-    private firmware: string
-    private stopBehaviour: "home" | "pause"
-    private debug: boolean
+    private api: API;
+    private log: Logging;
+    private name: string;
+    private model: string;
+    private serialnum: string;
+    private blid: string;
+    private robotpwd: string;
+    private ipaddress: string;
+    private firmware: string;
+    private stopBehaviour: "home" | "pause";
+    private debug: boolean;
 
-    private accessoryInfo: Service
-    private filterMaintenance: Service
-    private switchService: Service
-    private batteryService: Service
-    private dockService?: Service
-    private runningService?: Service
-    private binService?: Service
-    private dockingService?: Service
-    private homeService?: Service
+    private accessoryInfo: Service;
+    private filterMaintenance: Service;
+    private switchService: Service;
+    private batteryService: Service;
+    private dockService?: Service;
+    private runningService?: Service;
+    private binService?: Service;
+    private dockingService?: Service;
+    private homeService?: Service;
 
     /**
      * The last known state from Roomba, if any.
@@ -109,8 +109,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
     /**
      * Whether the plugin is actively watching Roomba's state and updating HomeKit
      */
-    private watching?: NodeJS.Timeout
-    private lastWatchingRequestTimestamp?: number
+    private watching?: NodeJS.Timeout;
+    private lastWatchingRequestTimestamp?: number;
 
     public constructor(log: Logging, config: AccessoryConfig, api: API) {
         this.api = api;
