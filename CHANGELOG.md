@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.1
+
+### Patch Changes
+
+- d69dcf0: Reduce info logging so the plugin is a lot quieter when not in debug logging mode
+- 438e99c: Add debug option to config schema
+
 ## 1.3.0
 
 ### Minor Changes
