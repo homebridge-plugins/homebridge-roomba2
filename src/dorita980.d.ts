@@ -31,7 +31,7 @@ declare module "dorita980" {
     }
 
     export class Local implements Roomba {
-        public connected: boolean
+        public connected: boolean;
 
         public constructor(blid: string, robotpwd: string, ipaddress: string)
 		
