@@ -199,6 +199,20 @@ That will prompt you to indicate whether your change is a patch (a bug fix) or a
 
 Changesets will create a new file in the `.changeset` directory that you can commit as part of your PR.
 
+### Releasing
+
+The maintainer will run these steps to update the plugin version and publish to [npmjs.com](https://npmjs.com/package/homebridge-roomba2):
+
+```shell
+pnpm changeset version
+```
+
+Review the additions to [`CHANGELOG.md`](./CHANGELOG.md), and then publish:
+
+```shell
+pnpm changeset publish
+```
+
 ## Credits
 
 STVMallen  - [Original plugin](https://github.com/stvmallen/homebridge-roomba-stv)
