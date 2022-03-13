@@ -1,5 +1,56 @@
 # Changelog
 
+## 1.3.0
+
+### Minor Changes
+
+- ae578c0: Refactor Roomba connection handling to improve reporting of issues connecting to Roomba and to reuse
+  existing Roomba connections to avoid conflicts [#66]
+- e7f574c: Organise config schema into sections and rename options
+- 5ab1507: Increase the frequency of Roomba status checks in order to support automations
+- 2863a49: Rename noDockOnStop to dockOnStop [#73 #74] (thanks @rcoletti116, @khad)
+- f15404e: Added support for Identify method (supported in 3rd party HomeKit apps)
+- 3e9e48b: Include a resume command when starting cleaning so we can cope with a paused Roomba
+- 44c6f8a: Actively watch Roomba's status and update HomeKit for a short period of time after being inspected
+
+  HomeKit inspects Roomba when you open the Home app, but it doesn't continously poll for changes
+  so the plugin now watches Roomba for changes and pushes them to the Home app.
+
+- b7322c0: Add docking contact sensor
+- 721c3a6: Add a setting to control whether Roomba is sent home when stopped [#63] (thanks @rcoletti116)
+- 0e87755: Add Home switch as separate to docking contact sensor
+- 28eeeec: Report current plugin version as the firmware version
+- 8ab5243: Change docking sensor to a switch so you can trigger docking
+- e32d078: Add a long-term slow watching of Roomba's status so we always have a status
+- 44c026c: Stop behaviour now checks what state Roomba is in and no longer triggers a docking if Roomba is already docked
+- aac6159: Change state refresh approach to be on demand rather than constant polling
+  or keeping a permanent connection.
+- 6dbb668: Convert to using TypeScript and pnpm for development
+- 853b39e: Overhauled Roomba connections and status again, status gathering is now more passive
+
+### Patch Changes
+
+- Enable serial number to be specified in the configuration
+- Change the manufacturer reported to HomeKit to iRobot
+- f71c085: Add source code linting
+- 05ca4e6: Improve handling around connections to Roomba that timeout
+- b3a25b0: Debug logging improvements and re-including the raw status in debug logs
+- 58cba16: Improve Roomba connection handling
+- 032098a: Improve the log message when Roomba fails to complete a docking manoeuvre
+- e623a28: Rename Docked contact sensor to Dock
+- 1f02665: Improve the default name of the Bin Full sensor
+- b9daed9: Recognise more Roomba phases, including more docking phases and stuck
+- 73b02d3: Add a timeout when waiting for the full status from Roomba so we release our connection to Roomba
+- c8ce152: Only update characteristics with changes
+- e79b7a3: Update dependencies
+- 477f571: Upgrade dependencies including dorita980 to address #81
+- f100e9f: Refresh Roomba's status after every action so we update our version of Roomba's state ASAP.
+
+  The previous approach of updating the state directly had a race condition with pre-existing updates of Roomba's state.
+
+- 5399dbb: Fix delay when trying to dock
+- 1346008: Logging more efficient and added a switch to enable easier debug logging
+
 ## 1.3.0-beta.11
 
 ### Patch Changes
