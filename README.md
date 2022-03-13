@@ -180,6 +180,9 @@ pnpm build && scp -r config.schema.json dist user@host.local:/usr/lib/node_modul
 
 Note: the destination path above is an example of what the path to `node_modules` on your Homebridge server _might be_.
 
+If you see "Permission denied" errors from `scp` you will need to adjust the permissions on the files in that folder
+on your Homebridge machine.
+
 ## Contributing
 
 The homebridge-roomba2 plugin uses [Changesets](https://github.com/atlassian/changesets) to maintain the [CHANGELOG.md](./CHANGELOG.md) and to bump the package's version number according to [semer](https://semver.org).
