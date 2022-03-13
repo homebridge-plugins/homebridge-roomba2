@@ -114,7 +114,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
     public constructor(log: Logging, config: AccessoryConfig, api: API) {
         this.api = api;
-        this.debug = config.debug;
+        this.debug = !!config.debug;
 
         this.log = !this.debug
             ? log

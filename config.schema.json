@@ -34,6 +34,11 @@
                 "title": "IP Address",
                 "required": true
             },
+            "debug": {
+                "type": "boolean",
+                "title": "Debug logging",
+                "required": false
+            },
             "dockContactSensor": {
                 "type": "boolean",
                 "title": "Home",
