@@ -38,12 +38,6 @@ const MAX_CACHED_STATUS_AGE_MILLIS = LONG_WATCH_INTERVAL_MILLIS + MAX_WAIT_FOR_S
  */
 const REFRESH_STATE_COALESCE_MILLIS = 10_000;
 
-/**
- * Whether to output debug logging at info level. Useful during debugging to be able to
- * see debug logs from this plugin.
- */
-const DEBUG = true;
-
 interface Status {
     timestamp: number
     running?: boolean
@@ -71,26 +65,27 @@ async function delay(duration: number) {
 
 export default class RoombaAccessory implements AccessoryPlugin {
 
-    private api: API
-    private log: Logging
-    private name: string
-    private model: string
-    private serialnum: string
-    private blid: string
-    private robotpwd: string
-    private ipaddress: string
-    private firmware: string
-    private stopBehaviour: "home" | "pause"
+    private api: API;
+    private log: Logging;
+    private name: string;
+    private model: string;
+    private serialnum: string;
+    private blid: string;
+    private robotpwd: string;
+    private ipaddress: string;
+    private firmware: string;
+    private stopBehaviour: "home" | "pause";
+    private debug: boolean;
 
-    private accessoryInfo: Service
-    private filterMaintenance: Service
-    private switchService: Service
-    private batteryService: Service
-    private dockService?: Service
-    private runningService?: Service
-    private binService?: Service
-    private dockingService?: Service
-    private homeService?: Service
+    private accessoryInfo: Service;
+    private filterMaintenance: Service;
+    private switchService: Service;
+    private batteryService: Service;
+    private dockService?: Service;
+    private runningService?: Service;
+    private binService?: Service;
+    private dockingService?: Service;
+    private homeService?: Service;
 
     /**
      * The last known state from Roomba, if any.
@@ -114,12 +109,14 @@ export default class RoombaAccessory implements AccessoryPlugin {
     /**
      * Whether the plugin is actively watching Roomba's state and updating HomeKit
      */
-    private watching?: NodeJS.Timeout
-    private lastWatchingRequestTimestamp?: number
+    private watching?: NodeJS.Timeout;
+    private lastWatchingRequestTimestamp?: number;
 
     public constructor(log: Logging, config: AccessoryConfig, api: API) {
         this.api = api;
-        this.log = !DEBUG
+        this.debug = config.debug;
+
+        this.log = !this.debug
             ? log
             : Object.assign(log, {
                 debug: (message: string, ...parameters: unknown[]) => {
@@ -170,7 +167,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
         this.accessoryInfo.setCharacteristic(Characteristic.Manufacturer, "iRobot");
         this.accessoryInfo.setCharacteristic(Characteristic.SerialNumber, this.serialnum);
-        this.accessoryInfo.setCharacteristic(Characteristic.Identify, false);
+        this.accessoryInfo.setCharacteristic(Characteristic.Identify, true);
         this.accessoryInfo.setCharacteristic(Characteristic.Name, this.name);
         this.accessoryInfo.setCharacteristic(Characteristic.Model, this.model);
         this.accessoryInfo.setCharacteristic(Characteristic.FirmwareRevision, version);
@@ -221,9 +218,19 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
         this.startLongWatch();
     }
-2
-    public identify(): void {
-        this.log.debug("Identify requested. Not supported yet.");
+
+    public identify() {
+        this.log("Identify requested");
+        this.connect(async(error, roomba) => {
+            if (error || !roomba) {
+                return;
+            }
+            try {
+                await roomba.find();
+            } catch (error) {
+                this.log("Roomba failed to locate: %s", (error as Error).message);
+            }
+        });
     }
 
     public getServices(): Service[] {

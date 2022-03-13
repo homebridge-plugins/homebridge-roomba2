@@ -12,6 +12,7 @@ declare module "dorita980" {
         stop(): Promise<CommandResult>
         end(): Promise<CommandResult>
         dock(): Promise<CommandResult>
+        find(): Promise<CommandResult>
         getRobotState(states: string[]): Promise<RobotState>
     }
 
@@ -30,7 +31,7 @@ declare module "dorita980" {
     }
 
     export class Local implements Roomba {
-        public connected: boolean
+        public connected: boolean;
 
         public constructor(blid: string, robotpwd: string, ipaddress: string)
 		
@@ -44,6 +45,7 @@ declare module "dorita980" {
         public stop(): Promise<CommandResult>
         public end(): Promise<CommandResult>
         public dock(): Promise<CommandResult>
+        public find(): Promise<CommandResult>
         public getRobotState(states: string[]): Promise<RobotState>
     }
 }
