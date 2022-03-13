@@ -220,7 +220,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     }
 
     public identify() {
-        this.log("Identify requested");
+        this.log.info("Identify requested");
         this.connect(async(error, roomba) => {
             if (error || !roomba) {
                 return;
@@ -228,7 +228,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
             try {
                 await roomba.find();
             } catch (error) {
-                this.log("Roomba failed to locate: %s", (error as Error).message);
+                this.log.warn("Roomba failed to locate: %s", (error as Error).message);
             }
         });
     }
@@ -269,7 +269,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
         this.connect(async(error, roomba) => {
             if (error || !roomba) {
-                this.log("Failed to connect to Roomba to refresh state: %s", error ? error.message : "Unknown");
+                this.log.warn("Failed to connect to Roomba to refresh state: %s", error ? error.message : "Unknown");
                 return;
             }
 
@@ -430,7 +430,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
     private setRunningState(powerOn: CharacteristicValue, callback: CharacteristicSetCallback) {
         if (powerOn) {
-            this.log("Starting Roomba");
+            this.log.info("Starting Roomba");
 
             this.connect(async(error, roomba) => {
                 if (error || !roomba) {
@@ -445,7 +445,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     await roomba.clean();
                     await roomba.resume();
 
-                    this.log("Roomba is running");
+                    this.log.debug("Roomba is running");
 
                     callback();
 
@@ -455,13 +455,13 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     /* After sending an action to Roomba, we start watching to ensure HomeKit has up to date status */
                     this.startWatching();
                 } catch (error) {
-                    this.log("Roomba failed: %s", (error as Error).message);
+                    this.log.warn("Roomba failed: %s", (error as Error).message);
 
                     callback(error as Error);
                 }
             });
         } else {
-            this.log("Stopping Roomba");
+            this.log.info("Stopping Roomba");
 
             this.connect(async(error, roomba) => {
                 if (error || !roomba) {
@@ -474,7 +474,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     const state = this.parseState(response);
 
                     if (state.running) {
-                        this.log("Roomba is pausing");
+                        this.log.debug("Roomba is pausing");
 
                         await roomba.pause();
 
@@ -484,13 +484,13 @@ export default class RoombaAccessory implements AccessoryPlugin {
                         this.refreshState();
 
                         if (this.stopBehaviour === "home") {
-                            this.log("Roomba paused, returning to Dock");
+                            this.log.debug("Roomba paused, returning to Dock");
                             await this.dockWhenStopped(roomba, 3000);
                         } else {
-                            this.log("Roomba is paused");
+                            this.log.debug("Roomba is paused");
                         }
                     } else if (state.docking) {
-                        this.log("Roomba is docking");
+                        this.log.debug("Roomba is docking");
                         await roomba.pause();
 
                         callback();
@@ -498,18 +498,18 @@ export default class RoombaAccessory implements AccessoryPlugin {
                         /* Force a refresh of state so we pick up the new state quickly */
                         this.refreshState();
 
-                        this.log("Roomba paused");
+                        this.log.debug("Roomba paused");
                     } else if (state.charging) {
-                        this.log("Roomba is already docked");
+                        this.log.debug("Roomba is already docked");
                         callback();
                     } else {
-                        this.log("Roomba is not running");
+                        this.log.debug("Roomba is not running");
                         callback();
                     }
 
                     this.startWatching();
                 } catch (error) {
-                    this.log("Roomba failed: %s", (error as Error).message);
+                    this.log.warn("Roomba failed: %s", (error as Error).message);
 
                     callback(error as Error);
                 }
@@ -518,7 +518,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     }
 
     private setDockingState(docking: CharacteristicValue, callback: CharacteristicSetCallback) {
-        this.log("Setting docking state to %s", JSON.stringify(docking));
+        this.log.debug("Setting docking state to %s", JSON.stringify(docking));
 
         this.connect(async(error, roomba) => {
             if (error || !roomba) {
@@ -529,10 +529,10 @@ export default class RoombaAccessory implements AccessoryPlugin {
             try {
                 if (docking) {
                     await roomba.dock();
-                    this.log("Roomba is docking");
+                    this.log.debug("Roomba is docking");
                 } else {
                     await roomba.pause();
-                    this.log("Roomba is paused");
+                    this.log.debug("Roomba is paused");
                 }
 
                 callback();
@@ -543,7 +543,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 /* After sending an action to Roomba, we start watching to ensure HomeKit has up to date status */
                 this.startWatching();
             } catch (error) {
-                this.log("Roomba failed: %s", (error as Error).message);
+                this.log.warn("Roomba failed: %s", (error as Error).message);
 
                 callback(error as Error);
             }
@@ -556,18 +556,18 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
             switch (state.cleanMissionStatus!.phase) {
                 case "stop":
-                    this.log("Roomba has stopped, issuing dock request");
+                    this.log.debug("Roomba has stopped, issuing dock request");
 
                     await roomba.dock();
 
-                    this.log("Roomba docking");
+                    this.log.debug("Roomba docking");
 
                     /* Force a refresh of state so we pick up the new state quickly */
                     this.refreshState();
 
                     break;
                 case "run":
-                    this.log("Roomba is still running. Will check again in %is", pollingInterval / 1000);
+                    this.log.debug("Roomba is still running. Will check again in %is", pollingInterval / 1000);
 
                     await delay(pollingInterval);
 
@@ -576,7 +576,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                     break;
                 default:
-                    this.log("Roomba is not running");
+                    this.log.debug("Roomba is not running");
 
                     break;
             }
@@ -593,10 +593,10 @@ export default class RoombaAccessory implements AccessoryPlugin {
             const returnCachedStatus = (status: Status) => {
                 const value = extractValue(status);
                 if (value === undefined) {
-                    this.log("%s: Returning no value (%ims old)", name, Date.now() - status.timestamp!);
+                    this.log.debug("%s: Returning no value (%ims old)", name, Date.now() - status.timestamp!);
                     callback(NO_VALUE);
                 } else {
-                    this.log("%s: Returning %s (%ims old)", name, String(value), Date.now() - status.timestamp!);
+                    this.log.debug("%s: Returning %s (%ims old)", name, String(value), Date.now() - status.timestamp!);
                     callback(null, value);
                 }
             };
@@ -612,7 +612,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     if (Date.now() - this.cachedStatus.timestamp < MAX_CACHED_STATUS_AGE_MILLIS) {
                         returnCachedStatus(this.cachedStatus);
                     } else {
-                        this.log("%s: Returning no value due to timeout", name);
+                        this.log.debug("%s: Returning no value due to timeout", name);
                         callback(NO_VALUE);
                     }
                 }, 500);
@@ -688,7 +688,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                     break;
                 default:
-                    this.log.info("Unsupported phase: %s", state.cleanMissionStatus!.phase);
+                    this.log.warn("Unsupported phase: %s", state.cleanMissionStatus!.phase);
 
                     status.running = false;
                     status.charging = false;
@@ -792,7 +792,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
     private startLongWatch() {
         const checkStatus = () => {
-            this.log.info("Refreshing Roomba's status (repeating in %im)", LONG_WATCH_INTERVAL_MILLIS / 60_000);
+            this.log.debug("Refreshing Roomba's status (repeating in %im)", LONG_WATCH_INTERVAL_MILLIS / 60_000);
 
             this.refreshState();
 
