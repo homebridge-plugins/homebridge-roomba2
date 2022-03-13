@@ -207,7 +207,7 @@ The maintainer will run these steps to update the plugin version and publish to 
 pnpm changeset version
 ```
 
-Review the additions to [`CHANGELOG.md`](./CHANGELOG.md), and then publish:
+Review the additions to [`CHANGELOG.md`](./CHANGELOG.md) and `package.json`, commit with the comment "vX.X", and then publish:
 
 ```shell
 pnpm changeset publish
