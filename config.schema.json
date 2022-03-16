@@ -81,6 +81,7 @@
         { "type": "section", "title": "Roomba Details", "items": [ "name", "model", "serialnum", "blid", "robotpwd", "ipaddress" ] },
         { "type": "section", "title": "Contact Sensors", "items": [ "dockContactSensor", "dockingContactSensor", "runningContactSensor", "binContactSensor" ] },
         { "type": "section", "title": "Switches", "items": [ "homeSwitch" ] },
-        { "type": "section", "title": "Behaviour", "items": [ "stopBehaviour" ] }
+        { "type": "section", "title": "Behaviour", "items": [ "stopBehaviour" ] },
+        { "type": "section", "title": "Plugin Options", "items": [ "debug" ] }
     ]
 }
