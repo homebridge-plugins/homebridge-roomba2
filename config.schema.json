@@ -65,6 +65,57 @@
                 "title": "Home",
                 "required": false
             },
+            "cleanBehaviour": {
+                "type": "string",
+                "title": "When Roomba is turned on",
+                "required": true,
+                "default": "everywhere",
+                "oneOf": [
+                    { "title": "Clean Everywhere", "enum": ["everywhere"] },
+                    { "title": "Specific Rooms", "enum": ["rooms"] }
+                ]
+            },
+            "mission": {
+                "type": "object",
+                "title": "What rooms should be cleaned",
+                "condition": {
+                    "functionBody": "return model.cleanBehaviour === 'rooms';"
+                },
+                "ordered": {
+                    "type": "boolean",
+                    "title": "Clean rooms in order",
+                    "default": true,
+                    "required": true
+                },
+                "pmap_id": {
+                    "type": "string",
+                    "title": "Pmap Id",
+                    "required": {
+                        "functionBody": "return model.cleanBehaviour === 'rooms';"
+                },
+                "regions": {
+                    "type": "array",
+                    "title": "Regions",
+                    "items": [
+                        "region_id": {
+                            "type": "string",
+                            "title": "Region Id"
+                        },
+                        "type": {
+                            "type": "string",
+                            "title": "Type",
+                            "default": "rid"
+                        }
+                    ]
+                },
+                "user_pmapv_id": {
+                    "type": "string",
+                    "title": "User Pmapv Id",
+                    "required": {
+                        "functionBody": "return model.cleanBehaviour === 'rooms';"
+                    }
+                }
+            },
             "stopBehaviour": {
                 "type": "string",
                 "title": "When Roomba is turned off",
@@ -81,7 +132,35 @@
         { "type": "section", "title": "Roomba Details", "items": [ "name", "model", "serialnum", "blid", "robotpwd", "ipaddress" ] },
         { "type": "section", "title": "Contact Sensors", "items": [ "dockContactSensor", "dockingContactSensor", "runningContactSensor", "binContactSensor" ] },
         { "type": "section", "title": "Switches", "items": [ "homeSwitch" ] },
-        { "type": "section", "title": "Behaviour", "items": [ "stopBehaviour" ] },
+        { "type": "section",
+        "title": "Behaviour",
+        "items": [ 
+            {
+                "key": "cleanBehaviour",
+                "type": "array",
+                "orderable": true,
+                "buttonText": "Add Region",
+                "items": [
+                        {
+                            "type": "div",
+                            "displayFlex": true,
+                            "flex-direction": "row",
+                            "items": [
+                                {
+                                    "key": "regions[].region_id",
+                                    "flex": "1 1 50px",
+                                    "notitle": true,
+                                    "placeholder": "Region Id"
+                                },
+                                {
+                                    "key": "regions[].type",
+                                    "flex": "1 1 50px",
+                                    "notitle": true,
+                                    "placeholder": "Type"
+                                }
+                            ]
+             },
+             "stopBehaviour" ] },
         { "type": "section", "title": "Plugin Options", "items": [ "debug" ] }
     ]
 }
