@@ -7,7 +7,7 @@ declare module "dorita980" {
         on(event: string, callback: () => void): void
         off(event: string, callback: unknown): void
         clean(): Promise<CommandResult>
-	cleanroom(): Promise<CommandResult>
+	cleanRoom(): Promise<CommandResult>
         resume(): Promise<CommandResult>
         pause(): Promise<CommandResult>
         stop(): Promise<CommandResult>
@@ -41,7 +41,7 @@ declare module "dorita980" {
         public on(event: string, callback: () => void): void;
         public off(event: string, callback: unknown): void;
         public clean(): Promise<CommandResult>
-	public cleanroom(): Promise<CommandResult>
+	public cleanRoom(): Promise<CommandResult>
         public resume(): Promise<CommandResult>
         public pause(): Promise<CommandResult>
         public stop(): Promise<CommandResult>
