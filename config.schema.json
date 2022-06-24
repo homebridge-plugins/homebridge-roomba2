@@ -72,50 +72,65 @@
                 "default": "everywhere",
                 "oneOf": [
                     { "title": "Clean Everywhere", "enum": ["everywhere"] },
-                    { "title": "Specific Rooms", "enum": ["rooms"] }
+                    { "title": "Clean Specific Rooms", "enum": ["rooms"] }
                 ]
             },
-            "mission": {
-                "type": "object",
-                "title": "What rooms should be cleaned",
-                "condition": {
-                    "functionBody": "return model.cleanBehaviour === 'rooms';"
-                },
-                "ordered": {
-                    "type": "boolean",
-                    "title": "Clean rooms in order",
-                    "default": true,
-                    "required": true
-                },
-                "pmap_id": {
-                    "type": "string",
-                    "title": "Pmap Id",
-                    "required": {
-                        "functionBody": "return model.cleanBehaviour === 'rooms';"
-                },
-                "regions": {
-                    "type": "array",
-                    "title": "Regions",
-                    "items": [
-                        "region_id": {
-                            "type": "string",
-                            "title": "Region Id"
-                        },
-                        "type": {
-                            "type": "string",
-                            "title": "Type",
-                            "default": "rid"
-                        }
-                    ]
-                },
-                "user_pmapv_id": {
-                    "type": "string",
-                    "title": "User Pmapv Id",
-                    "required": {
-                        "functionBody": "return model.cleanBehaviour === 'rooms';"
-                    }
-                }
-            },
+	    "mission": {
+		"type": "object",
+		"title": "Mission Info",
+		"properties": {
+			"ordered": {
+				"type": "number",
+				"title": "Clean rooms in order",
+				"default": 1,
+				"required": true,
+				"oneOf": [
+				    { "title": "True", "enum": [1] },
+				    { "title": "False", "enum": [0] }
+				    ],
+				"condition": {
+					"functionBody": "return model.cleanBehaviour === 'rooms';"
+					}
+			},
+			"pmap_id": {
+				"type": "string",
+				"title": "Pmap Id",
+				"required": false,
+				"condition": {
+					"functionBody": "return model.cleanBehaviour === 'rooms';"
+					}
+			},
+			"regions": {
+				"type": "array",
+				"title": "Rooms to be cleaned",
+				"items": {
+					"type": "object",
+					"properties": {
+						"region_id": {
+							"type": "string",
+							"title": "Region Id"
+						},
+						"type": {
+							"type": "string",
+							"title": "Type",
+							"default": "rid"
+						}
+					}
+				},
+				"condition": {
+					"functionBody": "return model.cleanBehaviour === 'rooms';"
+					}
+			},
+			"user_pmapv_id": {
+				"type": "string",
+				"title": "User Pmapv Id",
+				"required": false,
+				"condition": {
+					"functionBody": "return model.cleanBehaviour === 'rooms';"
+					}
+			}
+		}
+	    },
             "stopBehaviour": {
                 "type": "string",
                 "title": "When Roomba is turned off",
@@ -132,35 +147,31 @@
         { "type": "section", "title": "Roomba Details", "items": [ "name", "model", "serialnum", "blid", "robotpwd", "ipaddress" ] },
         { "type": "section", "title": "Contact Sensors", "items": [ "dockContactSensor", "dockingContactSensor", "runningContactSensor", "binContactSensor" ] },
         { "type": "section", "title": "Switches", "items": [ "homeSwitch" ] },
-        { "type": "section",
-        "title": "Behaviour",
-        "items": [ 
-            {
-                "key": "cleanBehaviour",
-                "type": "array",
-                "orderable": true,
-                "buttonText": "Add Region",
-                "items": [
-                        {
-                            "type": "div",
-                            "displayFlex": true,
-                            "flex-direction": "row",
-                            "items": [
-                                {
-                                    "key": "regions[].region_id",
-                                    "flex": "1 1 50px",
-                                    "notitle": true,
-                                    "placeholder": "Region Id"
-                                },
-                                {
-                                    "key": "regions[].type",
-                                    "flex": "1 1 50px",
-                                    "notitle": true,
-                                    "placeholder": "Type"
-                                }
-                            ]
-             },
-             "stopBehaviour" ] },
+        { "type": "section", "title": "Behaviour", "items": [ "cleanBehaviour", "mission.pmap_id", "mission.user_pmapv_id", {
+			"key": "mission.regions",
+			"type": "array",
+			"notitle": true,
+			"items": [
+				{
+					"type": "div",
+					"displayFlex": true,
+					"flex-direction": "row",
+					"items": [
+						{
+							"key": "mission.regions[].region_id",
+							"notitle": true,
+							"placeholder": "Region Id"
+						},
+						{
+							"key": "mission.regions[].type",
+							"notitle": true,
+							"placeholder": "Type"
+						}
+					]
+				}
+			]
+		},
+		"mission.ordered", "stopBehaviour" ] },
         { "type": "section", "title": "Plugin Options", "items": [ "debug" ] }
     ]
 }
