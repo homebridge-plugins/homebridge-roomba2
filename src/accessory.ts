@@ -74,6 +74,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private robotpwd: string;
     private ipaddress: string;
     private firmware: string;
+    private cleanBehaviour: "everywhere" | "rooms";
+    private mission: object;
     private stopBehaviour: "home" | "pause";
     private debug: boolean;
 
@@ -130,8 +132,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.robotpwd = config.robotpwd;
         this.ipaddress = config.ipaddress;
         this.firmware = "N/A";
+        this.cleanBehaviour = config.cleanBehaviour !== undefined ? config.cleanBehaviour : "everywhere";
+    	this.mission = config.mission;
         this.stopBehaviour = config.stopBehaviour !== undefined ? config.stopBehaviour : "home";
-
         const showDockAsContactSensor = config.dockContactSensor === undefined ? true : config.dockContactSensor;
         const showRunningAsContactSensor = config.runningContactSensor;
         const showBinStatusAsContactSensor = config.binContactSensor;
@@ -442,11 +445,15 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     /* To start Roomba we signal both a clean and a resume, as if Roomba is paused in a clean cycle,
                        we need to instruct it to resume instead.
                      */
-                    await roomba.clean();
-                    await roomba.resume();
-
-                    this.log.debug("Roomba is running");
-
+                    if (this.cleanBehaviour === "rooms") {
+                            await roomba.cleanRoom(this.mission);
+			                this.log.debug("Roomba is cleaning your rooms");
+                        }
+                        else {
+                            await roomba.clean();
+                    	    await roomba.resume();
+			                this.log.debug("Roomba is running");
+                        }
                     callback();
 
                     /* Force a refresh of state so we pick up the new state quickly */
