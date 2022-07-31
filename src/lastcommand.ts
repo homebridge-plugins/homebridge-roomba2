@@ -15,7 +15,7 @@ myRobotViaLocal.on('connect', init);
 
 function init () {
 
-  myRobotViaLocal.getWirelessStatus()
-  .then((result) => {console.log("lastCommand:", result.lastCommand); myRobotViaLocal.end()})
+  myRobotViaLocal.getRobotState(['lastCommand'])
+  .then((result: any) => {console.log("lastCommand:", result.lastCommand); myRobotViaLocal.end()})
   .catch(console.log);
 }
