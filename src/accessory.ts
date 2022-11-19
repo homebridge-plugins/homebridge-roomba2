@@ -371,7 +371,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
             if (this._currentlyConnectedRoombaRequests === 0) {
                 this._currentlyConnectedRoomba = undefined;
 
-                this.log.debug("Releasing Roomba instance");
                 roomba.end();
             } else {
                 this.log.debug("Leaving Roomba instance with %i ongoing requests", this._currentlyConnectedRoombaRequests);
