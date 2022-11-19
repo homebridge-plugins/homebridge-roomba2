@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.3.2-beta.3
+
+### Patch Changes
+
+- b646681: Fix too many close listeners warning when refreshing state
+- 7cc3440: Fix Homebridge crash due to ECONNREFUSED is dorita980 cannot connect to Roomba
+- 5e9a0f2: Make the idle watch interval configurable
+- 63a3a40: Decrease the frequency of Roomba status queries when Roomba is idle [#112]
+
+  Based on work by @Write. Also tidied up the handling of async in the connect method
+  and re-wrote the status watching approach.
+
 ## 1.3.2-beta.2
 
 ### Patch Changes
