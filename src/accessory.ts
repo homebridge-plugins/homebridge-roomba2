@@ -260,9 +260,14 @@ export default class RoombaAccessory implements AccessoryPlugin {
         return services;
     }
 
-    private refreshState() {
+    /**
+     * Refresh our knowledge of Roomba's state by connecting to Roomba and getting its status.
+     * @param force whether to force a refresh, or whether it's okay to use a recent cached state.
+     * @returns `true` if the state was refreshed, or `false` if a recent cached state is available instead.
+     */
+    private refreshState(force?: boolean): boolean {
         const now = Date.now();
-        if (now - this.lastRefreshState < REFRESH_STATE_COALESCE_MILLIS) {
+        if (!force && now - this.lastRefreshState < REFRESH_STATE_COALESCE_MILLIS) {
             return false;
         }
         this.lastRefreshState = now;
@@ -450,7 +455,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     callback();
 
                     /* Force a refresh of state so we pick up the new state quickly */
-                    this.refreshState();
+                    this.refreshState(true);
 
                     /* After sending an action to Roomba, we start watching to ensure HomeKit has up to date status */
                     this.startWatching();
@@ -481,7 +486,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                         callback();
 
                         /* Force a refresh of state so we pick up the new state quickly */
-                        this.refreshState();
+                        this.refreshState(true);
 
                         if (this.stopBehaviour === "home") {
                             this.log.debug("Roomba paused, returning to Dock");
@@ -496,7 +501,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                         callback();
 
                         /* Force a refresh of state so we pick up the new state quickly */
-                        this.refreshState();
+                        this.refreshState(true);
 
                         this.log.debug("Roomba paused");
                     } else if (state.charging) {
@@ -538,7 +543,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 callback();
 
                 /* Force a refresh of state so we pick up the new state quickly */
-                this.refreshState();
+                this.refreshState(true);
 
                 /* After sending an action to Roomba, we start watching to ensure HomeKit has up to date status */
                 this.startWatching();
@@ -563,7 +568,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     this.log.debug("Roomba docking");
 
                     /* Force a refresh of state so we pick up the new state quickly */
-                    this.refreshState();
+                    this.refreshState(true);
 
                     break;
                 case "run":
