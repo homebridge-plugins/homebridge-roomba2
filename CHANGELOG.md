@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.2-beta.4
+
+### Patch Changes
+
+- 1bfd4d1: Keep checking Roomba's status frequently for two minutes after it has been active [#112]
+- 931ba0d: Make starting Roomba more reliable by tacking whether a clean cycle is paused
+
 ## 1.3.2-beta.3
 
 ### Patch Changes
