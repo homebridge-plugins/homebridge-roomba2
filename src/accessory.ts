@@ -272,7 +272,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
         this.connect(async(error, roomba) => {
             if (error || !roomba) {
-                this.log.warn("Failed to connect to Roomba to refresh state: %s", error ? error.message : "Unknown");
+                this.log.warn("Failed to refresh Roomba's state: %s", error ? error.message : "Unknown");
                 return;
             }
 
@@ -309,18 +309,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     }
                 };
                 roomba.on("state", updateState);
-
-                const onClose = () => {
-                    roomba.off("close", onClose);
-                    resolve();
-                };
-                roomba.on("close", onClose);
-
-                const onError = () => {
-                    roomba.off("error", onError);
-                    resolve();
-                };
-                roomba.on("error", onError);
             });
         });
         return true;
