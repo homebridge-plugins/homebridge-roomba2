@@ -27,6 +27,7 @@ declare module "dorita980" {
         }
         cleanMissionStatus?: {
             phase: string
+            cycle: string
         }
     }
 

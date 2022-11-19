@@ -36,6 +36,10 @@ interface Status {
     running?: boolean
     docking?: boolean
     charging?: boolean
+    /**
+     * Paused during a clean cycle.
+     */
+    paused?: boolean
     batteryLevel?: number
     binFull?: boolean
 }
@@ -435,11 +439,12 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 }
 
                 try {
-                    /* To start Roomba we signal both a clean and a resume, as if Roomba is paused in a clean cycle,
-                       we need to instruct it to resume instead.
-                     */
-                    await roomba.clean();
-                    await roomba.resume();
+                    /* If Roomba is paused in a clean cycle we need to instruct it to resume instead, otherwise we just start a clean. */
+                    if (this.cachedStatus.paused) {
+                        await roomba.resume();
+                    } else {
+                        await roomba.clean();
+                    }
 
                     this.log.debug("Roomba is running");
 
@@ -683,6 +688,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                     break;
             }
+            status.paused = !status.running && state.cleanMissionStatus.cycle == "clean";
         }
 
         return status;
