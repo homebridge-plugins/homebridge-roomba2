@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.3.2-beta.0
+
+### Patch Changes
+
+- 09ef460: Don't use state from cache if we want to force a refresh
+- 80c790b: Simplify robot password script running
+- aa07d0e: Fix upstream dorita980 to fix node 18 TLS fault when connecting to Roomba
+- eb29f42: Upgrade dorita980 to resolve Node 18 connection issues [#126]
+- bd7c6c1: Add cipher to dorita980 to support J7 [#106]
+- 6f697d0: Don't double-log connect timeouts
+- 404bb02: Fix "Releasing an unexpected Roomba instance" logging after a timeout
+- e1989e4: Update to node 18 and upgrade dependencies
+
 ## 1.3.1
 
 ### Patch Changes
