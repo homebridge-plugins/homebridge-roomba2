@@ -12,6 +12,11 @@ const CONNECT_TIMEOUT_MILLIS = 60_000;
 const USER_INTERESTED_MILLIS = 60_000;
 
 /**
+ * How long after Roomba has been active should we continue frequently monitoring and reporting Roomba's status?
+ */
+const AFTER_ACTIVE_MILLIS = 120_000;
+
+/**
  * How long will we wait for the Roomba to send status before giving up?
  */
 const STATUS_TIMEOUT_MILLIS = 60_000;
@@ -103,6 +108,11 @@ export default class RoombaAccessory implements AccessoryPlugin {
      * When we think a user / HomeKit was last interested in Roomba's state.
      */
     private userLastInterestedTimestamp?: number;
+
+    /**
+     * When we last saw the Roomba active.
+     */
+    private roombaLastActiveTimestamp?: number;
 
     public constructor(log: Logging, config: AccessoryConfig, api: API) {
         this.api = api;
@@ -605,6 +615,10 @@ export default class RoombaAccessory implements AccessoryPlugin {
         if (Object.keys(status).length > 1) {
             this.log.debug("Merged updated state %s => %s", JSON.stringify(status), JSON.stringify(this.cachedStatus));
         }
+
+        if (this.isActive()) {
+            this.roombaLastActiveTimestamp = Date.now();
+        }
     }
 
     /**
@@ -769,7 +783,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
             return 5_000;
         }
 
-        if (this.cachedStatus.running || this.cachedStatus.docking) {
+        const timeSinceLastActive = Date.now() - (this.roombaLastActiveTimestamp || 0);
+        if (this.isActive() || timeSinceLastActive < AFTER_ACTIVE_MILLIS) {
             /* Roomba is actively doing things */
             return 10_000;
         }
@@ -777,6 +792,10 @@ export default class RoombaAccessory implements AccessoryPlugin {
         /* Roomba is idle */
         return this.idleWatchIntervalMillis;
     };
+
+    private isActive(): boolean {
+        return this.cachedStatus.running || this.cachedStatus.docking || false;
+    }
 
     private runningStatus = (status: Status) => status.running === undefined
         ? undefined
