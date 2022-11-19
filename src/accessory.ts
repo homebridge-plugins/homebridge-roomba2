@@ -63,6 +63,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private ipaddress: string;
     private stopBehaviour: "home" | "pause";
     private debug: boolean;
+    private idleWatchIntervalMillis: number;
 
     private accessoryInfo: Service;
     private filterMaintenance: Service;
@@ -117,6 +118,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.robotpwd = config.robotpwd;
         this.ipaddress = config.ipaddress;
         this.stopBehaviour = config.stopBehaviour !== undefined ? config.stopBehaviour : "home";
+        this.idleWatchIntervalMillis = (config.idleWatchInterval * 60_000) || 900_000;
 
         const showDockAsContactSensor = config.dockContactSensor === undefined ? true : config.dockContactSensor;
         const showRunningAsContactSensor = config.runningContactSensor;
@@ -768,7 +770,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
             return 10_000;
         }
 
-        return 60_000;
+        /* Roomba is idle */
+        return this.idleWatchIntervalMillis;
     };
 
     private runningStatus = (status: Status) => status.running === undefined

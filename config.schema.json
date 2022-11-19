@@ -74,6 +74,12 @@
                     { "title": "Home", "enum": ["home"] },
                     { "title": "Pause", "enum": ["pause"] }
                 ]
+            },
+            "idleWatchInterval": {
+                "type": "integer",
+                "title": "Idle Watch Interval (minutes)",
+                "description": "How often to check Roomba's status when it is idle. Defaults to 15 minutes.",
+                "required": false
             }
         }
     },
@@ -82,6 +88,6 @@
         { "type": "section", "title": "Contact Sensors", "items": [ "dockContactSensor", "dockingContactSensor", "runningContactSensor", "binContactSensor" ] },
         { "type": "section", "title": "Switches", "items": [ "homeSwitch" ] },
         { "type": "section", "title": "Behaviour", "items": [ "stopBehaviour" ] },
-        { "type": "section", "title": "Plugin Options", "items": [ "debug" ] }
+        { "type": "section", "title": "Plugin Options", "items": [ "idleWatchInterval", "debug" ] }
     ]
 }
