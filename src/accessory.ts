@@ -372,7 +372,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         const stopUsingRoomba = async(roomba: Roomba) => {
             if (roomba !== this._currentlyConnectedRoomba) {
                 this.log.warn("Releasing an unexpected Roomba instance");
-                await roomba.end();
+                roomba.end();
                 return;
             }
 
@@ -381,7 +381,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 this._currentlyConnectedRoomba = undefined;
 
                 this.log.debug("Releasing Roomba instance");
-                await roomba.end();
+                roomba.end();
             } else {
                 this.log.debug("Leaving Roomba instance with %i ongoing requests", this._currentlyConnectedRoombaRequests);
             }
@@ -405,7 +405,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
             this.log.warn("Timed out after %ims trying to connect to Roomba", Date.now() - startConnecting);
 
-            await stopUsingRoomba(roomba);
+            roomba.end();
             await callback(new Error("Connect timed out"));
         }, CONNECT_TIMEOUT_MILLIS);
 
