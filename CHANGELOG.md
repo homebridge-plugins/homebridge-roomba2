@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.2-beta.1
+
+### Patch Changes
+
+- 342a814: Fix custom dorita980 dependency
+
 ## 1.3.2-beta.0
 
 ### Patch Changes
