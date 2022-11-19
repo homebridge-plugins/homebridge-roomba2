@@ -13,7 +13,7 @@
     "url": "https://github.com/karlvr/homebridge-roomba2/issues"
   },
   "dependencies": {
-    "dorita980": "^3.1.11"
+    "dorita980": "karlvr/dorita980#node18-tls-fix"
   },
   "homepage": "https://github.com/karlvr/homebridge-roomba2#readme",
   "keywords": [
