@@ -30,7 +30,8 @@
   "scripts": {
     "build": "tsc",
     "clean": "rimraf dist",
-    "getrobotpwd": "cd node_modules/dorita980 && npm install && node ./bin/getpassword.js",
+    "getrobotpwd": "get-roomba-password",
+    "getpassword": "get-roomba-password",
     "lint": "eslint src/*.ts",
     "test": "node dist/index.js",
     "watch": "tsc --watch"
