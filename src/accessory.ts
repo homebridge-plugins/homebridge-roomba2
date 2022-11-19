@@ -98,7 +98,11 @@ export default class RoombaAccessory implements AccessoryPlugin {
      * Whether the plugin is actively watching Roomba's state and updating HomeKit
      */
     private watching?: NodeJS.Timeout;
-    private userInterestedTimestamp?: number;
+
+    /**
+     * When we think a user / HomeKit was last interested in Roomba's state.
+     */
+    private userLastInterestedTimestamp?: number;
 
     public constructor(log: Logging, config: AccessoryConfig, api: API) {
         this.api = api;
@@ -720,7 +724,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     }
 
     private userIsInterested() {
-        this.userInterestedTimestamp = Date.now();
+        this.userLastInterestedTimestamp = Date.now();
         this.startWatch(true);
     }
 
@@ -759,7 +763,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
     private currentWatchInterval = () => {
         /* Check if the user is still interested */
-        const timeSinceUserLastInterested = Date.now() - (this.userInterestedTimestamp || 0);
+        const timeSinceUserLastInterested = Date.now() - (this.userLastInterestedTimestamp || 0);
         if (timeSinceUserLastInterested < USER_INTERESTED_MILLIS) {
             /* HomeKit is actively querying Roomba's status so a user may be interested */
             return 5_000;
