@@ -5,14 +5,14 @@ specifiers:
   '@types/promise-timeout': ^1.3.0
   '@typescript-eslint/eslint-plugin': ^5.43.0
   '@typescript-eslint/parser': ^5.43.0
-  dorita980: karlvr/dorita980#node18-tls-fix
+  dorita980: npm:@karlvr/dorita980@^3.1.13
   eslint: ^8.28.0
   homebridge: ^1.5.1
   rimraf: ^3.0.2
   typescript: ^4.9.3
 
 dependencies:
-  dorita980: github.com/karlvr/dorita980/f9cd11bd0402c99ffc3c5861c6617c1d6308cfba
+  dorita980: /@karlvr/dorita980/3.1.13
 
 devDependencies:
   '@changesets/cli': 2.25.2
@@ -307,6 +307,19 @@ packages:
   /@humanwhocodes/object-schema/1.2.1:
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
     dev: true
+
+  /@karlvr/dorita980/3.1.13:
+    resolution: {integrity: sha512-xSiQG6q3q2ev1gFwszMQ/F9AAB9AAX+7N494uWpYqZ4pxPC4SsRKAegSs/VRPUueN053ttxGEc3FkAt9BOa4+Q==}
+    hasBin: true
+    dependencies:
+      mqtt: 4.3.7
+      request: 2.88.2
+      request-promise: 4.2.6_request@2.88.2
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+    dev: false
 
   /@leichtgewicht/ip-codec/2.0.4:
     resolution: {integrity: sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==}
@@ -3203,18 +3216,3 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
     dev: true
-
-  github.com/karlvr/dorita980/f9cd11bd0402c99ffc3c5861c6617c1d6308cfba:
-    resolution: {tarball: https://codeload.github.com/karlvr/dorita980/tar.gz/f9cd11bd0402c99ffc3c5861c6617c1d6308cfba}
-    name: dorita980
-    version: 3.1.11
-    hasBin: true
-    dependencies:
-      mqtt: 4.3.7
-      request: 2.88.2
-      request-promise: 4.2.6_request@2.88.2
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-    dev: false
