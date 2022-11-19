@@ -7,34 +7,22 @@ import { AccessoryConfig, AccessoryPlugin, API, Logging, Service, Characteristic
 const CONNECT_TIMEOUT_MILLIS = 60_000;
 
 /**
- * When actively watching Roomba's status, how often to query Roomba and update HomeKit.
+ * How long after HomeKit has asked for the plugin's status should we continue frequently monitoring and reporting Roomba's status?
  */
-const WATCH_INTERVAL_MILLIS = 5_000;
-
-/**
- * After starting to actively watch Roomba's status, how long should we watch for after
- * the last status enquiry from HomeKit? This lets us stop checking on Roomba when no
- * one is interested.
- */
-const WATCH_IDLE_TIMEOUT_MILLIS = 600_000;
-
-/**
- * How often to query Roomba and update HomeKit when not actively watching Roomba's status.
- */
-const LONG_WATCH_INTERVAL_MILLIS = 60_000;
+const USER_INTERESTED_MILLIS = 60_000;
 
 /**
  * How long will we wait for the Roomba to send status before giving up?
  */
-const MAX_WAIT_FOR_STATUS_MILLIS = 60_000;
+const STATUS_TIMEOUT_MILLIS = 60_000;
 
 /**
  * How old a cached status can be before we ignore it.
  */
-const MAX_CACHED_STATUS_AGE_MILLIS = LONG_WATCH_INTERVAL_MILLIS + MAX_WAIT_FOR_STATUS_MILLIS * 5;
+const MAX_CACHED_STATUS_AGE_MILLIS = STATUS_TIMEOUT_MILLIS * 5;
 
 /**
- * Coalesce refreshState requests into one when they're less than this many millis apart.
+ * Coalesce multiple refreshState requests into one when they're less than this many millis apart.
  */
 const REFRESH_STATE_COALESCE_MILLIS = 10_000;
 
@@ -109,7 +97,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
      * Whether the plugin is actively watching Roomba's state and updating HomeKit
      */
     private watching?: NodeJS.Timeout;
-    private lastWatchingRequestTimestamp?: number;
+    private userInterestedTimestamp?: number;
 
     public constructor(log: Logging, config: AccessoryConfig, api: API) {
         this.api = api;
@@ -214,7 +202,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 .on("get", this.createCharacteristicGetter("Returning Home", this.dockingStatus));
         }
 
-        this.startLongWatch();
+        this.startWatch();
     }
 
     public identify() {
@@ -260,26 +248,23 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
     /**
      * Refresh our knowledge of Roomba's state by connecting to Roomba and getting its status.
-     * @param force whether to force a refresh, or whether it's okay to use a recent cached state.
-     * @returns `true` if the state was refreshed, or `false` if a recent cached state is available instead.
+     * @param callback a function to call when the state refresh has completed.
+     * @returns `true` if the state will be refreshed, or `false` if this refresh call is ignored.
      */
-    private refreshState(force?: boolean): boolean {
+    private refreshState(callback: (success: boolean) => void): boolean {
         const now = Date.now();
-        if (!force && now - this.lastRefreshState < REFRESH_STATE_COALESCE_MILLIS) {
-            return false;
-        }
-        this.lastRefreshState = now;
-
+        
         this.connect(async(error, roomba) => {
             if (error || !roomba) {
                 this.log.warn("Failed to refresh Roomba's state: %s", error ? error.message : "Unknown");
+                callback(false);
                 return;
             }
 
             const startedWaitingForStatus = Date.now();
 
             /* Wait until we've received a state with all of the information we desire */
-            return new Promise((resolve) => {
+            return new Promise<void>((resolve) => {
                 let receivedState: RobotState | undefined = undefined;
 
                 const timeout = setTimeout(() => {
@@ -289,7 +274,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
                         receivedState ? JSON.stringify(receivedState) : "<none>",
                     );
                     resolve();
-                }, MAX_WAIT_FOR_STATUS_MILLIS);
+                    callback(false);
+                }, STATUS_TIMEOUT_MILLIS);
 
                 const updateState = (state: RobotState) => {
                     receivedState = state;
@@ -306,6 +292,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                         roomba.off("state", updateState);
                         resolve();
+                        callback(true);
                     }
                 };
                 roomba.on("state", updateState);
@@ -321,10 +308,11 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private receiveRobotState(state: RobotState) {
         const parsed = this.parseState(state);
         this.mergeCachedStatus(parsed);
+        
         return true;
     }
 
-    private async connect(callback: (error: Error | null, roomba?: Roomba) => Promise<void>) {
+    private connect(callback: (error: Error | null, roomba?: Roomba) => Promise<void>): void {
         const getRoomba = () => {
             if (this._currentlyConnectedRoomba) {
                 this._currentlyConnectedRoombaRequests++;
@@ -360,7 +348,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
             });
             return roomba;
         };
-        const stopUsingRoomba = async(roomba: Roomba) => {
+        const stopUsingRoomba = (roomba: Roomba) => {
             if (roomba !== this._currentlyConnectedRoomba) {
                 this.log.warn("Releasing an unexpected Roomba instance");
                 roomba.end();
@@ -381,8 +369,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
         if (roomba.connected) {
             this.log.debug("Reusing connected Roomba");
 
-            await callback(null, roomba);
-            await stopUsingRoomba(roomba);
+            callback(null, roomba).finally(() => {
+                stopUsingRoomba(roomba);
+            });
             return;
         }
 
@@ -390,18 +379,18 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
         const startConnecting = Date.now();
 
-        const timeout = setTimeout(async() => {
+        const timeout = setTimeout(() => {
             timedOut = true;
 
             this.log.debug("Timed out after %ims trying to connect to Roomba", Date.now() - startConnecting);
 
             roomba.end();
-            await callback(new Error("Connect timed out"));
+            callback(new Error("Connect timed out"));
         }, CONNECT_TIMEOUT_MILLIS);
 
         this.log.debug("Connecting to Roomba (%i others waiting)...", this._currentlyConnectedRoombaRequests - 1);
 
-        const onConnect = async() => {
+        const onConnect = () => {
             roomba.off("connect", onConnect);
 
             if (timedOut) {
@@ -412,8 +401,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
             clearTimeout(timeout);
 
             this.log.debug("Connected to Roomba in %ims", Date.now() - startConnecting);
-            await callback(null, roomba);
-            await stopUsingRoomba(roomba);
+            callback(null, roomba).finally(() => {
+                stopUsingRoomba(roomba);
+            });
         };
         roomba.on("connect", onConnect);
     }
@@ -439,11 +429,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                     callback();
 
-                    /* Force a refresh of state so we pick up the new state quickly */
-                    this.refreshState(true);
-
                     /* After sending an action to Roomba, we start watching to ensure HomeKit has up to date status */
-                    this.startWatching();
+                    this.userIsInterested();
                 } catch (error) {
                     this.log.warn("Roomba failed: %s", (error as Error).message);
 
@@ -470,9 +457,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                         callback();
 
-                        /* Force a refresh of state so we pick up the new state quickly */
-                        this.refreshState(true);
-
                         if (this.stopBehaviour === "home") {
                             this.log.debug("Roomba paused, returning to Dock");
                             await this.dockWhenStopped(roomba, 3000);
@@ -485,9 +469,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                         callback();
 
-                        /* Force a refresh of state so we pick up the new state quickly */
-                        this.refreshState(true);
-
                         this.log.debug("Roomba paused");
                     } else if (state.charging) {
                         this.log.debug("Roomba is already docked");
@@ -497,7 +478,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                         callback();
                     }
 
-                    this.startWatching();
+                    this.userIsInterested();
                 } catch (error) {
                     this.log.warn("Roomba failed: %s", (error as Error).message);
 
@@ -527,11 +508,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                 callback();
 
-                /* Force a refresh of state so we pick up the new state quickly */
-                this.refreshState(true);
-
                 /* After sending an action to Roomba, we start watching to ensure HomeKit has up to date status */
-                this.startWatching();
+                this.userIsInterested();
             } catch (error) {
                 this.log.warn("Roomba failed: %s", (error as Error).message);
 
@@ -552,8 +530,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
                     this.log.debug("Roomba docking");
 
-                    /* Force a refresh of state so we pick up the new state quickly */
-                    this.refreshState(true);
+                    this.userIsInterested();
 
                     break;
                 case "run":
@@ -583,16 +560,15 @@ export default class RoombaAccessory implements AccessoryPlugin {
             const returnCachedStatus = (status: Status) => {
                 const value = extractValue(status);
                 if (value === undefined) {
-                    this.log.debug("%s: Returning no value (%ims old)", name, Date.now() - status.timestamp!);
+                    this.log.debug("%s: Returning no value (%s old)", name, millisToString(Date.now() - status.timestamp!));
                     callback(NO_VALUE);
                 } else {
-                    this.log.debug("%s: Returning %s (%ims old)", name, String(value), Date.now() - status.timestamp!);
+                    this.log.debug("%s: Returning %s (%s old)", name, String(value), millisToString(Date.now() - status.timestamp!));
                     callback(null, value);
                 }
             };
 
-            this.refreshState();
-            this.startWatching();
+            this.userIsInterested();
 
             if (Date.now() - this.cachedStatus.timestamp < MAX_CACHED_STATUS_AGE_MILLIS) {
                 returnCachedStatus(this.cachedStatus);
@@ -741,57 +717,59 @@ export default class RoombaAccessory implements AccessoryPlugin {
         };
     }
 
+    private userIsInterested() {
+        this.userInterestedTimestamp = Date.now();
+        this.startWatch(true);
+    }
+
     /**
-     * Start actively watching Roomba's status and reporting updates to HomeKit.
+     * Start watching Roomba's status and reporting updates to HomeKit.
      * We start watching whenever an event occurs, so we update HomeKit promptly
      * when the status changes.
      */
-    private startWatching() {
-        this.lastWatchingRequestTimestamp = Date.now();
+    private startWatch(immediate?: boolean) {
+        const checkStatus = (scheduled: boolean) => {
+            const now = Date.now();
+            if (scheduled || now - this.lastRefreshState > REFRESH_STATE_COALESCE_MILLIS) {
+                this.lastRefreshState = now;
 
-        if (this.watching !== undefined) {
-            return;
-        }
+                if (!scheduled) {
+                    this.log.debug("Refreshing Roomba's status");
+                } else {
+                    this.log.debug("Automatically refreshing Roomba's status");
+                }
 
-        const checkStatus = () => {
-            const timeSinceLastWatchingRequest = Date.now() - (this.lastWatchingRequestTimestamp || 0);
-            if (timeSinceLastWatchingRequest > WATCH_IDLE_TIMEOUT_MILLIS) {
-                this.log.debug("Stopped watching Roomba due to idle timeout");
-                this.stopWatching();
-                return;
+                this.refreshState(() => {
+                    const interval = this.currentWatchInterval();
+                    this.log.debug("Will refresh Roomba's status again automatically in %s", millisToString(interval));
+        
+                    if (this.watching) {
+                        clearTimeout(this.watching);
+                        this.watching = undefined;
+                    }
+                    this.watching = setTimeout(() => checkStatus(true), interval);
+                });
             }
-
-            this.log.debug(
-                "Watching Roomba's status (repeating in %is, idle timeout in %is)",
-                WATCH_INTERVAL_MILLIS / 1000,
-                (WATCH_IDLE_TIMEOUT_MILLIS - timeSinceLastWatchingRequest) / 1000
-            );
-
-            this.refreshState();
-            this.watching = setTimeout(checkStatus, WATCH_INTERVAL_MILLIS);
         };
 
-        this.watching = setTimeout(checkStatus, WATCH_INTERVAL_MILLIS);
+        checkStatus(!immediate);
     }
 
-    private stopWatching() {
-        if (this.watching !== undefined) {
-            clearTimeout(this.watching);
-            this.watching = undefined;
+    private currentWatchInterval = () => {
+        /* Check if the user is still interested */
+        const timeSinceUserLastInterested = Date.now() - (this.userInterestedTimestamp || 0);
+        if (timeSinceUserLastInterested < USER_INTERESTED_MILLIS) {
+            /* HomeKit is actively querying Roomba's status so a user may be interested */
+            return 5_000;
         }
-    }
 
-    private startLongWatch() {
-        const checkStatus = () => {
-            this.log.debug("Refreshing Roomba's status (repeating in %im)", LONG_WATCH_INTERVAL_MILLIS / 60_000);
+        if (this.cachedStatus.running || this.cachedStatus.docking) {
+            /* Roomba is actively doing things */
+            return 10_000;
+        }
 
-            this.refreshState();
-
-            setTimeout(checkStatus, LONG_WATCH_INTERVAL_MILLIS);
-        };
-
-        checkStatus();
-    }
+        return 60_000;
+    };
 
     private runningStatus = (status: Status) => status.running === undefined
         ? undefined
@@ -827,4 +805,12 @@ export default class RoombaAccessory implements AccessoryPlugin {
             ? this.api.hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
             : this.api.hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
 
+}
+
+function millisToString(millis: number): string {
+    if (millis < 60_000) {
+        return `${millis / 1000}s`;
+    } else {
+        return `${millis / 60_000}m`;
+    }
 }
