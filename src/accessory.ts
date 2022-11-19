@@ -73,7 +73,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private blid: string;
     private robotpwd: string;
     private ipaddress: string;
-    private firmware: string;
     private stopBehaviour: "home" | "pause";
     private debug: boolean;
 
@@ -129,7 +128,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.blid = config.blid;
         this.robotpwd = config.robotpwd;
         this.ipaddress = config.ipaddress;
-        this.firmware = "N/A";
         this.stopBehaviour = config.stopBehaviour !== undefined ? config.stopBehaviour : "home";
 
         const showDockAsContactSensor = config.dockContactSensor === undefined ? true : config.dockContactSensor;
