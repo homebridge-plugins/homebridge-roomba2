@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.2-beta.2
+
+### Patch Changes
+
+- 64a137b: Support evac phase [#114]
+
 ## 1.3.2-beta.1
 
 ### Patch Changes
