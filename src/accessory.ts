@@ -403,7 +403,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         const timeout = setTimeout(async() => {
             timedOut = true;
 
-            this.log.warn("Timed out after %ims trying to connect to Roomba", Date.now() - startConnecting);
+            this.log.debug("Timed out after %ims trying to connect to Roomba", Date.now() - startConnecting);
 
             roomba.end();
             await callback(new Error("Connect timed out"));
