@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.2-beta.5
+
+### Patch Changes
+
+- c438513: Change max cache age to reflect current polling rate
+- 8edc43f: Change terminology from "watch" to "poll"
+- 27dc29b: Refactor watch loop to ensure no double-ups
+
 ## 1.3.2-beta.4
 
 ### Patch Changes
