@@ -22,11 +22,6 @@ const AFTER_ACTIVE_MILLIS = 120_000;
 const STATUS_TIMEOUT_MILLIS = 60_000;
 
 /**
- * How old a cached status can be before we ignore it.
- */
-const MAX_CACHED_STATUS_AGE_MILLIS = STATUS_TIMEOUT_MILLIS * 5;
-
-/**
  * Coalesce multiple refreshState requests into one when they're less than this many millis apart.
  */
 const REFRESH_STATE_COALESCE_MILLIS = 10_000;
@@ -117,6 +112,11 @@ export default class RoombaAccessory implements AccessoryPlugin {
      * When we last saw the Roomba active.
      */
     private roombaLastActiveTimestamp?: number;
+
+    /**
+     * The duration of the last watch interval used.
+     */
+    private lastWatchInterval?: number;
 
     public constructor(log: Logging, config: AccessoryConfig, api: API) {
         this.api = api;
@@ -576,25 +576,28 @@ export default class RoombaAccessory implements AccessoryPlugin {
      */
     private createCharacteristicGetter(name: string, extractValue: CharacteristicValueExtractor): CharacteristicGetter {
         return (callback: CharacteristicGetCallback) => {
+            /* Calculate the max age of cached information based on how often we're refreshing Roomba's status */
+            const maxCacheAge = (this.lastWatchInterval || 0) + STATUS_TIMEOUT_MILLIS * 2;
+
             const returnCachedStatus = (status: Status) => {
                 const value = extractValue(status);
                 if (value === undefined) {
-                    this.log.debug("%s: Returning no value (%s old)", name, millisToString(Date.now() - status.timestamp!));
+                    this.log.debug("%s: Returning no value (%s old, max %s)", name, millisToString(Date.now() - status.timestamp!), millisToString(maxCacheAge));
                     callback(NO_VALUE);
                 } else {
-                    this.log.debug("%s: Returning %s (%s old)", name, String(value), millisToString(Date.now() - status.timestamp!));
+                    this.log.debug("%s: Returning %s (%s old, max %s)", name, String(value), millisToString(Date.now() - status.timestamp!), millisToString(maxCacheAge));
                     callback(null, value);
                 }
             };
 
             this.refreshStatusForUser();
 
-            if (Date.now() - this.cachedStatus.timestamp < MAX_CACHED_STATUS_AGE_MILLIS) {
+            if (Date.now() - this.cachedStatus.timestamp < maxCacheAge) {
                 returnCachedStatus(this.cachedStatus);
             } else {
-                /* Wait a short period of time (not too long for Homebridge) for a value */
+                /* Wait a short period of time (not too long for Homebridge) for a value to be received by a status check so we can report it */
                 setTimeout(() => {
-                    if (Date.now() - this.cachedStatus.timestamp < MAX_CACHED_STATUS_AGE_MILLIS) {
+                    if (Date.now() - this.cachedStatus.timestamp < maxCacheAge) {
                         returnCachedStatus(this.cachedStatus);
                     } else {
                         this.log.debug("%s: Returning no value due to timeout", name);
@@ -848,9 +851,11 @@ export default class RoombaAccessory implements AccessoryPlugin {
 }
 
 function millisToString(millis: number): string {
-    if (millis < 60_000) {
-        return `${millis / 1000}s`;
+    if (millis < 1_000) {
+        return `${millis}ms`;
+    } else if (millis < 60_000) {
+        return `${Math.round((millis / 1000) * 10) / 10}s`;
     } else {
-        return `${millis / 60_000}m`;
+        return `${Math.round((millis / 60_000) * 10) / 10}m`;
     }
 }
