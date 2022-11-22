@@ -1,5 +1,5 @@
 ---
-"homebridge-roomba2": patch
+"homebridge-roomba2": minor
 ---
 
 Keep checking Roomba's status frequently for two minutes after it has been active [#112]

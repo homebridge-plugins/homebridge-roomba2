@@ -1,5 +1,5 @@
 ---
-"homebridge-roomba2": patch
+"homebridge-roomba2": minor
 ---
 
 Support evac phase [#114]

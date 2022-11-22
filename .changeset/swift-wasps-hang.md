@@ -1,5 +1,5 @@
 ---
-"homebridge-roomba2": patch
+"homebridge-roomba2": minor
 ---
 
 Decrease the frequency of Roomba status queries when Roomba is idle [#112]
