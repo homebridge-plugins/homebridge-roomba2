@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.4.0
+
+### Minor Changes
+
+- 8edc43f: Change terminology from "watch" to "poll"
+- 1bfd4d1: Keep checking Roomba's status frequently for two minutes after it has been active [#112]
+- aa07d0e: Fix upstream dorita980 to fix node 18 TLS fault when connecting to Roomba
+- eb29f42: Upgrade dorita980 to resolve Node 18 connection issues [#126]
+- bd7c6c1: Add cipher to dorita980 to support J7 [#106]
+- 5e9a0f2: Make the idle watch interval configurable
+- 64a137b: Support evac phase [#114]
+- 931ba0d: Make starting Roomba more reliable by tacking whether a clean cycle is paused
+- 63a3a40: Decrease the frequency of Roomba status queries when Roomba is idle [#112]
+
+  Based on work by @Write. Also tidied up the handling of async in the connect method
+  and re-wrote the status watching approach.
+
+### Patch Changes
+
+- 09ef460: Don't use state from cache if we want to force a refresh
+- c438513: Change max cache age to reflect current polling rate
+- 342a814: Fix custom dorita980 dependency
+- 80c790b: Simplify robot password script running
+- b646681: Fix too many close listeners warning when refreshing state
+- 6f697d0: Don't double-log connect timeouts
+- 7cc3440: Fix Homebridge crash due to ECONNREFUSED is dorita980 cannot connect to Roomba
+- 27dc29b: Refactor watch loop to ensure no double-ups
+- 404bb02: Fix "Releasing an unexpected Roomba instance" logging after a timeout
+- e1989e4: Update to node 18 and upgrade dependencies
+
 ## 1.3.2-beta.5
 
 ### Patch Changes
