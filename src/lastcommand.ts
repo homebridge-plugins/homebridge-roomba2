@@ -16,6 +16,6 @@ myRobotViaLocal.on('connect', init);
 function init () {
 
   myRobotViaLocal.getRobotState(['lastCommand'])
-  .then((result: any) => {console.log("lastCommand:", result.lastCommand); myRobotViaLocal.end()})
+  .then((result: any) => {console.log("lastCommand:", result.lastCommand, ", regionsDetails:", result.lastCommand.regions); myRobotViaLocal.end()})
   .catch(console.log);
 }

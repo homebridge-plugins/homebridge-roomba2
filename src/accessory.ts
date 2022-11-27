@@ -140,7 +140,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.ipaddress = config.ipaddress;
         this.firmware = "N/A";
         this.cleanBehaviour = config.cleanBehaviour !== undefined ? config.cleanBehaviour : "everywhere";
-    	  this.mission = config.mission;
+    	this.mission = config.mission;
         this.stopBehaviour = config.stopBehaviour !== undefined ? config.stopBehaviour : "home";
         this.idlePollIntervalMillis = (config.idleWatchInterval * 60_000) || 900_000;
 
@@ -451,8 +451,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                         if (this.cleanBehaviour === "rooms") {
                             await roomba.cleanRoom(this.mission);
 			                this.log.debug("Roomba is cleaning your rooms");
-                        }
-                        else {
+                        } else {
                             await roomba.clean();
 			                this.log.debug("Roomba is running");
                         }

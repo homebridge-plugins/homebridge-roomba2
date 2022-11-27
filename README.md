@@ -69,7 +69,23 @@ configure your accessory using JSON:
   "dockContactSensor": true,
   "runningContactSensor": true,
   "binContactSensor": true,
-  "dockOnStop": true
+  "cleanBehaviour": "rooms",
+  "mission": {
+    "ordered": 1,
+    "pmap_id": "ab1cd_eFGhiJklMN2PqRsT",
+    "regions": [
+      {
+        "region_id": "1",
+        "type": "rid",
+        "params": {
+          "noAutoPasses": true,
+          "twoPasses": true
+        }
+      }
+    ],
+    "user_pmapv_id": "220101T120101"
+  },
+  "stopBehaviour": "home"
 }
 ```
 
@@ -86,7 +102,17 @@ configure your accessory using JSON:
 |`runningContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba is running|`false`|
 |`binContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba's bin is full|`false`|
 |`dockingContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba is docking|`false`|
-|`dockOnStop`|Send home to dock when stopped|`true`|
+|`cleanBehaviour`|Roomba can clean everywhere or go on a specific cleaning mission when started|`everywhere`|
+|`stopBehaviour`|Roomba can go home or pause when stopped|`home`|
+
+### Cleaning Mission configuration
+
+This plugin can instruct the Roomba to clean everywhere or go on a specific cleaning job when started. Follow these steps to get the mission configuration values from the iRobot app.
+
+1) Select the rooms you want to clean in the iRobot app, start the cleaning job, then **close the iRobot app**.
+2) Open a terminal on your Homebridge system, either using `ssh` or by using the Homebridge Terminal located in the &vellip; menu, top-right in the Homebridge UI.
+3) Change into the directory where the plugin is installed: ```cd $(npm root -g)/homebridge-roomba2```
+4) Type ```npm run getlastcommand <BLID> <PASSWORD> <IP ADDRESS>``` (replacing `<BLID> <PASSWORD> <IP ADDRESS>` with the values for your robot).
 
 ### Deprecated configuration
 
