@@ -11,7 +11,7 @@ declare module "dorita980" {
         resume(): Promise<CommandResult>
         pause(): Promise<CommandResult>
         stop(): Promise<CommandResult>
-        end(): Promise<CommandResult>
+        end(): void
         dock(): Promise<CommandResult>
         find(): Promise<CommandResult>
         getRobotState(states: string[]): Promise<RobotState>
@@ -28,6 +28,7 @@ declare module "dorita980" {
         }
         cleanMissionStatus?: {
             phase: string
+            cycle: string
         }
     }
 

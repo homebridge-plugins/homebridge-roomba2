@@ -140,6 +140,12 @@
                     { "title": "Home", "enum": ["home"] },
                     { "title": "Pause", "enum": ["pause"] }
                 ]
+            },
+            "idleWatchInterval": {
+                "type": "integer",
+                "title": "Idle Poll Interval (minutes)",
+                "description": "How often to poll Roomba's status when it is idle. Defaults to 15 minutes.",
+                "required": false
             }
         }
     },
@@ -172,6 +178,6 @@
 			]
 		},
 		"mission.ordered", "stopBehaviour" ] },
-        { "type": "section", "title": "Plugin Options", "items": [ "debug" ] }
+        { "type": "section", "title": "Plugin Options", "items": [ "idleWatchInterval", "debug" ] }
     ]
 }

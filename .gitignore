@@ -1,4 +1,4 @@
 node_modules
 package-lock.json
 /dist
-/*.tgz
+/homebridge-roomba2-*.tgz

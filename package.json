@@ -1,7 +1,7 @@
 {
   "name": "homebridge-roomba2",
   "description": "homebridge-plugin for Roomba devices",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "engines": {
     "homebridge": ">=0.2.0",
     "node": ">=10"
@@ -13,7 +13,7 @@
     "url": "https://github.com/karlvr/homebridge-roomba2/issues"
   },
   "dependencies": {
-    "dorita980": "^3.1.11"
+    "dorita980": "npm:@karlvr/dorita980@3.1.14"
   },
   "homepage": "https://github.com/karlvr/homebridge-roomba2#readme",
   "keywords": [
@@ -30,20 +30,21 @@
   "scripts": {
     "build": "tsc",
     "clean": "rimraf dist",
-    "getrobotpwd": "cd node_modules/dorita980 && npm install && node ./bin/getpassword.js",
+    "getrobotpwd": "get-roomba-password",
+    "getpassword": "get-roomba-password",
     "getlastcommand": "npm install && node ./dist/lastcommand.js",
     "lint": "eslint src/*.ts",
     "test": "node dist/index.js",
     "watch": "tsc --watch"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.18.1",
+    "@changesets/cli": "^2.25.2",
     "@types/promise-timeout": "^1.3.0",
-    "@typescript-eslint/eslint-plugin": "^5.5.0",
-    "@typescript-eslint/parser": "^5.5.0",
-    "eslint": "^8.4.0",
-    "homebridge": "^1.3.8",
+    "@typescript-eslint/eslint-plugin": "^5.43.0",
+    "@typescript-eslint/parser": "^5.43.0",
+    "eslint": "^8.28.0",
+    "homebridge": "^1.5.1",
     "rimraf": "^3.0.2",
-    "typescript": "^4.5.2"
+    "typescript": "~4.8.4"
   }
 }
