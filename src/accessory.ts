@@ -65,7 +65,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private blid: string;
     private robotpwd: string;
     private ipaddress: string;
-    private firmware: string;
     private cleanBehaviour: "everywhere" | "rooms";
     private mission: object;
     private stopBehaviour: "home" | "pause";
@@ -138,7 +137,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.blid = config.blid;
         this.robotpwd = config.robotpwd;
         this.ipaddress = config.ipaddress;
-        this.firmware = "N/A";
         this.cleanBehaviour = config.cleanBehaviour !== undefined ? config.cleanBehaviour : "everywhere";
     	this.mission = config.mission;
         this.stopBehaviour = config.stopBehaviour !== undefined ? config.stopBehaviour : "home";
