@@ -33,9 +33,9 @@ declare module "dorita980" {
     }
 
     export interface RobotMission {
-        ordered: number
-        pmap_id: string
-        regions: {
+        ordered?: number
+        pmap_id?: string
+        regions?: {
             region_id: string
             type: string
             params?: {
@@ -43,7 +43,7 @@ declare module "dorita980" {
                 twoPasses?: boolean
             }
         }
-        user_pmapv_id: string
+        user_pmapv_id?: string
     }
 
     export class Local implements Roomba {

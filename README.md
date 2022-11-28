@@ -114,6 +114,8 @@ This plugin can instruct the Roomba to clean everywhere or go on a specific clea
 3) Change into the directory where the plugin is installed: ```cd $(npm root -g)/homebridge-roomba2```
 4) Type ```npm run getlastcommand <BLID> <PASSWORD> <IP ADDRESS>``` (replacing `<BLID> <PASSWORD> <IP ADDRESS>` with the values for your robot).
 
+**Note:** *Modifying the map (Room Dividers, Names or Zones) in the iRobot app will result in a new user_pmapv_id value and may result in new region_id values that will cause in an error if not updated in mission configuration.*
+
 ### Deprecated configuration
 
 The homebridge-roomba2 plugin used to support keep-alive and auto refresh modes for obtaining Roomba's status.
