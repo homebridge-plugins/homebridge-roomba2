@@ -450,10 +450,10 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     } else {
                         if (this.cleanBehaviour === "rooms") {
                             await roomba.cleanRoom(this.mission);
-			                this.log.debug("Roomba is cleaning your rooms");
+                            this.log.debug("Roomba is cleaning your rooms");
                         } else {
                             await roomba.clean();
-			                this.log.debug("Roomba is running");
+                            this.log.debug("Roomba is running");
                         }
                     }
 
