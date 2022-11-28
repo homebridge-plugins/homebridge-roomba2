@@ -103,6 +103,16 @@ configure your accessory using JSON:
 |`binContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba's bin is full|`false`|
 |`dockingContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba is docking|`false`|
 |`cleanBehaviour`|Roomba can clean everywhere or go on a specific cleaning mission when started|`everywhere`|
+|`mission` |Instructions passed to your Roomba for a specific cleaning mission||
+|`ordered`|Clean rooms in order specified|`1`|
+|`pmap_id`|The id of your map in the iRobot app||
+|`regions`|One or more rooms to be cleaned during mission||
+|`region_id`|The region id of the room to be cleaned ||
+|`type`|The type of region id specified|`rid`|
+|`params`|Additional parameters for the room to be cleaned||
+|`noAutoPasses`|Specify the number of cleaning passes for the room to be cleaned|`false`|
+|`twoPass`|Specify two cleaning passes for the room|`false`|
+|`user_pmapv_id`|The version id of your map in the iRobot app (contains Date and Time last modified)||
 |`stopBehaviour`|Roomba can go home or pause when stopped|`home`|
 
 ### Cleaning Mission configuration
