@@ -5,6 +5,7 @@
     "homebridge-roomba2": "1.4.0"
   },
   "changesets": [
+    "fuzzy-eyes-deny",
     "purple-experts-pull",
     "spicy-dolphins-prove"
   ]

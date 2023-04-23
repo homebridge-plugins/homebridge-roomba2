@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.0-beta.1
+
+### Patch Changes
+
+- f70fe7f: Fix build issue
+
 ## 1.5.0-beta.0
 
 ### Minor Changes
