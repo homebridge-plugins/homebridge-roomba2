@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.0-beta.0
+
+### Minor Changes
+
+- 695324d: Add more help and restructure the configuration schema
+- 8220909: Attempt multiple ciphers when connecting to Roomba to support newer Roomba models
+
 ## 1.4.0
 
 ### Minor Changes

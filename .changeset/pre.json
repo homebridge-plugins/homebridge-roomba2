@@ -1,0 +1,11 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "homebridge-roomba2": "1.4.0"
+  },
+  "changesets": [
+    "purple-experts-pull",
+    "spicy-dolphins-prove"
+  ]
+}
