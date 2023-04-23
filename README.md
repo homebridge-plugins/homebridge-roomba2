@@ -28,13 +28,9 @@ a few seconds).
 
 ## Installation
 
-### Automatic Installation
-
-1) Install Homebridge:   ```sudo npm i -g homebridge --unsafe-perm```
-2) Download this plugin: ```sudo npm i -g homebridge-roomba2```
-3) Follow [Setup](#setup) to get Roomba credentials
-4) Add an Accessory for your Roomba and configure it using [Config-Ui-X](https://github.com/oznu/homebridge-config-ui-x)
-5) Restart Homebridge
+1) Use the [Homebridge UI](https://github.com/oznu/homebridge-config-ui-x)'s Plugins screen to search for and install "homebridge-roomba2"
+2) Follow [Setup](#setup) to get Roomba credentials and to configure your Roomba
+3) Restart Homebridge
 
 ### Manual Installation
 
