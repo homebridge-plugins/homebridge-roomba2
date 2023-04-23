@@ -389,7 +389,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     if (error instanceof Error && error.message.indexOf("TLS") !== -1 && attempts < ROBOT_CIPHERS.length) {
                         /* Perhaps a cipher error, so we retry using the next cipher */
                         this.currentCipherIndex = (this.currentCipherIndex + 1) % ROBOT_CIPHERS.length;
-                        this.log.info("Retrying connection to Roomba with cipher %s", ROBOT_CIPHERS[this.currentCipherIndex]);
+                        this.log.debug("Retrying connection to Roomba with cipher %s", ROBOT_CIPHERS[this.currentCipherIndex]);
                         this.connectedRoomba(attempts + 1).then(resolve).catch(reject);
                     } else {
                         reject(error);
