@@ -26,6 +26,20 @@ const STATUS_TIMEOUT_MILLIS = 60_000;
  */
 const REFRESH_STATE_COALESCE_MILLIS = 10_000;
 
+const ROBOT_CIPHERS = ["AES128-SHA256", "TLS_AES_256_GCM_SHA384"];
+
+/**
+ * Holds a connection to Roomba and tracks the number of uses to enable connections to be closed
+ * when no longer in use.
+ */
+interface RoombaHolder {
+    readonly roomba: Roomba
+    /**
+     * How many requests are currently using the current Roomba instance.
+     */
+    useCount: number
+}
+
 interface Status {
     timestamp: number
     running?: boolean
@@ -89,14 +103,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private lastRefreshState = 0;
 
     /**
-     * The current Roomba instance _only_ used in the connect() method.
+     * The current promise that returns a Roomba instance (_only_ used in the connect() method).
      */
-    private _currentRoomba?: Roomba;
-
-    /**
-     * How many requests are currently using the current Roomba instance.
-     */
-    private _currentRoombaRequests = 0;
+    private _currentRoombaPromise?: Promise<RoombaHolder>;
 
     /**
      * Whether the plugin is actively polling Roomba's state and updating HomeKit
@@ -117,6 +126,11 @@ export default class RoombaAccessory implements AccessoryPlugin {
      * The duration of the last poll interval used.
      */
     private lastPollInterval?: number;
+
+    /**
+     * An index into `ROBOT_CIPHERS` indicating the current cipher configuration used to communicate with Roomba.
+     */
+    private currentCipherIndex = 0;
 
     public constructor(log: Logging, config: AccessoryConfig, api: API) {
         this.api = api;
@@ -330,98 +344,107 @@ export default class RoombaAccessory implements AccessoryPlugin {
         return true;
     }
 
-    private connect(callback: (error: Error | null, roomba?: Roomba) => Promise<void>): void {
-        const getRoomba = () => {
-            if (this._currentRoomba) {
-                this._currentRoombaRequests++;
-                return this._currentRoomba;
-            }
+    /**
+     * Returns a Promise that, when resolved, provides access to a connected Roomba instance.
+     * In order to reuse connected Roomba instances, this function returns the same Promise across
+     * multiple calls, until that Roomba instance is disconnected.
+     * <p>
+     * If the Promise fails it means there was a failure connecting to the Roomba instance.
+     * @returns a RoombaHolder containing a connected Roomba instance
+     */
+    private async connectedRoomba(attempts = 0): Promise<RoombaHolder> {
+        return new Promise<RoombaHolder>((resolve, reject) => {
+            let connected = false;
+            let failed = false;
+            
+            const roomba = new dorita980.Local(this.blid, this.robotpwd, this.ipaddress, 2, {
+                ciphers: ROBOT_CIPHERS[this.currentCipherIndex],
+            });
 
-            const roomba = new dorita980.Local(this.blid, this.robotpwd, this.ipaddress);
-            this._currentRoomba = roomba;
-            this._currentRoombaRequests = 1;
+            const startConnecting = Date.now();
+            const timeout = setTimeout(() => {
+                failed = true;
 
-            const onClose = () => {
-                if (roomba === this._currentRoomba) {
-                    this.log.debug("Connection close received");
-                    this._currentRoomba = undefined;
-                }
-                roomba.off("close", onClose);
-            };
-            roomba.on("close", onClose);
+                this.log.debug("Timed out after %ims trying to connect to Roomba", Date.now() - startConnecting);
 
-            const onError = (error: Error) => {
-                this.log.debug("Connection received error: %s", error.message);
-                if (roomba === this._currentRoomba) {
-                    this._currentRoomba = undefined;
-                }
-                roomba.off("error", onError);
-            };
-            roomba.on("error", onError);
+                roomba.end();
+                reject(new Error("Connect timed out"));
+            }, CONNECT_TIMEOUT_MILLIS);
 
             roomba.on("state", (state) => {
                 this.receiveRobotState(state);
             });
-            return roomba;
-        };
-        const stopUsingRoomba = (roomba: Roomba) => {
-            if (roomba !== this._currentRoomba) {
-                this.log.warn("Releasing an unexpected Roomba instance");
+
+            const onError = (error: Error) => {
+                this.log.debug("Connection received error: %s", error.message);
+
+                roomba.off("error", onError);
                 roomba.end();
-                return;
-            }
+                clearTimeout(timeout);
 
-            this._currentRoombaRequests--;
-            if (this._currentRoombaRequests === 0) {
-                this._currentRoomba = undefined;
+                if (!connected) {
+                    failed = true;
 
-                roomba.end();
-            } else {
-                this.log.debug("Leaving Roomba instance with %i ongoing requests", this._currentRoombaRequests);
-            }
-        };
+                    /* Check for recoverable errors */
+                    if (error instanceof Error && error.message.indexOf("TLS") !== -1 && attempts < ROBOT_CIPHERS.length) {
+                        /* Perhaps a cipher error, so we retry using the next cipher */
+                        this.currentCipherIndex = (this.currentCipherIndex + 1) % ROBOT_CIPHERS.length;
+                        this.log.info("Retrying connection to Roomba with cipher %s", ROBOT_CIPHERS[this.currentCipherIndex]);
+                        this.connectedRoomba(attempts + 1).then(resolve).catch(reject);
+                    } else {
+                        reject(error);
+                    }
+                }
+            };
+            roomba.on("error", onError);
 
-        const roomba = getRoomba();
-        if (roomba.connected) {
-            this.log.debug("Reusing connected Roomba");
+            this.log.debug("Connecting to Roomba...");
 
-            callback(null, roomba).finally(() => {
-                stopUsingRoomba(roomba);
+            const onConnect = () => {
+                roomba.off("connect", onConnect);
+                clearTimeout(timeout);
+
+                if (failed) {
+                    this.log.debug("Connection established to Roomba after failure");
+                    return;
+                }
+
+                connected = true;
+
+                this.log.debug("Connected to Roomba in %ims", Date.now() - startConnecting);
+                resolve({
+                    roomba,
+                    useCount: 0,
+                });
+            };
+            roomba.on("connect", onConnect);
+        });
+    }
+
+    private connect(callback: (error: Error | null, roomba?: Roomba) => Promise<void>): void {
+        /* Use the current Promise, if possible, so we share the connected Roomba instance, whether
+           it is already connected, or when it becomes connected.
+         */
+        const promise = this._currentRoombaPromise || this.connectedRoomba();
+        this._currentRoombaPromise = promise;
+
+        promise.then((holder) => {
+            holder.useCount++;
+            callback(null, holder.roomba).finally(() => {
+                holder.useCount--;
+
+                if (holder.useCount <= 0) {
+                    this._currentRoombaPromise = undefined;
+                    holder.roomba.end();
+                } else {
+                    this.log.debug("Leaving Roomba instance with %i ongoing requests", holder.useCount);
+                }
             });
-            return;
-        }
-
-        let timedOut = false;
-
-        const startConnecting = Date.now();
-
-        const timeout = setTimeout(() => {
-            timedOut = true;
-
-            this.log.debug("Timed out after %ims trying to connect to Roomba", Date.now() - startConnecting);
-
-            roomba.end();
-            callback(new Error("Connect timed out"));
-        }, CONNECT_TIMEOUT_MILLIS);
-
-        this.log.debug("Connecting to Roomba (%i others waiting)...", this._currentRoombaRequests - 1);
-
-        const onConnect = () => {
-            roomba.off("connect", onConnect);
-
-            if (timedOut) {
-                this.log.debug("Connection established to Roomba after timeout");
-                return;
-            }
-
-            clearTimeout(timeout);
-
-            this.log.debug("Connected to Roomba in %ims", Date.now() - startConnecting);
-            callback(null, roomba).finally(() => {
-                stopUsingRoomba(roomba);
-            });
-        };
-        roomba.on("connect", onConnect);
+        }).catch((error) => {
+            /* Failed to connect to Roomba */
+            this._currentRoombaPromise = undefined;
+            callback(error);
+        });
     }
 
     private setRunningState(powerOn: CharacteristicValue, callback: CharacteristicSetCallback) {
