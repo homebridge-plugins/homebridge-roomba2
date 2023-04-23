@@ -89,14 +89,14 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private lastRefreshState = 0;
 
     /**
-     * The currently connected Roomba instance _only_ used in the connect() method.
+     * The current Roomba instance _only_ used in the connect() method.
      */
-    private _currentlyConnectedRoomba?: Roomba;
+    private _currentRoomba?: Roomba;
 
     /**
-     * How many requests are currently using the connected Roomba instance.
+     * How many requests are currently using the current Roomba instance.
      */
-    private _currentlyConnectedRoombaRequests = 0;
+    private _currentRoombaRequests = 0;
 
     /**
      * Whether the plugin is actively polling Roomba's state and updating HomeKit
@@ -332,28 +332,28 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
     private connect(callback: (error: Error | null, roomba?: Roomba) => Promise<void>): void {
         const getRoomba = () => {
-            if (this._currentlyConnectedRoomba) {
-                this._currentlyConnectedRoombaRequests++;
-                return this._currentlyConnectedRoomba;
+            if (this._currentRoomba) {
+                this._currentRoombaRequests++;
+                return this._currentRoomba;
             }
 
             const roomba = new dorita980.Local(this.blid, this.robotpwd, this.ipaddress);
-            this._currentlyConnectedRoomba = roomba;
-            this._currentlyConnectedRoombaRequests = 1;
+            this._currentRoomba = roomba;
+            this._currentRoombaRequests = 1;
 
             const onClose = () => {
-                if (roomba === this._currentlyConnectedRoomba) {
+                if (roomba === this._currentRoomba) {
                     this.log.debug("Connection close received");
-                    this._currentlyConnectedRoomba = undefined;
+                    this._currentRoomba = undefined;
                 }
                 roomba.off("close", onClose);
             };
             roomba.on("close", onClose);
 
             const onError = (error: Error) => {
-                if (roomba === this._currentlyConnectedRoomba) {
+                if (roomba === this._currentRoomba) {
                     this.log.debug("Connection received error: %s", error.message);
-                    this._currentlyConnectedRoomba = undefined;
+                    this._currentRoomba = undefined;
                 } else {
                     this.log.debug("Old connection received error: %s", error.message);
                 }
@@ -367,19 +367,19 @@ export default class RoombaAccessory implements AccessoryPlugin {
             return roomba;
         };
         const stopUsingRoomba = (roomba: Roomba) => {
-            if (roomba !== this._currentlyConnectedRoomba) {
+            if (roomba !== this._currentRoomba) {
                 this.log.warn("Releasing an unexpected Roomba instance");
                 roomba.end();
                 return;
             }
 
-            this._currentlyConnectedRoombaRequests--;
-            if (this._currentlyConnectedRoombaRequests === 0) {
-                this._currentlyConnectedRoomba = undefined;
+            this._currentRoombaRequests--;
+            if (this._currentRoombaRequests === 0) {
+                this._currentRoomba = undefined;
 
                 roomba.end();
             } else {
-                this.log.debug("Leaving Roomba instance with %i ongoing requests", this._currentlyConnectedRoombaRequests);
+                this.log.debug("Leaving Roomba instance with %i ongoing requests", this._currentRoombaRequests);
             }
         };
 
@@ -406,7 +406,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
             callback(new Error("Connect timed out"));
         }, CONNECT_TIMEOUT_MILLIS);
 
-        this.log.debug("Connecting to Roomba (%i others waiting)...", this._currentlyConnectedRoombaRequests - 1);
+        this.log.debug("Connecting to Roomba (%i others waiting)...", this._currentRoombaRequests - 1);
 
         const onConnect = () => {
             roomba.off("connect", onConnect);
