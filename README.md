@@ -28,7 +28,7 @@ a few seconds).
 
 ## Installation
 
-1) Use the [Homebridge UI](https://github.com/oznu/homebridge-config-ui-x)'s Plugins screen to search for and install "homebridge-roomba2"
+1) Use the [Homebridge UI](https://github.com/oznu/homebridge-config-ui-x)’s Plugins screen to search for and install "homebridge-roomba2"
 2) Follow [Setup](#setup) to get Roomba credentials and to configure your Roomba
 3) Restart Homebridge
 
