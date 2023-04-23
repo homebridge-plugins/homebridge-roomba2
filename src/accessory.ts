@@ -351,11 +351,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
             roomba.on("close", onClose);
 
             const onError = (error: Error) => {
+                this.log.debug("Connection received error: %s", error.message);
                 if (roomba === this._currentRoomba) {
-                    this.log.debug("Connection received error: %s", error.message);
                     this._currentRoomba = undefined;
-                } else {
-                    this.log.debug("Old connection received error: %s", error.message);
                 }
                 roomba.off("error", onError);
             };
