@@ -51,8 +51,12 @@ a few seconds).
 
 ## Configuration
 
-This plugin supports GUI-based configuration using [Config-Ui-X](https://github.com/oznu/homebridge-config-ui-x). You can also
-configure your accessory using JSON:
+This plugin supports GUI-based configuration using [Config-Ui-X](https://github.com/oznu/homebridge-config-ui-x), which is the recommended
+approach for configuring your Roomba.
+
+### Manual configuration
+
+Here is example JSON for configuring a Roomba2 accessory:
 
 ```json
 {
@@ -120,7 +124,7 @@ This plugin can instruct the Roomba to clean everywhere or go on a specific clea
 3) Change into the directory where the plugin is installed: ```cd $(npm root -g)/homebridge-roomba2```
 4) Type ```npm run getlastcommand <BLID> <PASSWORD> <IP ADDRESS>``` (replacing `<BLID> <PASSWORD> <IP ADDRESS>` with the values for your robot).
 
-**Note:** *Modifying the map (Room Dividers, Names or Zones) in the iRobot app will result in a new user_pmapv_id value and may result in new region_id values that will cause an error if not updated in mission configuration.*
+**Note:** *Modifying the map (Room Dividers, Names or Zones) in the iRobot app will result in a new `user_pmapv_id` value and may result in new `region_id` values that will cause an error if not updated in mission configuration.*
 
 ### Deprecated configuration
 
@@ -209,7 +213,7 @@ folder to the `homebridge-roomba2` folder in your Homebridge's `node_modules` fo
 If your Homebridge is running on another machine, you can use a remote copy tool such as `scp` to copy the files:
 
 ```shell
-pnpm build && scp -r config.schema.json dist user@host.local:/usr/lib/node_modules/homebridge-roomba2/
+pnpm build && scp -r config.schema.json package.json dist user@host.local:/usr/lib/node_modules/homebridge-roomba2/
 ```
 
 Note: the destination path above is an example of what the path to `node_modules` on your Homebridge server _might be_.
