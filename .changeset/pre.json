@@ -5,8 +5,10 @@
     "homebridge-roomba2": "1.4.0"
   },
   "changesets": [
+    "angry-taxis-report",
     "fuzzy-eyes-deny",
     "purple-experts-pull",
+    "shiny-oranges-complain",
     "spicy-dolphins-prove"
   ]
 }

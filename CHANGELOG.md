@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.0-beta.2
+
+### Patch Changes
+
+- d1ea23f: Make retrying connection log a debug log
+- 70ed087: Attempt different ciphers based on error message seen from i1+
+
 ## 1.5.0-beta.1
 
 ### Patch Changes
