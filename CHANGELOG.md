@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.0-beta.3
+
+### Minor Changes
+
+- Add clean specific rooms behaviour from @boomseklecki
+
 ## 1.5.0-beta.2
 
 ### Patch Changes
