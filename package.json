@@ -13,12 +13,12 @@
     "get-last-command": "./dist/lastcommand.js"
   },
   "bugs": {
-    "url": "https://github.com/karlvr/homebridge-roomba2/issues"
+    "url": "https://github.com/homebridge-plugins/homebridge-roomba2/issues"
   },
   "dependencies": {
     "dorita980": "npm:@karlvr/dorita980@3.2.0"
   },
-  "homepage": "https://github.com/karlvr/homebridge-roomba2#readme",
+  "homepage": "https://github.com/homebridge-plugins/homebridge-roomba2#readme",
   "keywords": [
     "homebridge-plugin",
     "iRobot",
@@ -28,7 +28,7 @@
   "main": "./dist/index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/karlvr/homebridge-roomba2.git"
+    "url": "git://github.com/homebridge-plugins/homebridge-roomba2.git"
   },
   "scripts": {
     "build": "tsc",
