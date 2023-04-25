@@ -52,7 +52,7 @@
             },
             "binContactSensor": {
                 "type": "boolean",
-                "title": "Bin full",
+                "title": "Bin Full",
                 "required": false
             },
             "dockingContactSensor": {
@@ -71,8 +71,8 @@
                 "required": true,
                 "default": "everywhere",
                 "oneOf": [
-                    { "title": "Clean Everywhere", "enum": ["everywhere"] },
-                    { "title": "Clean Specific Rooms", "enum": ["rooms"] }
+                    { "title": "Clean everywhere", "enum": ["everywhere"] },
+                    { "title": "Clean specific rooms", "enum": ["rooms"] }
                 ]
             },
             "mission": {
@@ -85,8 +85,8 @@
                         "default": 1,
                         "required": true,
                         "oneOf": [
-                            { "title": "True", "enum": [1] },
-                            { "title": "False", "enum": [0] }
+                            { "title": "Yes", "enum": [1] },
+                            { "title": "No", "enum": [0] }
                             ],
                         "condition": {
                             "functionBody": "return model.cleanBehaviour === 'rooms';"
@@ -124,13 +124,13 @@
                                             "type": "boolean",
                                             "required": false,
                                             "default": false,
-                                            "title": "Specify Number of Cleaning Passes?"
+                                            "title": "Specify Number of Cleaning Passes"
                                         },
                                         "twoPass": {
                                             "type": "boolean",
                                             "required": false,
                                             "default": false,
-                                            "title": "Two Passes?"
+                                            "title": "Two Passes"
                                         }
                                     }
                                 }
