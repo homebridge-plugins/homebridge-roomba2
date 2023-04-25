@@ -32,7 +32,7 @@
     "clean": "rimraf dist",
     "getrobotpwd": "get-roomba-password",
     "getpassword": "get-roomba-password",
-    "getlastcommand": "npm install && node ./dist/lastcommand.js",
+    "getlastcommand": "node ./dist/lastcommand.js",
     "lint": "eslint src/*.ts",
     "test": "node dist/index.js",
     "watch": "tsc --watch"
