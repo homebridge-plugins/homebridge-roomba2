@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.0-beta.4
+
+### Patch Changes
+
+- 7a98203: `getlastcommand` script doesn't require `npm install`
+
 ## 1.5.0-beta.3
 
 ### Minor Changes
