@@ -386,7 +386,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     failed = true;
 
                     /* Check for recoverable errors */
-                    if (error instanceof Error && error.message.indexOf("TLS") !== -1 && attempts < ROBOT_CIPHERS.length) {
+                    if (error instanceof Error && shouldTryDifferentCipher(error) && attempts < ROBOT_CIPHERS.length) {
                         /* Perhaps a cipher error, so we retry using the next cipher */
                         this.currentCipherIndex = (this.currentCipherIndex + 1) % ROBOT_CIPHERS.length;
                         this.log.debug("Retrying connection to Roomba with cipher %s", ROBOT_CIPHERS[this.currentCipherIndex]);
@@ -879,4 +879,16 @@ function millisToString(millis: number): string {
     } else {
         return `${Math.round((millis / 60_000) * 10) / 10}m`;
     }
+}
+
+function shouldTryDifferentCipher(error: Error) {
+    /* Explicit TLS errors definitely suggest a different cipher should be used */
+    if (error.message.indexOf("TLS") !== -1) {
+        return true;
+    }
+    /* We have seen this error connecting to an i1+ https://github.com/homebridge-plugins/homebridge-roomba2/issues/129#issuecomment-1520733025 */
+    if (error.message.toLowerCase().indexOf("identifier rejected") !== -1) {
+        return true;
+    }
+    return false;
 }
