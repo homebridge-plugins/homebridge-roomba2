@@ -1,4 +1,4 @@
-import dorita980, { RobotState, Roomba } from "dorita980";
+import dorita980, { RobotMission, RobotState, Roomba } from "dorita980";
 import { AccessoryConfig, AccessoryPlugin, API, Logging, Service, CharacteristicValue, CharacteristicGetCallback, CharacteristicSetCallback } from "homebridge";
 
 /**
@@ -80,7 +80,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private robotpwd: string;
     private ipaddress: string;
     private cleanBehaviour: "everywhere" | "rooms";
-    private mission: object;
+    private mission: RobotMission;
     private stopBehaviour: "home" | "pause";
     private debug: boolean;
     private idlePollIntervalMillis: number;
@@ -152,7 +152,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.robotpwd = config.robotpwd;
         this.ipaddress = config.ipaddress;
         this.cleanBehaviour = config.cleanBehaviour !== undefined ? config.cleanBehaviour : "everywhere";
-    	this.mission = config.mission;
+        this.mission = config.mission;
         this.stopBehaviour = config.stopBehaviour !== undefined ? config.stopBehaviour : "home";
         this.idlePollIntervalMillis = (config.idleWatchInterval * 60_000) || 900_000;
 
@@ -462,7 +462,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 }
 
                 try {
-
                     /* If Roomba is paused in a clean cycle we need to instruct it to resume instead, otherwise we just start a clean. */
                     if (this.cachedStatus.paused) {
                         await roomba.resume();
