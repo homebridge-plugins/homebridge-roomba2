@@ -65,7 +65,23 @@ configure your accessory using JSON:
   "dockContactSensor": true,
   "runningContactSensor": true,
   "binContactSensor": true,
-  "dockOnStop": true
+  "cleanBehaviour": "rooms",
+  "mission": {
+    "ordered": 1,
+    "pmap_id": "ab1cd_eFGhiJklMN2PqRsT",
+    "regions": [
+      {
+        "region_id": "1",
+        "type": "rid",
+        "params": {
+          "noAutoPasses": true,
+          "twoPasses": true
+        }
+      }
+    ],
+    "user_pmapv_id": "220101T120101"
+  },
+  "stopBehaviour": "home"
 }
 ```
 
@@ -82,7 +98,29 @@ configure your accessory using JSON:
 |`runningContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba is running|`false`|
 |`binContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba's bin is full|`false`|
 |`dockingContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba is docking|`false`|
-|`dockOnStop`|Send home to dock when stopped|`true`|
+|`cleanBehaviour`|Roomba can clean everywhere or go on a specific cleaning mission when started|`everywhere`|
+|`mission` |Instructions passed to your Roomba for a specific cleaning mission||
+|`ordered`|Clean rooms in order specified|`1`|
+|`pmap_id`|The id of your map in the iRobot app||
+|`regions`|One or more rooms to be cleaned during mission||
+|`region_id`|The region id of the room to be cleaned ||
+|`type`|The type of region id specified|`rid`|
+|`params`|Additional parameters for the room to be cleaned||
+|`noAutoPasses`|Specify the number of cleaning passes for the room to be cleaned|`false`|
+|`twoPass`|Specify two cleaning passes for the room|`false`|
+|`user_pmapv_id`|The version id of your map in the iRobot app (contains Date and Time last modified)||
+|`stopBehaviour`|Roomba can go home or pause when stopped|`home`|
+
+### Cleaning Mission configuration
+
+This plugin can instruct the Roomba to clean everywhere or go on a specific cleaning job when started. Follow these steps to get the mission configuration values from the iRobot app.
+
+1) Select the rooms you want to clean in the iRobot app, start the cleaning job, then **close the iRobot app**.
+2) Open a terminal on your Homebridge system, either using `ssh` or by using the Homebridge Terminal located in the &vellip; menu, top-right in the Homebridge UI.
+3) Change into the directory where the plugin is installed: ```cd $(npm root -g)/homebridge-roomba2```
+4) Type ```npm run getlastcommand <BLID> <PASSWORD> <IP ADDRESS>``` (replacing `<BLID> <PASSWORD> <IP ADDRESS>` with the values for your robot).
+
+**Note:** *Modifying the map (Room Dividers, Names or Zones) in the iRobot app will result in a new user_pmapv_id value and may result in new region_id values that will cause an error if not updated in mission configuration.*
 
 ### Deprecated configuration
 

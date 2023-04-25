@@ -79,6 +79,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private blid: string;
     private robotpwd: string;
     private ipaddress: string;
+    private cleanBehaviour: "everywhere" | "rooms";
+    private mission: object;
     private stopBehaviour: "home" | "pause";
     private debug: boolean;
     private idlePollIntervalMillis: number;
@@ -149,6 +151,8 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.blid = config.blid;
         this.robotpwd = config.robotpwd;
         this.ipaddress = config.ipaddress;
+        this.cleanBehaviour = config.cleanBehaviour !== undefined ? config.cleanBehaviour : "everywhere";
+    	this.mission = config.mission;
         this.stopBehaviour = config.stopBehaviour !== undefined ? config.stopBehaviour : "home";
         this.idlePollIntervalMillis = (config.idleWatchInterval * 60_000) || 900_000;
 
@@ -458,14 +462,19 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 }
 
                 try {
+
                     /* If Roomba is paused in a clean cycle we need to instruct it to resume instead, otherwise we just start a clean. */
                     if (this.cachedStatus.paused) {
                         await roomba.resume();
                     } else {
-                        await roomba.clean();
+                        if (this.cleanBehaviour === "rooms") {
+                            await roomba.cleanRoom(this.mission);
+                            this.log.debug("Roomba is cleaning your rooms");
+                        } else {
+                            await roomba.clean();
+                            this.log.debug("Roomba is running");
+                        }
                     }
-
-                    this.log.debug("Roomba is running");
 
                     callback();
 
