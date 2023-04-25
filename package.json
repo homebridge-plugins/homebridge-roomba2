@@ -9,6 +9,9 @@
   "author": {
     "name": "RayanKhan"
   },
+  "bin": {
+    "get-last-command": "./dist/lastcommand.js"
+  },
   "bugs": {
     "url": "https://github.com/karlvr/homebridge-roomba2/issues"
   },
@@ -32,7 +35,7 @@
     "clean": "rimraf dist",
     "getrobotpwd": "get-roomba-password",
     "getpassword": "get-roomba-password",
-    "getlastcommand": "npm install && node ./dist/lastcommand.js",
+    "getlastcommand": "get-last-command",
     "lint": "eslint src/*.ts",
     "test": "node dist/index.js",
     "watch": "tsc --watch"
