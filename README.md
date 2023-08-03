@@ -102,6 +102,7 @@ Here is example JSON for configuring a Roomba2 accessory:
 |`runningContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba is running|`false`|
 |`binContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba's bin is full|`false`|
 |`dockingContactSensor`|Add a contact sensor to HomeKit that's _open_ when Roomba is docking|`false`|
+|`tankContactSensor`|Add a contact sensor to HomeKit that's _open_ when Braava's water tank is empty|`false`|
 |`cleanBehaviour`|Roomba can clean everywhere or go on a specific cleaning mission when started|`everywhere`|
 |`mission` |Instructions passed to your Roomba for a specific cleaning mission||
 |`ordered`|Clean rooms in order specified|`1`|
