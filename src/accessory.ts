@@ -51,6 +51,7 @@ interface Status {
     paused?: boolean
     batteryLevel?: number
     binFull?: boolean
+    tankLevel?: number
 }
 
 const EMPTY_STATUS: Status = {
@@ -94,6 +95,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private binService?: Service;
     private dockingService?: Service;
     private homeService?: Service;
+    private tankService?: Service;
 
     /**
      * The last known state from Roomba, if any.
@@ -161,6 +163,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         const showBinStatusAsContactSensor = config.binContactSensor;
         const showDockingAsContactSensor = config.dockingContactSensor;
         const showHomeSwitch = config.homeSwitch;
+        const showTankAsContactSensor = config.tankContactSensor;
 
         const Service = api.hap.Service;
 
@@ -180,6 +183,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
         }
         if (showDockingAsContactSensor) {
             this.dockingService = new Service.ContactSensor(this.name + " Docking", "docking");
+        }
+        if (showTankAsContactSensor) {
+            this.tankService = new Service.FilterMaintenance(this.name + " Water Tank Empty", "Empty");
         }
         if (showHomeSwitch) {
             this.homeService = new Service.Switch(this.name + " Home", "returning");
@@ -239,6 +245,14 @@ export default class RoombaAccessory implements AccessoryPlugin {
                 .on("set", this.setDockingState.bind(this))
                 .on("get", this.createCharacteristicGetter("Returning Home", this.dockingStatus));
         }
+        if (this.tankService) {
+            this.tankService
+                .getCharacteristic(Characteristic.FilterChangeIndication)
+                .on("get", this.createCharacteristicGetter("Tank status", this.tankStatus));
+            this.tankService
+                .getCharacteristic(Characteristic.FilterLifeLevel)
+                .on("get", this.createCharacteristicGetter("Tank level", this.tankLevelStatus));
+        }
 
         this.startPolling();
     }
@@ -280,6 +294,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
         if (this.homeService) {
             services.push(this.homeService);
         }
+        if (this.tankService) {
+            services.push(this.tankService);
+        }
 
         return services;
     }
@@ -290,7 +307,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
      */
     private refreshState(callback: (success: boolean) => void): void {
         const now = Date.now();
-        
+
         this.connect(async(error, roomba) => {
             if (error || !roomba) {
                 this.log.warn("Failed to refresh Roomba's state: %s", error ? error.message : "Unknown");
@@ -344,7 +361,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     private receiveRobotState(state: RobotState) {
         const parsed = this.parseState(state);
         this.mergeCachedStatus(parsed);
-        
+
         return true;
     }
 
@@ -360,7 +377,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         return new Promise<RoombaHolder>((resolve, reject) => {
             let connected = false;
             let failed = false;
-            
+
             const roomba = new dorita980.Local(this.blid, this.robotpwd, this.ipaddress, 2, {
                 ciphers: ROBOT_CIPHERS[this.currentCipherIndex],
             });
@@ -665,7 +682,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         this.updateCharacteristics(status);
     }
 
-    private parseState(state: RobotState) {
+    private parseState(state: RobotState & { tankLvl?: number }) {
         const status: Status = {
             timestamp: Date.now(),
         };
@@ -675,6 +692,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
         }
         if (state.bin !== undefined) {
             status.binFull = state.bin.full;
+        }
+        if (state.tankLvl !== undefined) {
+            status.tankLevel = state.tankLvl;
         }
 
         if (state.cleanMissionStatus !== undefined) {
@@ -766,6 +786,10 @@ export default class RoombaAccessory implements AccessoryPlugin {
         if (this.homeService) {
             updateCharacteristic(this.homeService, Characteristic.On, this.dockingStatus);
         }
+        if (this.tankService) {
+            updateCharacteristic(this.tankService, Characteristic.FilterChangeIndication, this.tankStatus);
+            updateCharacteristic(this.tankService, Characteristic.FilterLifeLevel, this.tankLevelStatus);
+        }
 
         this.lastUpdatedStatus = {
             ...this.lastUpdatedStatus,
@@ -808,7 +832,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
                     const interval = this.currentPollInterval();
                     this.lastPollInterval = interval;
                     this.log.debug("Will refresh Roomba's status again automatically in %s", millisToString(interval));
-        
+
                     if (this.currentPollTimeout) {
                         clearTimeout(this.currentPollTimeout);
                         this.currentPollTimeout = undefined;
@@ -876,7 +900,14 @@ export default class RoombaAccessory implements AccessoryPlugin {
         : status.batteryLevel <= 20
             ? this.api.hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
             : this.api.hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
-
+    private tankStatus = (status: Status) => status.tankLevel === undefined
+        ? undefined
+        : status.tankLevel
+            ? this.api.hap.Characteristic.FilterChangeIndication.FILTER_OK
+            : this.api.hap.Characteristic.FilterChangeIndication.CHANGE_FILTER;
+    private tankLevelStatus = (status: Status) => status.tankLevel === undefined
+        ? undefined
+        : status.tankLevel;
 }
 
 function millisToString(millis: number): string {
