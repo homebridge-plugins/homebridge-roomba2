@@ -163,7 +163,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         const showBinStatusAsContactSensor = config.binContactSensor;
         const showDockingAsContactSensor = config.dockingContactSensor;
         const showHomeSwitch = config.homeSwitch;
-        const showTankAsContactSensor = config.tankContactSensor;
+        const showTankAsFilterMaintenance = config.tankContactSensor;
 
         const Service = api.hap.Service;
 
@@ -184,7 +184,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
         if (showDockingAsContactSensor) {
             this.dockingService = new Service.ContactSensor(this.name + " Docking", "docking");
         }
-        if (showTankAsContactSensor) {
+        if (showTankAsFilterMaintenance) {
             this.tankService = new Service.FilterMaintenance(this.name + " Water Tank Empty", "Empty");
         }
         if (showHomeSwitch) {
