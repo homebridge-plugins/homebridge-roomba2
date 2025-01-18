@@ -1,11 +1,12 @@
-import { API } from "homebridge";
-
-import { ACCESSORY_NAME, PLUGIN_NAME } from "./settings";
-import RoombaAccessory from "./accessory";
-
-/**
- * This method registers the platform with Homebridge
+/*
+ * index.ts: homebridge-roomba2.
  */
-export = (api: API): void => {
-    api.registerAccessory(PLUGIN_NAME, ACCESSORY_NAME, RoombaAccessory);
-};
+import type { API } from 'homebridge'
+
+import RoombaAccessory from './accessory.js'
+import { ACCESSORY_NAME, PLUGIN_NAME } from './settings.js'
+
+// Register our platform with homebridge.
+export default (api: API): void => {
+  api.registerAccessory(PLUGIN_NAME, ACCESSORY_NAME, RoombaAccessory)
+}
