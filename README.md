@@ -230,6 +230,16 @@ That will prompt you to indicate whether your change is a patch (a bug fix) or a
 
 Changesets will create a new file in the `.changeset` directory that you can commit as part of your PR.
 
+### `.git-blame-ignore-revs`
+
+Some revisions in the git history are spurious in a git blame, such as linting the code base.
+These revisions are listed in `.git-blame-ignore-revs`. You can configure your local git repository
+to use this file to skip these revisions in a blame:
+
+```shell
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
 ### `config.schema.json`
 
 Useful references for the `config.schema.json`:
