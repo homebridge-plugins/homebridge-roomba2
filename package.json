@@ -1,5 +1,5 @@
 {
-  "name": "homebridge-roomba2",
+  "name": "@homebridge-plugins/homebridge-roomba2",
   "description": "homebridge-plugin for Roomba devices",
   "version": "1.5.0",
   "engines": {
@@ -14,6 +14,9 @@
   },
   "dependencies": {
     "dorita980": "npm:@karlvr/dorita980@3.2.1"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "homepage": "https://github.com/homebridge-plugins/homebridge-roomba2#readme",
   "keywords": [

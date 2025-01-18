@@ -5,6 +5,6 @@
 	],
 	"window.title": "${activeEditorShort}${separator}${rootName}",
 	"editor.codeActionsOnSave": {
-		"source.fixAll.eslint": true
+		"source.fixAll.eslint": "explicit"
 	}
 }
