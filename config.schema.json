@@ -60,6 +60,11 @@
                 "title": "Returning Home",
                 "required": false
             },
+            "tankContactSensor": {
+                "type": "boolean",
+                "title": "Braava Water Tank",
+                "required": false
+            },
             "homeSwitch": {
                 "type": "boolean",
                 "title": "Home",
@@ -184,7 +189,7 @@
         ] },
         { "type": "section", "title": "Contact Sensors", "items": [
             { "type": "help", "helpvalue": "<span class='help-block'>Contact sensors appear in the Home app and show what state Roomba is in.</span>" },
-            "dockContactSensor", "dockingContactSensor", "runningContactSensor", "binContactSensor"
+            "dockContactSensor", "dockingContactSensor", "runningContactSensor", "binContactSensor", "tankContactSensor"
         ] },
         { "type": "section", "title": "Behavior", "items": [ "cleanBehaviour", "mission.pmap_id", "mission.user_pmapv_id", {
 			"key": "mission.regions",
