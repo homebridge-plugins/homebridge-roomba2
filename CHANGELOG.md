@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.5.0
+
+### Minor Changes
+
+- Add clean specific rooms behaviour from @boomseklecki
+- 695324d: Add more help and restructure the configuration schema
+- 8220909: Attempt multiple ciphers when connecting to Roomba to support newer Roomba models
+
+### Patch Changes
+
+- d1ea23f: Make retrying connection log a debug log
+- 7a98203: `getlastcommand` script doesn't require `npm install`
+- f70fe7f: Fix build issue
+- 70ed087: Attempt different ciphers based on error message seen from i1+
+
 ## 1.5.0-beta.4
 
 ### Patch Changes
