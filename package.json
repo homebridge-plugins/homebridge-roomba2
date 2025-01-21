@@ -1,41 +1,35 @@
 {
   "name": "@homebridge-plugins/homebridge-roomba2",
   "type": "module",
-  "description": "homebridge-plugin for Roomba devices",
   "version": "1.5.0",
+  "description": "homebridge-plugin for Roomba devices",
+  "author": {
+    "name": "RayanKhan"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/homebridge-plugins/homebridge-roomba2#readme",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/homebridge-plugins/homebridge-roomba2.git"
+  },
+  "bugs": {
+    "url": "https://github.com/homebridge-plugins/homebridge-roomba2/issues"
+  },
+  "keywords": [
+    "homebridge-plugin",
+    "iRobot",
+    "Roomba"
+  ],
+  "main": "./dist/index.js",
   "engines": {
     "homebridge": ">=0.2.0",
     "node": ">=10"
-  },
-  "author": {
-    "name": "RayanKhan"
   },
   "maintainers": [
     {
       "name": "karlvr"
     }
   ],
-  "bugs": {
-    "url": "https://github.com/homebridge-plugins/homebridge-roomba2/issues"
-  },
-  "dependencies": {
-    "dorita980": "npm:@karlvr/dorita980@3.2.1"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "homepage": "https://github.com/homebridge-plugins/homebridge-roomba2#readme",
-  "keywords": [
-    "homebridge-plugin",
-    "iRobot",
-    "Roomba"
-  ],
-  "license": "MIT",
-  "main": "./dist/index.js",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/homebridge-plugins/homebridge-roomba2.git"
-  },
   "scripts": {
     "build": "tsc",
     "clean": "rimraf dist",
@@ -46,6 +40,12 @@
     "lint:fix": "eslint src/**/*.ts --fix",
     "test": "node dist/index.js",
     "watch": "tsc --watch"
+  },
+  "dependencies": {
+    "dorita980": "npm:@karlvr/dorita980@3.2.1"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.14.0",
