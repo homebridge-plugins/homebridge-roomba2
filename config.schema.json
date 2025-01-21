@@ -1,6 +1,8 @@
 {
     "pluginAlias": "Roomba2",
     "pluginType": "accessory",
+    "customUi": true,
+    "customUiPath": "./dist/homebridge-ui",
     "schema": {
         "type": "object",
         "properties": {
