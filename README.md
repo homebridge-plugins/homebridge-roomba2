@@ -160,7 +160,7 @@ Click on any of the items below to expand the corresponding answer.
 
 ## Building
 
-The homebridge-roomba2 plugin uses [TypeScript](https://www.typescriptlang.org), [`pnpm`](https://pnpm.io) and
+The homebridge-roomba2 plugin uses [TypeScript](https://www.typescriptlang.org) and
 [`nvm`](https://github.com/nvm-sh/nvm).
 
 `nvm` is used to control the version of node used. You can skip the `nvm` step if you manage your own
@@ -178,28 +178,22 @@ or, if you don't have the required node version installed:
 nvm install
 ```
 
-Install `pnpm`, if you haven't already:
-
-```shell
-npm -g install pnpm
-```
-
 Prepare the project:
 
 ```shell
-pnpm install
+npm install
 ```
 
 Build the project:
 
 ```shell
-pnpm build
+npm run build
 ```
 
 or
 
 ```shell
-pnpm watch
+npm run watch
 ```
 
 ### Testing
@@ -212,7 +206,7 @@ folder to the `homebridge-roomba2` folder in your Homebridge's `node_modules` fo
 If your Homebridge is running on another machine, you can use a remote copy tool such as `scp` to copy the files:
 
 ```shell
-pnpm build && scp -r config.schema.json package.json dist user@host.local:/usr/lib/node_modules/homebridge-roomba2/
+npm run build && scp -r config.schema.json package.json dist user@host.local:/usr/lib/node_modules/homebridge-roomba2/
 ```
 
 Note: the destination path above is an example of what the path to `node_modules` on your Homebridge server _might be_.
@@ -229,7 +223,7 @@ If you are preparing a PR, please consider using Changesets to include a summary
 To create a new changeset:
 
 ```shell
-pnpm changeset
+npm exec changeset
 ```
 
 That will prompt you to indicate whether your change is a patch (a bug fix) or a minor or major change. If you are adding a feature it is a minor change, not a patch.
@@ -249,13 +243,13 @@ Useful references for the `config.schema.json`:
 The maintainer will run these steps to update the plugin version and publish to [npmjs.com](https://npmjs.com/package/homebridge-roomba2):
 
 ```shell
-pnpm changeset version
+npm exec changeset version
 ```
 
 Review the additions to [`CHANGELOG.md`](./CHANGELOG.md) and `package.json`, commit with the comment "vX.X", and then publish:
 
 ```shell
-pnpm changeset publish
+npm exec changeset publish
 ```
 
 ## Credits
