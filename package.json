@@ -9,6 +9,11 @@
   "author": {
     "name": "RayanKhan"
   },
+  "maintainers": [
+    {
+      "name": "karlvr"
+    }
+  ],
   "bugs": {
     "url": "https://github.com/homebridge-plugins/homebridge-roomba2/issues"
   },
