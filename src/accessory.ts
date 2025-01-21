@@ -1,5 +1,8 @@
 import type { RobotMission, RobotState, Roomba } from 'dorita980'
-import type { AccessoryConfig, AccessoryPlugin, API, CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicValue, Logging, Service } from 'homebridge'
+import type { AccessoryConfig, AccessoryPlugin, API, CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicValue, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge'
+
+import type RoombaPlatform from './platform'
+import type { DeviceConfig } from './types'
 
 import { readFileSync } from 'node:fs'
 
@@ -74,19 +77,16 @@ async function delay(duration: number) {
   })
 }
 
-export default class RoombaAccessory implements AccessoryPlugin {
-  private api: API
-  private log: Logging
+export default class RoombaAccessory {
   private name: string
   private model: string
-  private serialnum: string
+  private serialnum?: string
   private blid: string
   private robotpwd: string
   private ipaddress: string
   private cleanBehaviour: 'everywhere' | 'rooms'
-  private mission: RobotMission
+  private mission?: RobotMission
   private stopBehaviour: 'home' | 'pause'
-  private debug: boolean
   private idlePollIntervalMillis: number
 
   private accessoryInfo: Service
@@ -139,17 +139,13 @@ export default class RoombaAccessory implements AccessoryPlugin {
    */
   private currentCipherIndex = 0
 
-  public constructor(log: Logging, config: AccessoryConfig, api: API) {
-    this.api = api
-    this.debug = !!config.debug
+  constructor(
+    private readonly platform: RoombaPlatform,
+    private readonly accessory: PlatformAccessory,
+    private readonly log: Logging,
+  ) {
+    const config: DeviceConfig = accessory.context.device
 
-    this.log = !this.debug
-      ? log
-      : Object.assign(log, {
-          debug: (message: string, ...parameters: unknown[]) => {
-            log.info(`DEBUG: ${message}`, ...parameters)
-          },
-        })
     this.name = config.name
     this.model = config.model
     this.serialnum = config.serialnum
@@ -168,7 +164,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     const showHomeSwitch = config.homeSwitch
     const showTankAsFilterMaintenance = config.tankContactSensor
 
-    const Service = api.hap.Service
+    const Service = platform.Service
 
     this.accessoryInfo = new Service.AccessoryInformation()
     this.filterMaintenance = new Service.FilterMaintenance(this.name)
@@ -194,12 +190,12 @@ export default class RoombaAccessory implements AccessoryPlugin {
       this.homeService = new Service.Switch(`${this.name} Home`, 'returning')
     }
 
-    const Characteristic = this.api.hap.Characteristic
+    const Characteristic = platform.Characteristic
 
     const version: string = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8')).version
 
     this.accessoryInfo.setCharacteristic(Characteristic.Manufacturer, 'iRobot')
-    this.accessoryInfo.setCharacteristic(Characteristic.SerialNumber, this.serialnum)
+    this.accessoryInfo.setCharacteristic(Characteristic.SerialNumber, this.serialnum || '1')
     this.accessoryInfo.setCharacteristic(Characteristic.Identify, true)
     this.accessoryInfo.setCharacteristic(Characteristic.Name, this.name)
     this.accessoryInfo.setCharacteristic(Characteristic.Model, this.model)
@@ -486,7 +482,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
           if (this.cachedStatus.paused) {
             await roomba.resume()
           } else {
-            if (this.cleanBehaviour === 'rooms') {
+            if (this.cleanBehaviour === 'rooms' && this.mission) {
               await roomba.cleanRoom(this.mission)
               this.log.debug('Roomba is cleaning your rooms')
             } else {
@@ -767,7 +763,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
       }
     }
 
-    const Characteristic = this.api.hap.Characteristic
+    const Characteristic = this.platform.Characteristic
 
     updateCharacteristic(this.switchService, Characteristic.On, this.runningStatus)
     updateCharacteristic(this.batteryService, Characteristic.ChargingState, this.chargingStatus)
@@ -879,20 +875,20 @@ export default class RoombaAccessory implements AccessoryPlugin {
   private chargingStatus = (status: Status) => status.charging === undefined
     ? undefined
     : status.charging
-      ? this.api.hap.Characteristic.ChargingState.CHARGING
-      : this.api.hap.Characteristic.ChargingState.NOT_CHARGING
+      ? this.platform.Characteristic.ChargingState.CHARGING
+      : this.platform.Characteristic.ChargingState.NOT_CHARGING
 
   private dockingStatus = (status: Status) => status.docking === undefined
     ? undefined
     : status.docking
-      ? this.api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
-      : this.api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED
+      ? this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
+      : this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED
 
   private dockedStatus = (status: Status) => status.charging === undefined
     ? undefined
     : status.charging
-      ? this.api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED
-      : this.api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
+      ? this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED
+      : this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
 
   private batteryLevelStatus = (status: Status) => status.batteryLevel === undefined
     ? undefined
@@ -901,20 +897,20 @@ export default class RoombaAccessory implements AccessoryPlugin {
   private binStatus = (status: Status) => status.binFull === undefined
     ? undefined
     : status.binFull
-      ? this.api.hap.Characteristic.FilterChangeIndication.CHANGE_FILTER
-      : this.api.hap.Characteristic.FilterChangeIndication.FILTER_OK
+      ? this.platform.Characteristic.FilterChangeIndication.CHANGE_FILTER
+      : this.platform.Characteristic.FilterChangeIndication.FILTER_OK
 
   private batteryStatus = (status: Status) => status.batteryLevel === undefined
     ? undefined
     : status.batteryLevel <= 20
-      ? this.api.hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
-      : this.api.hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL
+      ? this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
+      : this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL
 
   private tankStatus = (status: Status) => status.tankLevel === undefined
     ? undefined
     : status.tankLevel
-      ? this.api.hap.Characteristic.FilterChangeIndication.FILTER_OK
-      : this.api.hap.Characteristic.FilterChangeIndication.CHANGE_FILTER
+      ? this.platform.Characteristic.FilterChangeIndication.FILTER_OK
+      : this.platform.Characteristic.FilterChangeIndication.CHANGE_FILTER
 
   private tankLevelStatus = (status: Status) => status.tankLevel === undefined
     ? undefined
