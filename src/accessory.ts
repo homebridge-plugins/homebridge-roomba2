@@ -1,6 +1,8 @@
 import type { RobotMission, RobotState, Roomba } from 'dorita980'
 import type { AccessoryConfig, AccessoryPlugin, API, CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicValue, Logging, Service } from 'homebridge'
 
+import { readFileSync } from 'node:fs'
+
 import dorita980 from 'dorita980'
 
 /**
@@ -194,7 +196,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
     const Characteristic = this.api.hap.Characteristic
 
-    const version: string = require('../package.json').version
+    const version: string = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8')).version
 
     this.accessoryInfo.setCharacteristic(Characteristic.Manufacturer, 'iRobot')
     this.accessoryInfo.setCharacteristic(Characteristic.SerialNumber, this.serialnum)
