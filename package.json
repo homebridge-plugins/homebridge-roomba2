@@ -33,9 +33,8 @@
   "scripts": {
     "build": "tsc",
     "clean": "rimraf dist",
-    "getrobotpwd": "get-roomba-password",
-    "getpassword": "get-roomba-password",
-    "getlastcommand": "node ./dist/lastcommand.js",
+    "roomba:getpassword": "get-roomba-password",
+    "roomba:getlastcommand": "node ./dist/lastcommand.js",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "test": "node dist/index.js",

@@ -42,7 +42,7 @@ a few seconds).
 1. Find your Roomba's IP address (for help see the [troubleshooting](#troubleshooting) section); it will look like `192.168.X.XXX` or `10.X.X.XXX`, or similar.
 2. Open a terminal on your Homebridge system, either using `ssh` or by using the Homebridge Terminal located in the &vellip; menu, top-right in the Homebridge UI.
 3. Change into the directory where the plugin is installed: `cd $(npm root -g)/homebridge-roomba2`
-4. Type `npm run getpassword <IP ADDRESS>` (replacing `<IP ADDRESS>` with the IP address you discovered above).
+4. Type `npm run roomba:getpassword <IP ADDRESS>` (replacing `<IP ADDRESS>` with the IP address you discovered above).
 5. Follow the instructions on screen to obtain your Roomba's `blid` and password. NB: Read the instructions carefully and ensure that you're pressing and holding the correct button on your Roomba.
 6. Proceed to _Configuration_.
 
@@ -120,7 +120,7 @@ This plugin can instruct the Roomba to clean everywhere or go on a specific clea
 1. Select the rooms you want to clean in the iRobot app, start the cleaning job, then **close the iRobot app**.
 2. Open a terminal on your Homebridge system, either using `ssh` or by using the Homebridge Terminal located in the &vellip; menu, top-right in the Homebridge UI.
 3. Change into the directory where the plugin is installed: `cd $(npm root -g)/homebridge-roomba2`
-4. Type `npm run getlastcommand <BLID> <PASSWORD> <IP ADDRESS>` (replacing `<BLID> <PASSWORD> <IP ADDRESS>` with the values for your robot).
+4. Type `npm run roomba:getlastcommand <BLID> <PASSWORD> <IP ADDRESS>` (replacing `<BLID> <PASSWORD> <IP ADDRESS>` with the values for your robot).
 
 **Note:** _Modifying the map (Room Dividers, Names or Zones) in the iRobot app will result in a new `user_pmapv_id` value and may result in new `region_id` values that will cause an error if not updated in mission configuration._
 
