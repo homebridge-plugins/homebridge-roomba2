@@ -51,6 +51,7 @@
     "docs:theme": "typedoc --theme default-modern"
   },
   "dependencies": {
+    "@homebridge/plugin-ui-utils": "^2.0.0",
     "dorita980": "npm:@karlvr/dorita980@3.2.1"
   },
   "publishConfig": {
