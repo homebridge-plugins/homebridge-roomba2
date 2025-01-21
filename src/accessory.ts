@@ -358,7 +358,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
   }
 
   private receivedRobotStateIsComplete(state: RobotState) {
-    return (state.batPct != undefined && state.bin !== undefined && state.cleanMissionStatus !== undefined)
+    return (state.batPct !== undefined && state.bin !== undefined && state.cleanMissionStatus !== undefined)
   }
 
   private receiveRobotState(state: RobotState) {
@@ -741,7 +741,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
           break
       }
-      status.paused = !status.running && state.cleanMissionStatus.cycle == 'clean'
+      status.paused = !status.running && state.cleanMissionStatus.cycle === 'clean'
     }
 
     return status
