@@ -2,18 +2,30 @@ import type { API } from 'homebridge'
 
 import { describe, expect, it, vi } from 'vitest'
 
-import RoombaAccessory from '../src/accessory.js'
-import registerAccessory from '../src/index.js'
-import { ACCESSORY_NAME, PLUGIN_NAME } from '../src/settings.js'
+import registerPlatform from '../src/index.js'
+import RoombaPlatform from '../src/platform.js'
+import { PLATFORM_NAME, PLUGIN_NAME } from '../src/settings.js'
 
-describe('registerAccessory', () => {
-  it('should register the accessory with homebridge', () => {
+describe('registerPlatform', () => {
+  it('should call registerPlatform once', () => {
     const api = {
-      registerAccessory: vi.fn(),
+      registerPlatform: vi.fn(),
     } as unknown as API
 
-    registerAccessory(api)
+    registerPlatform(api)
 
-    expect(api.registerAccessory).toHaveBeenCalledWith(PLUGIN_NAME, ACCESSORY_NAME, RoombaAccessory)
+    expect(api.registerPlatform).toHaveBeenCalledTimes(1)
+  })
+
+  it('should not call registerPlatform with incorrect arguments', () => {
+    const api = {
+      registerPlatform: vi.fn(),
+    } as unknown as API
+
+    registerPlatform(api)
+
+    expect(api.registerPlatform).not.toHaveBeenCalledWith('wrongPluginName', PLATFORM_NAME, RoombaPlatform)
+    expect(api.registerPlatform).not.toHaveBeenCalledWith(PLUGIN_NAME, 'wrongPlatformName', RoombaPlatform)
+    expect(api.registerPlatform).not.toHaveBeenCalledWith(PLUGIN_NAME, PLATFORM_NAME, {})
   })
 })

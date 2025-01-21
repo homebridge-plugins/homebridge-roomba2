@@ -3,12 +3,10 @@
  */
 import type { API } from 'homebridge'
 
-import RoombaAccessory from './accessory.js'
-import { ACCESSORY_NAME, PLUGIN_NAME } from './settings.js'
+import RoombaPlatform from './platform.js'
+import { PLATFORM_NAME } from './settings.js'
 
-/**
- * This method registers the platform with Homebridge
- */
-export default function (api: API): void {
-  api.registerAccessory(PLUGIN_NAME, ACCESSORY_NAME, RoombaAccessory)
+// Register our platform with homebridge.
+export default (api: API): void => {
+  api.registerPlatform(PLATFORM_NAME, RoombaPlatform)
 }
