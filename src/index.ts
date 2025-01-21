@@ -1,3 +1,6 @@
+/*
+ * index.ts: homebridge-roomba2.
+ */
 import type { API } from 'homebridge'
 
 import RoombaAccessory from './accessory.js'
