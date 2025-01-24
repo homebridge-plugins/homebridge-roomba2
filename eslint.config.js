@@ -42,7 +42,8 @@ export default antfu(
       'style/quote-props': ['error', 'consistent-as-needed'],
       'test/no-only-tests': 'error',
       'unicorn/no-useless-spread': 'error',
-      'unused-imports/no-unused-vars': ['error', { caughtErrors: 'none' }],
+      'unused-imports/no-unused-imports': ['error', { caughtErrors: 'none' }],
+      'unused-imports/no-unused-vars': 0, // Disable the no-unused-vars rule as it mistakenly identifies callback parameters
       'no-new': 0, // Disable the no-new rule
       'new-cap': 0, // Disable the new-cap rule
     },
