@@ -161,7 +161,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     this.blid = device.blid
     this.robotpwd = device.robotpwd
     this.ipaddress = device.ipaddress
-    this.version = this.platform.version() ?? '0.0.0'
+    this.version = this.platform.version ?? '0.0.0'
     this.cleanBehaviour = device.cleanBehaviour !== undefined ? device.cleanBehaviour : 'everywhere'
     this.mission = device.mission || { pmap_id: 'local' }
     this.stopBehaviour = device.stopBehaviour !== undefined ? device.stopBehaviour : 'home'
