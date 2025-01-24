@@ -1,6 +1,8 @@
 import type { RobotMission, RobotState, Roomba } from 'dorita980'
 import type { AccessoryConfig, AccessoryPlugin, API, CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicValue, Logging, Service } from 'homebridge'
 
+import { readFileSync } from 'node:fs'
+
 import dorita980 from 'dorita980'
 
 /**
@@ -86,6 +88,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
   private stopBehaviour: 'home' | 'pause'
   private debug: boolean
   private idlePollIntervalMillis: number
+  private version: string
 
   private accessoryInfo: Service
   private filterMaintenance: Service
@@ -158,6 +161,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     this.mission = config.mission
     this.stopBehaviour = config.stopBehaviour !== undefined ? config.stopBehaviour : 'home'
     this.idlePollIntervalMillis = (config.idleWatchInterval * 60_000) || 900_000
+    this.version = getVersion()
 
     const showDockAsContactSensor = config.dockContactSensor === undefined ? true : config.dockContactSensor
     const showRunningAsContactSensor = config.runningContactSensor
@@ -194,15 +198,12 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
     const Characteristic = this.api.hap.Characteristic
 
-    // eslint-disable-next-line ts/no-require-imports
-    const version: string = require('../package.json').version
-
     this.accessoryInfo.setCharacteristic(Characteristic.Manufacturer, 'iRobot')
     this.accessoryInfo.setCharacteristic(Characteristic.SerialNumber, this.serialnum)
     this.accessoryInfo.setCharacteristic(Characteristic.Identify, true)
     this.accessoryInfo.setCharacteristic(Characteristic.Name, this.name)
     this.accessoryInfo.setCharacteristic(Characteristic.Model, this.model)
-    this.accessoryInfo.setCharacteristic(Characteristic.FirmwareRevision, version)
+    this.accessoryInfo.setCharacteristic(Characteristic.FirmwareRevision, this.version)
 
     this.switchService
       .getCharacteristic(Characteristic.On)
@@ -940,4 +941,18 @@ function shouldTryDifferentCipher(error: Error) {
     return true
   }
   return false
+}
+
+/**
+ * Asynchronously retrieves the version of the plugin from the package.json file.
+ *
+ * This method reads the package.json file located in the parent directory,
+ * parses its content to extract the version, and logs the version using the debug logger.
+ * The extracted version is then assigned to the `version` property of the class.
+ *
+ * @returns {Promise<void>} A promise that resolves when the version has been retrieved and logged.
+ */
+function getVersion(): string {
+  const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8'))
+  return version
 }
