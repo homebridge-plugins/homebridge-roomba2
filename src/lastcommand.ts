@@ -16,10 +16,12 @@ const myRobotViaLocal = new dorita980.Local(robot_blid, robot_pwd, robot_ip_addr
 
 myRobotViaLocal.on('connect', init)
 
+type RobotState = dorita980.RobotState & { lastCommand?: { regions: { regionId: number, regionType: string }[] } }
+
 function init() {
   myRobotViaLocal.getRobotState(['lastCommand'])
-    .then((result: any) => {
-      console.log('lastCommand:', result.lastCommand, ', regionsDetails:', result.lastCommand.regions)
+    .then((result: RobotState) => {
+      console.log('lastCommand:', result.lastCommand, ', regionsDetails:', result.lastCommand?.regions)
       myRobotViaLocal.end()
     })
     .catch(console.log)

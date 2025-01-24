@@ -89,6 +89,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
   private stopBehaviour: 'home' | 'pause'
   private debug: boolean
   private idlePollIntervalMillis: number
+  private version: string
 
   private accessoryInfo: Service
   private filterMaintenance: Service
@@ -139,7 +140,6 @@ export default class RoombaAccessory implements AccessoryPlugin {
    * An index into `ROBOT_CIPHERS` indicating the current cipher configuration used to communicate with Roomba.
    */
   private currentCipherIndex = 0
-  version: string
 
   public constructor(
     readonly platform: RoombaPlatform,
@@ -152,9 +152,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     this.api = api
     this.debug = !!config.debug
 
-    this.log = !this.debug
-      ? log
-      : Object.assign(log, { debug: (message: string, ...parameters: unknown[]) => { log.info(`DEBUG: ${message}`, ...parameters) } })
+    this.log = !this.debug ? log : Object.assign(log, { debug: (message: string, ...parameters: unknown[]) => { log.info(`DEBUG: ${message}`, ...parameters) } })
     this.name = device.name
     this.model = device.model
     this.serialnum = device.serialnum ?? device.ipaddress
