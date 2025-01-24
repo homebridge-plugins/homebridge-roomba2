@@ -1,10 +1,8 @@
 import type { RobotMission, RobotState, Roomba } from 'dorita980'
-import type { AccessoryConfig, AccessoryPlugin, API, CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicValue, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge'
+import type { AccessoryPlugin, API, CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicValue, Logging, PlatformAccessory, Service } from 'homebridge'
 
 import type RoombaPlatform from './platform.js'
-import type { DeviceConfig } from './types.js'
-
-import { readFileSync } from 'node:fs'
+import type { DeviceConfig, RoombaPlatformConfig } from './types.js'
 
 import dorita980 from 'dorita980'
 
@@ -77,16 +75,19 @@ async function delay(duration: number) {
   })
 }
 
-export default class RoombaAccessory {
+export default class RoombaAccessory implements AccessoryPlugin {
+  private api: API
+  private log: Logging
   private name: string
   private model: string
-  private serialnum?: string
+  private serialnum: string
   private blid: string
   private robotpwd: string
   private ipaddress: string
   private cleanBehaviour: 'everywhere' | 'rooms'
-  private mission?: RobotMission
+  private mission: RobotMission
   private stopBehaviour: 'home' | 'pause'
+  private debug: boolean
   private idlePollIntervalMillis: number
 
   private accessoryInfo: Service
@@ -138,33 +139,42 @@ export default class RoombaAccessory {
    * An index into `ROBOT_CIPHERS` indicating the current cipher configuration used to communicate with Roomba.
    */
   private currentCipherIndex = 0
+  version: string
 
-  constructor(
-    private readonly platform: RoombaPlatform,
-    private readonly accessory: PlatformAccessory,
-    private readonly log: Logging,
+  public constructor(
+    readonly platform: RoombaPlatform,
+    accessory: PlatformAccessory,
+    log: Logging,
+    device: DeviceConfig,
+    config: RoombaPlatformConfig,
+    api: API,
   ) {
-    const config: DeviceConfig = accessory.context.device
+    this.api = api
+    this.debug = !!config.debug
 
-    this.name = config.name
-    this.model = config.model
-    this.serialnum = config.serialnum
-    this.blid = config.blid
-    this.robotpwd = config.robotpwd
-    this.ipaddress = config.ipaddress
-    this.cleanBehaviour = config.cleanBehaviour !== undefined ? config.cleanBehaviour : 'everywhere'
-    this.mission = config.mission
-    this.stopBehaviour = config.stopBehaviour !== undefined ? config.stopBehaviour : 'home'
-    this.idlePollIntervalMillis = (config.idleWatchInterval * 60_000) || 900_000
+    this.log = !this.debug
+      ? log
+      : Object.assign(log, { debug: (message: string, ...parameters: unknown[]) => { log.info(`DEBUG: ${message}`, ...parameters) } })
+    this.name = device.name
+    this.model = device.model
+    this.serialnum = device.serialnum ?? device.ipaddress
+    this.blid = device.blid
+    this.robotpwd = device.robotpwd
+    this.ipaddress = device.ipaddress
+    this.version = this.platform.version() ?? '0.0.0'
+    this.cleanBehaviour = device.cleanBehaviour !== undefined ? device.cleanBehaviour : 'everywhere'
+    this.mission = device.mission || { pmap_id: 'local' }
+    this.stopBehaviour = device.stopBehaviour !== undefined ? device.stopBehaviour : 'home'
+    this.idlePollIntervalMillis = (device.idleWatchInterval * 60_000) || 900_000
 
-    const showDockAsContactSensor = config.dockContactSensor === undefined ? true : config.dockContactSensor
-    const showRunningAsContactSensor = config.runningContactSensor
-    const showBinStatusAsContactSensor = config.binContactSensor
-    const showDockingAsContactSensor = config.dockingContactSensor
-    const showHomeSwitch = config.homeSwitch
-    const showTankAsFilterMaintenance = config.tankContactSensor
+    const showDockAsContactSensor = device.dockContactSensor === undefined ? true : device.dockContactSensor
+    const showRunningAsContactSensor = device.runningContactSensor
+    const showBinStatusAsContactSensor = device.binContactSensor
+    const showDockingAsContactSensor = device.dockingContactSensor
+    const showHomeSwitch = device.homeSwitch
+    const showTankAsFilterMaintenance = device.tankContactSensor
 
-    const Service = platform.Service
+    const Service = api.hap.Service
 
     this.accessoryInfo = new Service.AccessoryInformation()
     this.filterMaintenance = new Service.FilterMaintenance(this.name)
@@ -190,16 +200,28 @@ export default class RoombaAccessory {
       this.homeService = new Service.Switch(`${this.name} Home`, 'returning')
     }
 
-    const Characteristic = platform.Characteristic
+    const Characteristic = this.api.hap.Characteristic
 
-    const version: string = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8')).version
+    // Set accessory information
+    accessory
+      .getService(Service.AccessoryInformation)!
+      .setCharacteristic(Characteristic.Manufacturer, 'iRobot')
+      .setCharacteristic(Characteristic.AppMatchingIdentifier, 'id1012014442')
+      .setCharacteristic(Characteristic.Name, this.name)
+      .setCharacteristic(Characteristic.ConfiguredName, this.name)
+      .setCharacteristic(Characteristic.Model, this.model)
+      .setCharacteristic(Characteristic.ProductData, this.blid)
+      .setCharacteristic(Characteristic.SerialNumber, this.serialnum)
+      .setCharacteristic(Characteristic.FirmwareRevision, this.version)
+      .getCharacteristic(Characteristic.FirmwareRevision)
+      .updateValue(this.version)
 
     this.accessoryInfo.setCharacteristic(Characteristic.Manufacturer, 'iRobot')
-    this.accessoryInfo.setCharacteristic(Characteristic.SerialNumber, this.serialnum || '1')
+    this.accessoryInfo.setCharacteristic(Characteristic.SerialNumber, this.serialnum)
     this.accessoryInfo.setCharacteristic(Characteristic.Identify, true)
     this.accessoryInfo.setCharacteristic(Characteristic.Name, this.name)
     this.accessoryInfo.setCharacteristic(Characteristic.Model, this.model)
-    this.accessoryInfo.setCharacteristic(Characteristic.FirmwareRevision, version)
+    this.accessoryInfo.setCharacteristic(Characteristic.FirmwareRevision, this.version)
 
     this.switchService
       .getCharacteristic(Characteristic.On)
@@ -482,7 +504,7 @@ export default class RoombaAccessory {
           if (this.cachedStatus.paused) {
             await roomba.resume()
           } else {
-            if (this.cleanBehaviour === 'rooms' && this.mission) {
+            if (this.cleanBehaviour === 'rooms') {
               await roomba.cleanRoom(this.mission)
               this.log.debug('Roomba is cleaning your rooms')
             } else {
@@ -763,7 +785,7 @@ export default class RoombaAccessory {
       }
     }
 
-    const Characteristic = this.platform.Characteristic
+    const Characteristic = this.api.hap.Characteristic
 
     updateCharacteristic(this.switchService, Characteristic.On, this.runningStatus)
     updateCharacteristic(this.batteryService, Characteristic.ChargingState, this.chargingStatus)
@@ -875,20 +897,20 @@ export default class RoombaAccessory {
   private chargingStatus = (status: Status) => status.charging === undefined
     ? undefined
     : status.charging
-      ? this.platform.Characteristic.ChargingState.CHARGING
-      : this.platform.Characteristic.ChargingState.NOT_CHARGING
+      ? this.api.hap.Characteristic.ChargingState.CHARGING
+      : this.api.hap.Characteristic.ChargingState.NOT_CHARGING
 
   private dockingStatus = (status: Status) => status.docking === undefined
     ? undefined
     : status.docking
-      ? this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
-      : this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED
+      ? this.api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
+      : this.api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED
 
   private dockedStatus = (status: Status) => status.charging === undefined
     ? undefined
     : status.charging
-      ? this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED
-      : this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
+      ? this.api.hap.Characteristic.ContactSensorState.CONTACT_DETECTED
+      : this.api.hap.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
 
   private batteryLevelStatus = (status: Status) => status.batteryLevel === undefined
     ? undefined
@@ -897,20 +919,20 @@ export default class RoombaAccessory {
   private binStatus = (status: Status) => status.binFull === undefined
     ? undefined
     : status.binFull
-      ? this.platform.Characteristic.FilterChangeIndication.CHANGE_FILTER
-      : this.platform.Characteristic.FilterChangeIndication.FILTER_OK
+      ? this.api.hap.Characteristic.FilterChangeIndication.CHANGE_FILTER
+      : this.api.hap.Characteristic.FilterChangeIndication.FILTER_OK
 
   private batteryStatus = (status: Status) => status.batteryLevel === undefined
     ? undefined
     : status.batteryLevel <= 20
-      ? this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
-      : this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL
+      ? this.api.hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
+      : this.api.hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL
 
   private tankStatus = (status: Status) => status.tankLevel === undefined
     ? undefined
     : status.tankLevel
-      ? this.platform.Characteristic.FilterChangeIndication.FILTER_OK
-      : this.platform.Characteristic.FilterChangeIndication.CHANGE_FILTER
+      ? this.api.hap.Characteristic.FilterChangeIndication.FILTER_OK
+      : this.api.hap.Characteristic.FilterChangeIndication.CHANGE_FILTER
 
   private tankLevelStatus = (status: Status) => status.tankLevel === undefined
     ? undefined

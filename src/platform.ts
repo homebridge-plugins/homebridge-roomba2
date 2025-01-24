@@ -1,6 +1,8 @@
 import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge'
 
-import type { DeviceConfig } from './types.js'
+import type { DeviceConfig, RoombaPlatformConfig } from './types.js'
+
+import { readFileSync } from 'node:fs'
 
 import RoombaAccessory from './accessory.js'
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js'
@@ -11,10 +13,11 @@ export default class RoombaPlatform implements DynamicPlatformPlugin {
 
   private api: API
   private log: Logging
-  private config: PlatformConfig
+  private config: RoombaPlatformConfig
   private readonly accessories: Map<string, PlatformAccessory> = new Map()
+  version: any
 
-  public constructor(log: Logging, config: PlatformConfig, api: API) {
+  public constructor(log: Logging, config: RoombaPlatformConfig, api: API) {
     this.Service = api.hap.Service
     this.Characteristic = api.hap.Characteristic
 
@@ -24,11 +27,7 @@ export default class RoombaPlatform implements DynamicPlatformPlugin {
 
     this.log = !debug
       ? log
-      : Object.assign(log, {
-          debug: (message: string, ...parameters: unknown[]) => {
-            log.info(`DEBUG: ${message}`, ...parameters)
-          },
-        })
+      : Object.assign(log, { debug: (message: string, ...parameters: unknown[]) => { log.info(`DEBUG: ${message}`, ...parameters) } })
 
     this.api.on('didFinishLaunching', () => {
       this.discoverDevices()
@@ -61,7 +60,7 @@ export default class RoombaPlatform implements DynamicPlatformPlugin {
 
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
-        new RoombaAccessory(this, existingAccessory, this.log)
+        new RoombaAccessory(this, existingAccessory, this.log, device, this.config, this.api)
 
         // it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, e.g.:
         // remove platform accessories when no longer present
@@ -80,7 +79,7 @@ export default class RoombaPlatform implements DynamicPlatformPlugin {
 
         // create the accessory handler for the newly create accessory
         // this is imported from `platformAccessory.ts`
-        new RoombaAccessory(this, accessory, this.log)
+        new RoombaAccessory(this, accessory, this.log, device, this.config, this.api)
 
         // link the accessory to your platform
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory])
@@ -106,5 +105,20 @@ export default class RoombaPlatform implements DynamicPlatformPlugin {
 
   private getDevicesFromConfig(): DeviceConfig[] {
     return this.config.devices || []
+  }
+
+  /**
+   * Asynchronously retrieves the version of the plugin from the package.json file.
+   *
+   * This method reads the package.json file located in the parent directory,
+   * parses its content to extract the version, and logs the version using the debug logger.
+   * The extracted version is then assigned to the `version` property of the class.
+   *
+   * @returns {Promise<void>} A promise that resolves when the version has been retrieved and logged.
+   */
+  async getVersion(): Promise<void> {
+    const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8'))
+    this.log.debug(`Plugin Version: ${version}`)
+    this.version = version
   }
 }
