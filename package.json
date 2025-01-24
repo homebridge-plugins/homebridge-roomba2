@@ -1,7 +1,7 @@
 {
   "name": "@homebridge-plugins/homebridge-roomba2",
   "description": "homebridge-plugin for Roomba devices",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "type": "module",
   "engines": {
     "homebridge": ">=0.2.0",

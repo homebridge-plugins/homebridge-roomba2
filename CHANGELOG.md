@@ -1,9 +1,16 @@
 # Changelog
 
+## [1.5.3](https://github.com/homebridge-plugins/homebridge-roomba2/releases/tag/v1.5.3) (2025-01-24)
+
+### What's Changes
+- Fixed `require is not defined` [#148](https://github.com/homebridge-plugins/homebridge-roomba2/issues/148)
+
+**Full Changelog**: https://github.com/homebridge-plugins/homebridge-roomba2/compare/v1.5.2...v1.5.3
+
 ## [1.5.2](https://github.com/homebridge-plugins/homebridge-roomba2/releases/tag/v1.5.2) (2025-01-24)
 
 ### What's Changes
-- Fixed Cannot find module Issue [#148](https://github.com/homebridge-plugins/homebridge-roomba2/issues/148)
+- Fixed `Cannot find module` Issue [#148](https://github.com/homebridge-plugins/homebridge-roomba2/issues/148)
 
 **Full Changelog**: https://github.com/homebridge-plugins/homebridge-roomba2/compare/v1.5.1...v1.5.2
 
