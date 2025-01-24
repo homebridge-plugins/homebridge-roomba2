@@ -6,7 +6,7 @@ src
 
 # eslint
 
-.eslintrc
+eslint.config.*
 
 # typescript
 
@@ -126,7 +126,6 @@ web_modules/
 # Nuxt.js build / generate output
 
 .nuxt
-dist
 
 # Gatsby files
 
@@ -169,3 +168,22 @@ dist
 .yarn/build-state.yml
 .pnp.\*
 
+# nvm
+
+.nvmrc
+
+# Changesets
+
+.changeset
+
+# GitHub
+
+.github
+
+# npm
+
+*.tgz
+
+# Documentation
+
+*.md
