@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.1.0](https://github.com/homebridge-plugins/homebridge-roomba/releases/tag/v2.1.0) (2025-01-XX)
+
+### What's Changes
+- Added option to use iRobot credentials to get devices info.
+- Set default idleWatchInterval for plugin, but allow for override per device or overall plugin.
+- Housekeeping and updated dependencies.
+
+**Full Changelog**: https://github.com/homebridge-plugins/homebridge-roomba/compare/v2.0.0...v2.1.0
+
 ## [2.0.0](https://github.com/homebridge-plugins/homebridge-roomba/releases/tag/v2.0.0) (2025-01-25)
 
 ### What's Changes

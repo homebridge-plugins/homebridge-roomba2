@@ -1,6 +1,3 @@
-/*
- * index.ts: homebridge-roomba.
- */
 import type { API } from 'homebridge'
 
 import RoombaPlatform from './platform.js'

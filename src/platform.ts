@@ -1,29 +1,37 @@
-import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service } from 'homebridge'
+import type { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, Service } from 'homebridge'
 
-import type { DeviceConfig, RoombaPlatformConfig } from './types.js'
+import type { DeviceInfo, Robot } from './roomba.js'
+import type { DeviceConfig, RoombaPlatformConfig } from './settings.js'
 
 import { readFileSync } from 'node:fs'
 
 import RoombaAccessory from './accessory.js'
+import { getRoombas } from './roomba.js'
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js'
 
 export default class RoombaPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service
   public readonly Characteristic: typeof Characteristic
-
   private api: API
-  private log: Logging
+  private log!: Logging
   private config: RoombaPlatformConfig
   private readonly accessories: Map<string, PlatformAccessory> = new Map()
-  version: string
+  version!: string
 
   public constructor(log: Logging, config: RoombaPlatformConfig, api: API) {
     this.Service = api.hap.Service
     this.Characteristic = api.hap.Characteristic
-
     this.api = api
     this.config = config
     const debug = !!config.debug
+
+    try {
+      this.verifyConfig()
+      log.debug('Configuration:', JSON.stringify(this.config, null, 2))
+    } catch (e: any) {
+      log.error('Error in configuration:', e.message ?? e)
+      return
+    }
 
     this.log = !debug
       ? log
@@ -36,62 +44,76 @@ export default class RoombaPlatform implements DynamicPlatformPlugin {
     })
   }
 
+  private verifyConfig() {
+    if (this.config.disableDiscovery === undefined) {
+      this.config.disableDiscovery = false
+    }
+  }
+
   public configureAccessory(accessory: PlatformAccessory): void {
     this.log(`Configuring accessory: ${accessory.displayName}`)
-
     this.accessories.set(accessory.UUID, accessory)
   }
 
-  private discoverDevices(): void {
-    const devices: DeviceConfig[] = this.getDevicesFromConfig()
+  private async discoveryMethod(): Promise<DeviceConfig[]> {
+    if (this.config.email && this.config.password) {
+      const robots: Robot[] = await getRoombas(this.config.email, this.config.password, this.log, this.config)
+      return robots.map((robot) => {
+        const deviceConfig = this.config.devices?.find(device => device.blid === robot.blid) || {}
+        return {
+          ...robot,
+          ...deviceConfig,
+        } as any
+      })
+    } else if (this.config.devices) {
+      return this.config.devices.map(device => ({
+        ...device,
+      }))
+    } else {
+      this.log.error('No configuration provided for devices.')
+      return []
+    }
+  }
+
+  private async discoverDevices(): Promise<void> {
+    const devices: Robot[] & DeviceConfig[] = await this.discoveryMethod()
     const configuredAccessoryUUIDs = new Set<string>()
 
     for (const device of devices) {
       const uuid = this.api.hap.uuid.generate(device.blid)
-
       const existingAccessory = this.accessories.get(uuid)
+
       if (existingAccessory) {
-        // the accessory already exists
+        this.log.debug('existingAccessory device: %s', JSON.stringify(device))
         this.log.debug('Restoring existing accessory from cache:', existingAccessory.displayName)
-
-        // TODO when should we update the device config
-
-        // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. e.g.:
         existingAccessory.context.device = device
-        // this.api.updatePlatformAccessories([existingAccessory]);
-
-        // create the accessory handler for the restored accessory
-        // this is imported from `platformAccessory.ts`
-        new RoombaAccessory(this, existingAccessory, this.log, device, this.config, this.api)
-
-        // it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, e.g.:
-        // remove platform accessories when no longer present
-        // this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
-        // this.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
+        const { serialNumber, deviceInfo } = this.serialNum(device)
+        existingAccessory.context.serialNumber = serialNumber
+        existingAccessory.context.deviceInfo = deviceInfo
+        existingAccessory.context.model = device.model
+        existingAccessory.context.firmwareRevision = device.softwareVer ?? this.version ?? '0.0.0'
+        this.api.updatePlatformAccessories([existingAccessory])
+        new RoombaAccessory(this, existingAccessory, this.log, {
+          ...device,
+        }, this.config, this.api)
       } else {
-        // the accessory does not yet exist, so we need to create it
+        this.log.debug('accessory device: %s', JSON.stringify(device))
         this.log.info('Adding new accessory:', device.name)
-
-        // create a new accessory
         const accessory = new this.api.platformAccessory(device.name, uuid)
-
-        // store a copy of the device object in the `accessory.context`
-        // the `context` property can be used to store any data about the accessory you may need
         accessory.context.device = device
-
-        // create the accessory handler for the newly create accessory
-        // this is imported from `platformAccessory.ts`
-        new RoombaAccessory(this, accessory, this.log, device, this.config, this.api)
-
-        // link the accessory to your platform
+        const { serialNumber, deviceInfo } = this.serialNum(device)
+        accessory.context.serialNumber = serialNumber
+        accessory.context.deviceInfo = deviceInfo
+        accessory.context.model = device.model
+        accessory.context.firmwareRevision = device.softwareVer ?? this.version ?? '0.0.0'
+        new RoombaAccessory(this, accessory, this.log, {
+          ...device,
+        }, this.config, this.api)
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory])
       }
       configuredAccessoryUUIDs.add(uuid)
     }
 
-    // you can also deal with accessories from the cache which are no longer present by removing them from Homebridge
-    // for example, if your plugin logs into a cloud account to retrieve a device list, and a user has previously removed a device
-    // from this cloud account, then this device will no longer be present in the device list but will still be in the Homebridge cache
     const accessoriesToRemove: PlatformAccessory[] = []
     for (const [uuid, accessory] of this.accessories) {
       if (!configuredAccessoryUUIDs.has(uuid)) {
@@ -105,18 +127,26 @@ export default class RoombaPlatform implements DynamicPlatformPlugin {
     }
   }
 
-  private getDevicesFromConfig(): DeviceConfig[] {
-    return this.config.devices || []
+  private serialNum(device: Robot & DeviceConfig) {
+    let deviceInfo: DeviceInfo | undefined
+    let serialNumber: string
+    const serialNum = device.ipaddress ?? device.ip
+    if (device.info) {
+      deviceInfo = device.info
+      if (device.info.serialNum) {
+        serialNumber = device.info.serialNum
+        return { serialNumber, deviceInfo }
+      } else {
+        serialNumber = serialNum
+        return { serialNumber, deviceInfo }
+      }
+    } else {
+      deviceInfo = undefined
+      serialNumber = serialNum
+      return { serialNumber, deviceInfo }
+    }
   }
 
-  /**
-   * Retrieves the version of the plugin from the package.json file.
-   *
-   * This method reads the package.json file located in the parent directory,
-   * parses its content to extract the version, and logs the version using the debug logger.
-   *
-   * @returns {string} The version.
-   */
   private getVersion(): string {
     const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8'))
     this.log.debug(`Plugin Version: ${version}`)
