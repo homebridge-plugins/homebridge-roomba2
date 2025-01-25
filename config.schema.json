@@ -11,8 +11,33 @@
             "name": {
                 "type": "string",
                 "title": "Name",
-                "default": "NoIP",
+                "default": "Roomba",
                 "required": true
+            },
+            "email": {
+                "type": "string",
+                "title": "iRobot Account Email",
+                "description": "The email address you use to log into the iRobot Home app.",
+                "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+                "required": true,
+                "x-schema-form": {
+                    "type": "email"
+                }
+            },
+            "password": {
+                "type": "string",
+                "title": "iRobot Account Password",
+                "description": "The password you use to log into the iRobot Home app.",
+                "required": true,
+                "x-schema-form": {
+                    "type": "password"
+                }
+            },
+            "disableDiscovery": {
+                "type": "boolean",
+                "title": "Auto Discovery",
+                "description": "Automatically discover Roomba devices on the network.",
+                "required": false
             },
             "devices": {
                 "type": "array",
@@ -109,7 +134,6 @@
                                     "type": "number",
                                     "title": "Clean rooms in order",
                                     "default": 1,
-                                    "required": true,
                                     "oneOf": [
                                         {
                                             "title": "Yes",
@@ -131,7 +155,6 @@
                                 "pmap_id": {
                                     "type": "string",
                                     "title": "Pmap Id",
-                                    "required": true,
                                     "condition": {
                                         "functionBody": "return (model.devices && model.devices[arrayIndices].cleanBehaviour === 'rooms');"
                                     }
@@ -144,14 +167,12 @@
                                         "properties": {
                                             "region_id": {
                                                 "type": "string",
-                                                "title": "Region Id",
-                                                "required": true
+                                                "title": "Region Id"
                                             },
                                             "type": {
                                                 "type": "string",
                                                 "title": "Type",
-                                                "default": "rid",
-                                                "required": true
+                                                "default": "rid"
                                             },
                                             "params": {
                                                 "type": "object",
@@ -224,47 +245,69 @@
     },
     "layout": [
         {
-            "key": "devices",
-            "notitle": false,
-            "type": "tabarray",
-            "title": "{{ value.name || value.ipaddress || value.serialnum || 'New Vacuum' }}",
+            "type": "fieldset",
+            "title": "iRobot Account",
             "expandable": true,
             "expanded": false,
-            "orderable": false,
             "items": [
-                "devices[].name",
-                "devices[].model",
-                "devices[].serialnum",
-                "devices[].blid",
-                "devices[].robotpwd",
-                "devices[].ipaddress",
-                "devices[].homeSwitch",
-                "devices[].dockContactSensor",
-                "devices[].dockingContactSensor",
-                "devices[].runningContactSensor",
-                "devices[].binContactSensor",
-                "devices[].tankContactSensor",
-                "devices[].idleWatchInterval",
-                "devices[].cleanBehaviour",
+                "email",
+                "password"
+            ]
+        },
+        {
+            "type": "fieldset",
+            "title": "Roomba Device Settings",
+            "expandable": true,
+            "expanded": false,
+            "items": [
                 {
-                    "key": "devices[].mission",
-                    "type": "fieldset",
-                    "title": "Mission Settings",
+                    "type": "help",
+                    "helpvalue": "<em class='primary-text'>With Roomba Device Setting, you can set device specific settings based on <b style='color: var(--secondary-color);'>blid</b>.</em>"
+                },
+                {
+                    "key": "devices",
+                    "notitle": false,
+                    "type": "tabarray",
+                    "title": "{{ value.name || value.ipaddress || value.serialnum || 'New Vacuum' }}",
                     "expandable": true,
                     "expanded": false,
+                    "orderable": false,
                     "items": [
-                        "devices[].mission.pmap_id",
-                        "devices[].mission.user_pmapv_id",
-                        "devices[].mission.regions",
-                        "devices[].mission.regions[].region_id",
-                        "devices[].mission.regions[].type",
-                        "devices[].mission.regions[].params.noAutoPasses",
-                        "devices[].mission.regions[].params.twoPass",
-                        "devices[].mission.ordered"
+                        "devices[].name",
+                        "devices[].model",
+                        "devices[].serialnum",
+                        "devices[].blid",
+                        "devices[].robotpwd",
+                        "devices[].ipaddress",
+                        "devices[].homeSwitch",
+                        "devices[].dockContactSensor",
+                        "devices[].dockingContactSensor",
+                        "devices[].runningContactSensor",
+                        "devices[].binContactSensor",
+                        "devices[].tankContactSensor",
+                        "devices[].idleWatchInterval",
+                        "devices[].cleanBehaviour",
+                        {
+                            "key": "devices[].mission",
+                            "type": "fieldset",
+                            "title": "Mission Settings",
+                            "expandable": true,
+                            "expanded": false,
+                            "items": [
+                                "devices[].mission.pmap_id",
+                                "devices[].mission.user_pmapv_id",
+                                "devices[].mission.regions",
+                                "devices[].mission.regions[].region_id",
+                                "devices[].mission.regions[].type",
+                                "devices[].mission.regions[].params.noAutoPasses",
+                                "devices[].mission.regions[].params.twoPass",
+                                "devices[].mission.ordered"
+                            ]
+                        },
+                        "devices[].stopBehaviour",
+                        "devices[].idleWatchInterval"
                     ]
-                },
-                "devices[].stopBehaviour",
-                "devices[].idleWatchInterval"
+                }
             ]
         },
         {
@@ -273,6 +316,7 @@
             "expandable": true,
             "expanded": false,
             "items": [
+                "disableDiscovery",
                 "debug"
             ]
         }

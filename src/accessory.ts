@@ -2,7 +2,8 @@ import type { RobotMission, RobotState, Roomba } from 'dorita980'
 import type { AccessoryPlugin, API, CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicValue, Logging, PlatformAccessory, Service, WithUUID } from 'homebridge'
 
 import type RoombaPlatform from './platform.js'
-import type { DeviceConfig, RoombaPlatformConfig } from './types.js'
+import type { Robot } from './roomba.js'
+import type { DeviceConfig, RoombaPlatformConfig } from './settings.js'
 
 import dorita980 from 'dorita980'
 
@@ -145,21 +146,34 @@ export default class RoombaAccessory implements AccessoryPlugin {
     readonly platform: RoombaPlatform,
     accessory: PlatformAccessory,
     log: Logging,
-    device: DeviceConfig,
+    device: Robot & DeviceConfig,
     config: RoombaPlatformConfig,
     api: API,
   ) {
     this.api = api
+    this.log = log
     this.debug = !!config.debug
 
-    this.log = !this.debug ? log : Object.assign(log, { debug: (message: string, ...parameters: unknown[]) => { log.info(`DEBUG: ${message}`, ...parameters) } })
+    this.log.debug('device: %s', JSON.stringify(device), 'config: %s', JSON.stringify(config))
+
+    if (!this.debug) {
+      this.log = log
+    } else {
+      this.log = Object.assign(log, {
+        debug: (message: string, ...parameters: unknown[]) => {
+          log.info(`DEBUG: ${message}`, ...parameters)
+        },
+      })
+    }
+    const deviceInfo = device.info ?? undefined
+    this.log.debug('device info: %s', JSON.stringify(deviceInfo))
     this.name = device.name
     this.model = device.model
-    this.serialnum = device.serialnum ?? device.ipaddress
+    this.serialnum = deviceInfo?.mac ?? device.ipaddress
     this.blid = device.blid
-    this.robotpwd = device.robotpwd
-    this.ipaddress = device.ipaddress
-    this.version = this.platform.version ?? '0.0.0'
+    this.robotpwd = device.password
+    this.ipaddress = device.ipaddress ?? device.ip
+    this.version = device.softwareVer ?? this.platform.version ?? '0.0.0'
     this.cleanBehaviour = device.cleanBehaviour !== undefined ? device.cleanBehaviour : 'everywhere'
     this.mission = device.mission || { pmap_id: 'local' }
     this.stopBehaviour = device.stopBehaviour !== undefined ? device.stopBehaviour : 'home'
@@ -488,6 +502,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     /* Use the current Promise, if possible, so we share the connected Roomba instance, whether
            it is already connected, or when it becomes connected.
          */
+    this.log.debug('currentRoombaPromise: %s', this._currentRoombaPromise ? 'yes' : 'no')
     const promise = this._currentRoombaPromise || this.connectedRoomba()
     this._currentRoombaPromise = promise
 
