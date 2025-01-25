@@ -52,7 +52,7 @@ export default class RoombaPlatform implements DynamicPlatformPlugin {
       const existingAccessory = this.accessories.get(uuid)
       if (existingAccessory) {
         // the accessory already exists
-        this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName)
+        this.log.debug('Restoring existing accessory from cache:', existingAccessory.displayName)
 
         // TODO when should we update the device config
 
