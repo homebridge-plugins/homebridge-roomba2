@@ -4,6 +4,7 @@
 
 <a href="https://www.npmjs.com/package/@homebridge-plugins/homebridge-roomba"><img title="npm version" src="https://badgen.net/npm/v/@homebridge-plugins/homebridge-roomba" ></a>
 <a href="https://www.npmjs.com/package/@homebridge-plugins/homebridge-roomba"><img title="npm downloads" src="https://badgen.net/npm/dt/@homebridge-plugins/homebridge-roomba?label=downloads" ></a>
+
 [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 
 </span>
