@@ -15,7 +15,7 @@ export default class RoombaPlatform implements DynamicPlatformPlugin {
   private log: Logging
   private config: RoombaPlatformConfig
   private readonly accessories: Map<string, PlatformAccessory> = new Map()
-  version: any
+  version: string
 
   public constructor(log: Logging, config: RoombaPlatformConfig, api: API) {
     this.Service = api.hap.Service
@@ -28,6 +28,8 @@ export default class RoombaPlatform implements DynamicPlatformPlugin {
     this.log = !debug
       ? log
       : Object.assign(log, { debug: (message: string, ...parameters: unknown[]) => { log.info(`DEBUG: ${message}`, ...parameters) } })
+
+    this.version = this.getVersion()
 
     this.api.on('didFinishLaunching', () => {
       this.discoverDevices()
@@ -108,17 +110,16 @@ export default class RoombaPlatform implements DynamicPlatformPlugin {
   }
 
   /**
-   * Asynchronously retrieves the version of the plugin from the package.json file.
+   * Retrieves the version of the plugin from the package.json file.
    *
    * This method reads the package.json file located in the parent directory,
    * parses its content to extract the version, and logs the version using the debug logger.
-   * The extracted version is then assigned to the `version` property of the class.
    *
-   * @returns {Promise<void>} A promise that resolves when the version has been retrieved and logged.
+   * @returns {string} The version.
    */
-  async getVersion(): Promise<void> {
+  private getVersion(): string {
     const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8'))
     this.log.debug(`Plugin Version: ${version}`)
-    this.version = version
+    return version
   }
 }
