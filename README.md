@@ -1,9 +1,9 @@
 <span align="center">
 
-# Homebridge-Roomba2
+# homebridge-roomba
 
-<a href="https://www.npmjs.com/package/homebridge-roomba2"><img title="npm version" src="https://badgen.net/npm/v/homebridge-roomba2" ></a>
-<a href="https://www.npmjs.com/package/homebridge-roomba2"><img title="npm downloads" src="https://badgen.net/npm/dt/homebridge-roomba2" ></a>
+<a href="https://www.npmjs.com/package/@homebridge-plugins/homebridge-roomba"><img title="npm version" src="https://badgen.net/npm/v/@homebridge-plugins/homebridge-roomba" ></a>
+<a href="https://www.npmjs.com/package/@homebridge-plugins/homebridge-roomba"><img title="npm downloads" src="https://badgen.net/npm/dt/@homebridge-plugins/homebridge-roomba?label=downloads" ></a>
 [![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 
 </span>
@@ -19,20 +19,20 @@
 - Roomba bin full notification
 - Find Roomba (Identify Function, supported in 3rd Party HomeKit apps)
 
-The homebridge-roomba2 plugin polls Roomba for its status when requested by HomeKit, so when you first open
+The homebridge-roomba plugin polls Roomba for its status when requested by HomeKit, so when you first open
 the Home app you may see an old status, or no status, until Roomba has had time to respond (which may take
 a few seconds).
 
 ## Installation
 
-1. Use the [Homebridge UI](https://github.com/oznu/homebridge-config-ui-x)’s Plugins screen to search for and install "homebridge-roomba2"
+1. Use the [Homebridge UI](https://github.com/homebridge/homebridge-config-ui-x)’s Plugins screen to search for and install "homebridge-roomba"
 2. Follow [Setup](#setup) to get Roomba credentials and to configure your Roomba
 3. Restart Homebridge
 
 ### Manual Installation
 
 1. Install Homebridge: `sudo npm i -g homebridge --unsafe-perm`
-2. Download this plugin: `sudo npm i -g homebridge-roomba2`
+2. Download this plugin: `sudo npm i -g @homebridge-plugins/homebridge-roomba`
 3. Follow [Setup](#setup) to get Roomba credentials
 4. Enter Roomba's credentials in your `config.json` file.
 5. Restart Homebridge
@@ -41,23 +41,23 @@ a few seconds).
 
 1. Find your Roomba's IP address (for help see the [troubleshooting](#troubleshooting) section); it will look like `192.168.X.XXX` or `10.X.X.XXX`, or similar.
 2. Open a terminal on your Homebridge system, either using `ssh` or by using the Homebridge Terminal located in the &vellip; menu, top-right in the Homebridge UI.
-3. Change into the directory where the plugin is installed: `cd $(npm root -g)/homebridge-roomba2`
+3. Change into the directory where the plugin is installed: `cd $(npm root -g)/homebridge-roomba`
 4. Type `npm run roomba:getpassword <IP ADDRESS>` (replacing `<IP ADDRESS>` with the IP address you discovered above).
 5. Follow the instructions on screen to obtain your Roomba's `blid` and password. NB: Read the instructions carefully and ensure that you're pressing and holding the correct button on your Roomba.
 6. Proceed to _Configuration_.
 
 ## Configuration
 
-This plugin supports GUI-based configuration using [Config-Ui-X](https://github.com/oznu/homebridge-config-ui-x), which is the recommended
+This plugin supports GUI-based configuration using [Homebridge UI](https://github.com/homebridge/homebridge-config-ui-x), which is the recommended
 approach for configuring your Roomba.
 
 ### Manual configuration
 
-Here is example JSON for configuring a Roomba2 accessory:
+Here is example JSON for configuring a Roomba accessory:
 
 ```json
 {
-  "accessory": "Roomba2",
+  "accessory": "Roomba",
   "name": "Roomba",
   "model": "960",
   "blid": "1234567890",
@@ -88,7 +88,7 @@ Here is example JSON for configuring a Roomba2 accessory:
 
 | Key                    | Description                                                                         | Default Value |
 | ---------------------- | ----------------------------------------------------------------------------------- | ------------- |
-| `accessory`            | Loads this plugin. Must be set to `Roomba2`                                         |               |
+| `accessory`            | Loads this plugin. Must be set to `Roomba`                                         |               |
 | `name`                 | The name of your Roomba as it should appear in Homebridge and HomeKit               |               |
 | `model`                | The model of your Roomba as you'd like it to appear in HomeKit                      |               |
 | `serialnum`            | The serial number as you'd like it to appear in HomeKit                             |               |
@@ -119,14 +119,14 @@ This plugin can instruct the Roomba to clean everywhere or go on a specific clea
 
 1. Select the rooms you want to clean in the iRobot app, start the cleaning job, then **close the iRobot app**.
 2. Open a terminal on your Homebridge system, either using `ssh` or by using the Homebridge Terminal located in the &vellip; menu, top-right in the Homebridge UI.
-3. Change into the directory where the plugin is installed: `cd $(npm root -g)/homebridge-roomba2`
+3. Change into the directory where the plugin is installed: `cd $(npm root -g)/homebridge-roomba`
 4. Type `npm run roomba:getlastcommand <BLID> <PASSWORD> <IP ADDRESS>` (replacing `<BLID> <PASSWORD> <IP ADDRESS>` with the values for your robot).
 
 **Note:** _Modifying the map (Room Dividers, Names or Zones) in the iRobot app will result in a new `user_pmapv_id` value and may result in new `region_id` values that will cause an error if not updated in mission configuration._
 
 ### Deprecated configuration
 
-The homebridge-roomba2 plugin used to support keep-alive and auto refresh modes for obtaining Roomba's status.
+The homebridge-roomba plugin used to support keep-alive and auto refresh modes for obtaining Roomba's status.
 Both of these modes required more resources from Homebridge and Roomba than were necessary.
 
 Now the plugin efficiently queries Roomba's status on demand so as not to slow down Homebridge and so
@@ -141,7 +141,7 @@ Click on any of the items below to expand the corresponding answer.
 
 > You can find your Roomba's IP Address in the iRobot app. Open the app and choose your Robot. Scroll down to the bottom and find Robot Settings. Click Wi-Fi Settings and then Robot Wi-FI Details. You will find your IP address and various other network goodies here.
 
-![Alt Text](https://github.com/rcoletti116/homebridge-roomba2/blob/rcoletti116-docsfiles/trim.1BD89A46-80F9-4FCB-A04B-4A610D403D4F.gif)
+![Alt Text](https://github.com/rcoletti116/homebridge-roomba/blob/rcoletti116-docsfiles/trim.1BD89A46-80F9-4FCB-A04B-4A610D403D4F.gif)
 
 > Alternatively you can open up your Router Admin Panel and look for a list of devices. Once you identify the Roomba, you should see an associated IP address, however, this process will be different for each type of router.
 
@@ -160,7 +160,7 @@ Click on any of the items below to expand the corresponding answer.
 
 ## Building
 
-The homebridge-roomba2 plugin uses [TypeScript](https://www.typescriptlang.org) and
+The homebridge-roomba plugin uses [TypeScript](https://www.typescriptlang.org) and
 [`nvm`](https://github.com/nvm-sh/nvm).
 
 `nvm` is used to control the version of node used. You can skip the `nvm` step if you manage your own
@@ -201,12 +201,12 @@ npm run watch
 The fastest way to test changes is to copy the built product directly to your Homebridge, and then to restart Homebridge.
 
 If your Homebridge is running on your local machine, you can build (as above) and then copy the `config.schema.json` file and `dist`
-folder to the `homebridge-roomba2` folder in your Homebridge's `node_modules` folder.
+folder to the `homebridge-roomba` folder in your Homebridge's `node_modules` folder.
 
 If your Homebridge is running on another machine, you can use a remote copy tool such as `scp` to copy the files:
 
 ```shell
-npm run build && scp -r config.schema.json package.json dist user@host.local:/usr/lib/node_modules/homebridge-roomba2/
+npm run build && scp -r config.schema.json package.json dist user@host.local:/usr/lib/node_modules/homebridge-roomba/
 ```
 
 Note: the destination path above is an example of what the path to `node_modules` on your Homebridge server _might be_.
@@ -216,7 +216,7 @@ on your Homebridge machine.
 
 ## Contributing
 
-The homebridge-roomba2 plugin uses [Changesets](https://github.com/atlassian/changesets) to maintain the [CHANGELOG.md](./CHANGELOG.md) and to bump the package's version number according to [semver](https://semver.org).
+The homebridge-roomba plugin uses [Changesets](https://github.com/atlassian/changesets) to maintain the [CHANGELOG.md](./CHANGELOG.md) and to bump the package's version number according to [semver](https://semver.org).
 
 If you are preparing a PR, please consider using Changesets to include a summary of your change for the [CHANGELOG.md](./CHANGELOG.md), following the example of existing changelog entries (but feel free to provide more detail).
 
@@ -250,7 +250,7 @@ Useful references for the `config.schema.json`:
 
 ### Releasing
 
-The maintainer will run these steps to update the plugin version and publish to [npmjs.com](https://npmjs.com/package/homebridge-roomba2):
+The maintainer will run these steps to update the plugin version and publish to [npmjs.com](https://npmjs.com/package/homebridge-roomba):
 
 ```shell
 npm exec changeset version

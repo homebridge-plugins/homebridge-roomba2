@@ -37,7 +37,7 @@ body:
   - type: textarea
     id: Config
     attributes:
-      label: Config for homebridge-roomba2
+      label: Config for homebridge-roomba
       placeholder: Paste your homebridge config.json here. Remove any sensitive information.
       render: shell
     validations:
@@ -73,7 +73,7 @@ body:
       required: true
   - type: input
     attributes:
-      label: Homebridge Roomba2 Plugin Version
+      label: Homebridge Roomba Plugin Version
       placeholder: v1.1.0
     validations:
       required: true

@@ -1,34 +1,40 @@
 # Changelog
 
-## [2.0.0](https://github.com/homebridge-plugins/homebridge-roomba2/releases/tag/v2.0.0) (2025-01-24)
+## [2.0.0](https://github.com/homebridge-plugins/homebridge-roomba/releases/tag/v2.0.0) (2025-01-25)
 
 ### What's Changes
 #### Major Changes
 - Change from `Accessory` base to `Platform` based Plugin
+  - ***You will need to re-setup your vacuum***
+    - You can reuse your config by taking your `serialnum`, `blid`, `robotpwd`, `ipaddress` from the Accessory config and input it in the Homebridge UI when adding a new device.
+- Pluging has been renamed from `homebridge-roomba2` to `homebridge-roomba` now that it is a scoped plugin.
 
-**Full Changelog**: https://github.com/homebridge-plugins/homebridge-roomba2/compare/v1.5.3...v2.0.0
-
-## [1.5.3](https://github.com/homebridge-plugins/homebridge-roomba2/releases/tag/v1.5.3) (2025-01-24)
-
-### What's Changes
-- Fixed `require is not defined` [#148](https://github.com/homebridge-plugins/homebridge-roomba2/issues/148)
-
-**Full Changelog**: https://github.com/homebridge-plugins/homebridge-roomba2/compare/v1.5.2...v1.5.3
-
-## [1.5.2](https://github.com/homebridge-plugins/homebridge-roomba2/releases/tag/v1.5.2) (2025-01-24)
-
-### What's Changes
-- Fixed `Cannot find module` Issue [#148](https://github.com/homebridge-plugins/homebridge-roomba2/issues/148)
-
-**Full Changelog**: https://github.com/homebridge-plugins/homebridge-roomba2/compare/v1.5.1...v1.5.2
-
-## [1.5.1](https://github.com/homebridge-plugins/homebridge-roomba2/releases/tag/v1.5.1) (2025-01-23)
-
-### What's Changes
-- Fixed Cannot find module Issue [#148](https://github.com/homebridge-plugins/homebridge-roomba2/issues/148)
+#### Other Changes
 - Housekeeping and updated dependencies.
 
-**Full Changelog**: https://github.com/homebridge-plugins/homebridge-roomba2/compare/v1.5.0...v1.5.1
+**Full Changelog**: https://github.com/homebridge-plugins/homebridge-roomba/compare/v1.5.3...v2.0.0
+
+## [1.5.3](https://github.com/homebridge-plugins/homebridge-roomba/releases/tag/v1.5.3) (2025-01-24)
+
+### What's Changes
+- Fixed `require is not defined` [#148](https://github.com/homebridge-plugins/homebridge-roomba/issues/148)
+
+**Full Changelog**: https://github.com/homebridge-plugins/homebridge-roomba/compare/v1.5.2...v1.5.3
+
+## [1.5.2](https://github.com/homebridge-plugins/homebridge-roomba/releases/tag/v1.5.2) (2025-01-24)
+
+### What's Changes
+- Fixed `Cannot find module` Issue [#148](https://github.com/homebridge-plugins/homebridge-roomba/issues/148)
+
+**Full Changelog**: https://github.com/homebridge-plugins/homebridge-roomba/compare/v1.5.1...v1.5.2
+
+## [1.5.1](https://github.com/homebridge-plugins/homebridge-roomba/releases/tag/v1.5.1) (2025-01-23)
+
+### What's Changes
+- Fixed Cannot find module Issue [#148](https://github.com/homebridge-plugins/homebridge-roomba/issues/148)
+- Housekeeping and updated dependencies.
+
+**Full Changelog**: https://github.com/homebridge-plugins/homebridge-roomba/compare/v1.5.0...v1.5.1
 
 ## 1.5.0
 

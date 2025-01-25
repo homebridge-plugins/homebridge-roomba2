@@ -7,7 +7,7 @@
 /*.tgz
 /docs
 /eslint.*
-/homebridge-roomba2-*.tgz
+/homebridge-roomba-*.tgz
 /nodemon.json
 /src
 /test

@@ -1,5 +1,5 @@
 /*
- * index.ts: homebridge-roomba2.
+ * index.ts: homebridge-roomba.
  */
 import type { API } from 'homebridge'
 

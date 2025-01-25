@@ -2,7 +2,7 @@ import fs from 'node:fs'
 
 /* Copyright(C) 2023`-2024, donavanbecker (https://github.com/donavanbecker). All rights reserved.
  *
- * server.ts: homebridge-roomba2.
+ * server.ts: homebridge-roomba.
  */
 import { HomebridgePluginUiServer } from '@homebridge/plugin-ui-utils'
 
@@ -15,7 +15,7 @@ class PluginUiServer extends HomebridgePluginUiServer {
     */
     this.onRequest('getCachedAccessories', () => {
       try {
-        const plugin = 'homebridge-roomba2'
+        const plugin = 'homebridge-roomba'
         const devicesToReturn = []
 
         // The path and file of the cached accessories
