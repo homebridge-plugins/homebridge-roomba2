@@ -1,10 +1,13 @@
-/* eslint-disable no-console */
+import type { Logging } from 'homebridge'
+
 import process from 'node:process'
 
 import dorita980 from 'dorita980'
 
+const logger = console as unknown as Logging
+
 if (!process.argv[4]) {
-  console.log('Usage: npm run getlastcommand <robot_blid> <robot_pwd> <robot_ip_address>')
+  logger.error('Usage: npm run getlastcommand <robot_blid> <robot_pwd> <robot_ip_address>')
   process.exit()
 }
 
@@ -21,8 +24,8 @@ type RobotState = dorita980.RobotState & { lastCommand?: { regions: { regionId: 
 function init() {
   myRobotViaLocal.getRobotState(['lastCommand'])
     .then((result: RobotState) => {
-      console.log('lastCommand:', result.lastCommand, ', regionsDetails:', result.lastCommand?.regions)
+      logger.info('lastCommand:', result.lastCommand, ', regionsDetails:', result.lastCommand?.regions)
       myRobotViaLocal.end()
     })
-    .catch(console.log)
+    .catch(logger.error)
 }
