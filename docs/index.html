@@ -23,7 +23,7 @@ a few seconds).</p>
 <li>Restart Homebridge</li>
 </ol>
 <a id="manual-installation" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Manual Installation<a href="#manual-installation" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><ol>
-<li>Install Homebridge:   <code>sudo npm i -g homebridge --unsafe-perm</code></li>
+<li>Install Homebridge: <code>sudo npm i -g homebridge --unsafe-perm</code></li>
 <li>Download this plugin: <code>sudo npm i -g homebridge-roomba2</code></li>
 <li>Follow <a href="#setup">Setup</a> to get Roomba credentials</li>
 <li>Enter Roomba's credentials in your <code>config.json</code> file.</li>
@@ -33,7 +33,7 @@ a few seconds).</p>
 <li>Find your Roomba's IP address (for help see the <a href="#troubleshooting">troubleshooting</a> section); it will look like <code>192.168.X.XXX</code> or <code>10.X.X.XXX</code>, or similar.</li>
 <li>Open a terminal on your Homebridge system, either using <code>ssh</code> or by using the Homebridge Terminal located in the ⋮ menu, top-right in the Homebridge UI.</li>
 <li>Change into the directory where the plugin is installed: <code>cd $(npm root -g)/homebridge-roomba2</code></li>
-<li>Type <code>npm run getpassword &lt;IP ADDRESS&gt;</code> (replacing <code>&lt;IP ADDRESS&gt;</code> with the IP address you discovered above).</li>
+<li>Type <code>npm run roomba:getpassword &lt;IP ADDRESS&gt;</code> (replacing <code>&lt;IP ADDRESS&gt;</code> with the IP address you discovered above).</li>
 <li>Follow the instructions on screen to obtain your Roomba's <code>blid</code> and password. NB: Read the instructions carefully and ensure that you're pressing and holding the correct button on your Roomba.</li>
 <li>Proceed to <em>Configuration</em>.</li>
 </ol>
@@ -179,7 +179,7 @@ approach for configuring your Roomba.</p>
 <li>Select the rooms you want to clean in the iRobot app, start the cleaning job, then <strong>close the iRobot app</strong>.</li>
 <li>Open a terminal on your Homebridge system, either using <code>ssh</code> or by using the Homebridge Terminal located in the ⋮ menu, top-right in the Homebridge UI.</li>
 <li>Change into the directory where the plugin is installed: <code>cd $(npm root -g)/homebridge-roomba2</code></li>
-<li>Type <code>npm run getlastcommand &lt;BLID&gt; &lt;PASSWORD&gt; &lt;IP ADDRESS&gt;</code> (replacing <code>&lt;BLID&gt; &lt;PASSWORD&gt; &lt;IP ADDRESS&gt;</code> with the values for your robot).</li>
+<li>Type <code>npm run roomba:getlastcommand &lt;BLID&gt; &lt;PASSWORD&gt; &lt;IP ADDRESS&gt;</code> (replacing <code>&lt;BLID&gt; &lt;PASSWORD&gt; &lt;IP ADDRESS&gt;</code> with the values for your robot).</li>
 </ol>
 <p><strong>Note:</strong> <em>Modifying the map (Room Dividers, Names or Zones) in the iRobot app will result in a new <code>user_pmapv_id</code> value and may result in new <code>region_id</code> values that will cause an error if not updated in mission configuration.</em></p>
 <a id="deprecated-configuration" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Deprecated configuration<a href="#deprecated-configuration" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>The homebridge-roomba2 plugin used to support keep-alive and auto refresh modes for obtaining Roomba's status.
@@ -207,7 +207,7 @@ as to provide HomeKit with Roomba's status only when it requests it.</p>
 <p><strong>NOTE</strong>: If you choose to set an IP address that is different than the IP address your Roomba was previously assigned, you'll need to restart your router before the Roomba will begin responding on the new IP address.</p>
 </blockquote>
 </details>
-<a id="building" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Building<a href="#building" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>The homebridge-roomba2 plugin uses <a href="https://www.typescriptlang.org">TypeScript</a>, <a href="https://pnpm.io"><code>pnpm</code></a> and
+<a id="building" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Building<a href="#building" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>The homebridge-roomba2 plugin uses <a href="https://www.typescriptlang.org">TypeScript</a> and
 <a href="https://github.com/nvm-sh/nvm"><code>nvm</code></a>.</p>
 <p><code>nvm</code> is used to control the version of node used. You can skip the <code>nvm</code> step if you manage your own
 node versions.</p>
@@ -219,27 +219,23 @@ node versions.</p>
 <pre><code class="shell"><span class="hl-5">nvm</span><span class="hl-0"> </span><span class="hl-2">install</span>
 </code><button type="button">Copy</button></pre>
 
-<p>Install <code>pnpm</code>, if you haven't already:</p>
-<pre><code class="shell"><span class="hl-5">npm</span><span class="hl-0"> </span><span class="hl-3">-g</span><span class="hl-0"> </span><span class="hl-2">install</span><span class="hl-0"> </span><span class="hl-2">pnpm</span>
-</code><button type="button">Copy</button></pre>
-
 <p>Prepare the project:</p>
-<pre><code class="shell"><span class="hl-5">pnpm</span><span class="hl-0"> </span><span class="hl-2">install</span>
+<pre><code class="shell"><span class="hl-5">npm</span><span class="hl-0"> </span><span class="hl-2">install</span>
 </code><button type="button">Copy</button></pre>
 
 <p>Build the project:</p>
-<pre><code class="shell"><span class="hl-5">pnpm</span><span class="hl-0"> </span><span class="hl-2">build</span>
+<pre><code class="shell"><span class="hl-5">npm</span><span class="hl-0"> </span><span class="hl-2">run</span><span class="hl-0"> </span><span class="hl-2">build</span>
 </code><button type="button">Copy</button></pre>
 
 <p>or</p>
-<pre><code class="shell"><span class="hl-5">pnpm</span><span class="hl-0"> </span><span class="hl-2">watch</span>
+<pre><code class="shell"><span class="hl-5">npm</span><span class="hl-0"> </span><span class="hl-2">run</span><span class="hl-0"> </span><span class="hl-2">watch</span>
 </code><button type="button">Copy</button></pre>
 
 <a id="testing" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Testing<a href="#testing" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>The fastest way to test changes is to copy the built product directly to your Homebridge, and then to restart Homebridge.</p>
 <p>If your Homebridge is running on your local machine, you can build (as above) and then copy the <code>config.schema.json</code> file and <code>dist</code>
 folder to the <code>homebridge-roomba2</code> folder in your Homebridge's <code>node_modules</code> folder.</p>
 <p>If your Homebridge is running on another machine, you can use a remote copy tool such as <code>scp</code> to copy the files:</p>
-<pre><code class="shell"><span class="hl-5">pnpm</span><span class="hl-0"> </span><span class="hl-2">build</span><span class="hl-0"> &amp;&amp; </span><span class="hl-5">scp</span><span class="hl-0"> </span><span class="hl-3">-r</span><span class="hl-0"> </span><span class="hl-2">config.schema.json</span><span class="hl-0"> </span><span class="hl-2">package.json</span><span class="hl-0"> </span><span class="hl-2">dist</span><span class="hl-0"> </span><span class="hl-2">user@host.local:/usr/lib/node_modules/homebridge-roomba2/</span>
+<pre><code class="shell"><span class="hl-5">npm</span><span class="hl-0"> </span><span class="hl-2">run</span><span class="hl-0"> </span><span class="hl-2">build</span><span class="hl-0"> &amp;&amp; </span><span class="hl-5">scp</span><span class="hl-0"> </span><span class="hl-3">-r</span><span class="hl-0"> </span><span class="hl-2">config.schema.json</span><span class="hl-0"> </span><span class="hl-2">package.json</span><span class="hl-0"> </span><span class="hl-2">dist</span><span class="hl-0"> </span><span class="hl-2">user@host.local:/usr/lib/node_modules/homebridge-roomba2/</span>
 </code><button type="button">Copy</button></pre>
 
 <p>Note: the destination path above is an example of what the path to <code>node_modules</code> on your Homebridge server <em>might be</em>.</p>
@@ -248,11 +244,17 @@ on your Homebridge machine.</p>
 <a id="contributing" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Contributing<a href="#contributing" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>The homebridge-roomba2 plugin uses <a href="https://github.com/atlassian/changesets">Changesets</a> to maintain the <a href="media/CHANGELOG.md">CHANGELOG.md</a> and to bump the package's version number according to <a href="https://semver.org">semver</a>.</p>
 <p>If you are preparing a PR, please consider using Changesets to include a summary of your change for the <a href="media/CHANGELOG.md">CHANGELOG.md</a>, following the example of existing changelog entries (but feel free to provide more detail).</p>
 <p>To create a new changeset:</p>
-<pre><code class="shell"><span class="hl-5">pnpm</span><span class="hl-0"> </span><span class="hl-2">changeset</span>
+<pre><code class="shell"><span class="hl-5">npm</span><span class="hl-0"> </span><span class="hl-2">exec</span><span class="hl-0"> </span><span class="hl-2">changeset</span>
 </code><button type="button">Copy</button></pre>
 
 <p>That will prompt you to indicate whether your change is a patch (a bug fix) or a minor or major change. If you are adding a feature it is a minor change, not a patch.</p>
 <p>Changesets will create a new file in the <code>.changeset</code> directory that you can commit as part of your PR.</p>
+<a id="git-blame-ignore-revs" class="tsd-anchor"></a><h3 class="tsd-anchor-link"><code>.git-blame-ignore-revs</code><a href="#git-blame-ignore-revs" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Some revisions in the git history are spurious in a git blame, such as linting the code base.
+These revisions are listed in <code>.git-blame-ignore-revs</code>. You can configure your local git repository
+to use this file to skip these revisions in a blame:</p>
+<pre><code class="shell"><span class="hl-5">git</span><span class="hl-0"> </span><span class="hl-2">config</span><span class="hl-0"> </span><span class="hl-2">blame.ignoreRevsFile</span><span class="hl-0"> </span><span class="hl-2">.git-blame-ignore-revs</span>
+</code><button type="button">Copy</button></pre>
+
 <a id="configschemajson" class="tsd-anchor"></a><h3 class="tsd-anchor-link"><code>config.schema.json</code><a href="#configschemajson" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>Useful references for the <code>config.schema.json</code>:</p>
 <ul>
 <li><a href="https://github.com/oznu/homebridge-config-ui-x/wiki/Developers:-Plugin-Settings-GUI">https://github.com/oznu/homebridge-config-ui-x/wiki/Developers:-Plugin-Settings-GUI</a></li>
@@ -260,13 +262,13 @@ on your Homebridge machine.</p>
 <li><a href="https://github.com/json-schema-form/angular-schema-form/blob/master/docs/index.md">https://github.com/json-schema-form/angular-schema-form/blob/master/docs/index.md</a></li>
 </ul>
 <a id="releasing" class="tsd-anchor"></a><h3 class="tsd-anchor-link">Releasing<a href="#releasing" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3><p>The maintainer will run these steps to update the plugin version and publish to <a href="https://npmjs.com/package/homebridge-roomba2">npmjs.com</a>:</p>
-<pre><code class="shell"><span class="hl-5">pnpm</span><span class="hl-0"> </span><span class="hl-2">changeset</span><span class="hl-0"> </span><span class="hl-2">version</span>
+<pre><code class="shell"><span class="hl-5">npm</span><span class="hl-0"> </span><span class="hl-2">exec</span><span class="hl-0"> </span><span class="hl-2">changeset</span><span class="hl-0"> </span><span class="hl-2">version</span>
 </code><button type="button">Copy</button></pre>
 
 <p>Review the additions to <a href="media/CHANGELOG.md"><code>CHANGELOG.md</code></a> and <code>package.json</code>, commit with the comment "vX.X", and then publish:</p>
-<pre><code class="shell"><span class="hl-5">pnpm</span><span class="hl-0"> </span><span class="hl-2">changeset</span><span class="hl-0"> </span><span class="hl-2">publish</span>
+<pre><code class="shell"><span class="hl-5">npm</span><span class="hl-0"> </span><span class="hl-2">exec</span><span class="hl-0"> </span><span class="hl-2">changeset</span><span class="hl-0"> </span><span class="hl-2">publish</span>
 </code><button type="button">Copy</button></pre>
 
-<a id="credits" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Credits<a href="#credits" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>STVMallen  - <a href="https://github.com/stvmallen/homebridge-roomba-stv">Original plugin</a></p>
+<a id="credits" class="tsd-anchor"></a><h2 class="tsd-anchor-link">Credits<a href="#credits" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2><p>STVMallen - <a href="https://github.com/stvmallen/homebridge-roomba-stv">Original plugin</a></p>
 <p>ncovercash - <a href="https://github.com/stvmallen/homebridge-roomba-stv/pull/63">Dock status</a></p>
-</div></div><div class="col-sidebar" tabindex="-1"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-accordion"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked=""><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li></ul></div><div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div><details open="" class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>On This Page</h3></summary><div class="tsd-accordion-details" tabindex="-1"><a href="#homebridge-roomba2"><span>Homebridge-<wbr>Roomba2</span></a><ul><li><a href="#features"><span>Features</span></a></li><li><a href="#installation"><span>Installation</span></a></li><li><ul><li><a href="#manual-installation"><span>Manual <wbr>Installation</span></a></li></ul></li><li><a href="#setup"><span>Setup</span></a></li><li><a href="#configuration"><span>Configuration</span></a></li><li><ul><li><a href="#manual-configuration"><span>Manual configuration</span></a></li><li><a href="#cleaning-mission-configuration"><span>Cleaning <wbr>Mission configuration</span></a></li><li><a href="#deprecated-configuration"><span>Deprecated configuration</span></a></li></ul></li><li><a href="#troubleshooting"><span>Troubleshooting</span></a></li><li><a href="#building"><span>Building</span></a></li><li><ul><li><a href="#testing"><span>Testing</span></a></li></ul></li><li><a href="#contributing"><span>Contributing</span></a></li><li><ul><li><a href="#configschemajson"><span>config.schema.json</span></a></li><li><a href="#releasing"><span>Releasing</span></a></li></ul></li><li><a href="#credits"><span>Credits</span></a></li></ul></div></details></div><div class="site-menu" tabindex="-1"><nav class="tsd-navigation"><a href="modules.html">@homebridge-plugins/homebridge-roomba2</a><ul class="tsd-small-nested-navigation" id="tsd-nav-container"></ul></nav></div></div></div></main></body></html>
+</div></div><div class="col-sidebar" tabindex="-1"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-accordion"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked=""><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li></ul></div><div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div><details open="" class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><use href="assets/icons.svg#icon-chevronDown"></use></svg>On This Page</h3></summary><div class="tsd-accordion-details" tabindex="-1"><a href="#homebridge-roomba2"><span>Homebridge-<wbr>Roomba2</span></a><ul><li><a href="#features"><span>Features</span></a></li><li><a href="#installation"><span>Installation</span></a></li><li><ul><li><a href="#manual-installation"><span>Manual <wbr>Installation</span></a></li></ul></li><li><a href="#setup"><span>Setup</span></a></li><li><a href="#configuration"><span>Configuration</span></a></li><li><ul><li><a href="#manual-configuration"><span>Manual configuration</span></a></li><li><a href="#cleaning-mission-configuration"><span>Cleaning <wbr>Mission configuration</span></a></li><li><a href="#deprecated-configuration"><span>Deprecated configuration</span></a></li></ul></li><li><a href="#troubleshooting"><span>Troubleshooting</span></a></li><li><a href="#building"><span>Building</span></a></li><li><ul><li><a href="#testing"><span>Testing</span></a></li></ul></li><li><a href="#contributing"><span>Contributing</span></a></li><li><ul><li><a href="#git-blame-ignore-revs"><span>.git-<wbr>blame-<wbr>ignore-<wbr>revs</span></a></li><li><a href="#configschemajson"><span>config.schema.json</span></a></li><li><a href="#releasing"><span>Releasing</span></a></li></ul></li><li><a href="#credits"><span>Credits</span></a></li></ul></div></details></div><div class="site-menu" tabindex="-1"><nav class="tsd-navigation"><a href="modules.html">@homebridge-plugins/homebridge-roomba2</a><ul class="tsd-small-nested-navigation" id="tsd-nav-container"></ul></nav></div></div></div></main></body></html>
