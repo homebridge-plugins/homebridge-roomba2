@@ -173,14 +173,14 @@
             }
         }
     },
-    "headerDisplay": "For more information and help please consult the [README](https://github.com/homebridge-plugins/homebridge-roomba2#setup).",
+    "headerDisplay": "For more information and help please consult the [README](https://github.com/homebridge-plugins/homebridge-roomba#setup).",
     "layout": [
         { "type": "section", "title": "Display Details", "items": [
             { "type": "help", "helpvalue": "<span class='help-block'>Details about your Roomba to be displayed in the Home app. You can make up the values you enter&nbsp;here.</span>" },
             "name", "model", "serialnum"
         ] },
         { "type": "section", "title": "Connection", "items": [
-            { "type": "help", "helpvalue": "<span class='help-block'>Please consult the <a href='https://github.com/homebridge-plugins/homebridge-roomba2#setup' target='_blank'>README</a> to obtain these connection values for your&nbsp;Roomba.</span>" },
+            { "type": "help", "helpvalue": "<span class='help-block'>Please consult the <a href='https://github.com/homebridge-plugins/homebridge-roomba#setup' target='_blank'>README</a> to obtain these connection values for your&nbsp;Roomba.</span>" },
             "blid", "robotpwd", "ipaddress"
         ] },
         { "type": "section", "title": "Switches", "items": [

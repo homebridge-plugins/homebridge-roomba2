@@ -6,4 +6,4 @@ export const ACCESSORY_NAME = 'Roomba2'
 /**
  * This must match the name of your plugin as defined the package.json
  */
-export const PLUGIN_NAME = 'homebridge-roomba2'
+export const PLUGIN_NAME = 'homebridge-roomba'

@@ -936,7 +936,7 @@ function shouldTryDifferentCipher(error: Error) {
   if (error.message.includes('TLS')) {
     return true
   }
-  /* We have seen this error connecting to an i1+ https://github.com/homebridge-plugins/homebridge-roomba2/issues/129#issuecomment-1520733025 */
+  /* We have seen this error connecting to an i1+ https://github.com/homebridge-plugins/homebridge-roomba/issues/129#issuecomment-1520733025 */
   if (error.message.toLowerCase().includes('identifier rejected')) {
     return true
   }

@@ -3,6 +3,6 @@ contact_links:
   - name: Homebridge Discord Channel for Roomba2
     url: https://discord.gg/8fpZA4S
     about: Please ask and answer questions here.
-  - name: homebridge-roomba2 - Pull Requests
-    url: https://github.com/homebridge-plugins/homebridge-roomba2/pulls
+  - name: homebridge-roomba - Pull Requests
+    url: https://github.com/homebridge-plugins/homebridge-roomba/pulls
     about: Please report security vulnerabilities here.

@@ -1,5 +1,5 @@
 {
-  "name": "@homebridge-plugins/homebridge-roomba2",
+  "name": "@homebridge-plugins/homebridge-roomba",
   "description": "homebridge-plugin for Roomba devices",
   "version": "1.5.3",
   "type": "module",
@@ -11,7 +11,7 @@
     "name": "RayanKhan"
   },
   "bugs": {
-    "url": "https://github.com/homebridge-plugins/homebridge-roomba2/issues"
+    "url": "https://github.com/homebridge-plugins/homebridge-roomba/issues"
   },
   "dependencies": {
     "dorita980": "npm:@karlvr/dorita980@3.2.1"
@@ -19,7 +19,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://github.com/homebridge-plugins/homebridge-roomba2#readme",
+  "homepage": "https://github.com/homebridge-plugins/homebridge-roomba#readme",
   "keywords": [
     "homebridge-plugin",
     "iRobot",
@@ -29,7 +29,7 @@
   "main": "./dist/index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/homebridge-plugins/homebridge-roomba2.git"
+    "url": "git://github.com/homebridge-plugins/homebridge-roomba.git"
   },
   "scripts": {
     "check": "npm install && npm outdated",

@@ -8,7 +8,7 @@
   "description": "Homebridge plugin for Roomba 9xx",
   "platforms": [],
   "plugins": [
-    "homebridge-roomba2"
+    "homebridge-roomba"
   ],
   "accessories": [
     {

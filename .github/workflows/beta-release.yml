@@ -18,7 +18,7 @@ jobs:
 
   publish:
     needs: lint
-    if: ${{ github.repository == 'homebridge-plugins/homebridge-roomba2' }}
+    if: ${{ github.repository == 'homebridge-plugins/homebridge-roomba' }}
     permissions:
       id-token: write
     uses: homebridge/.github/.github/workflows/npm-publish-esm.yml@latest
@@ -32,24 +32,24 @@ jobs:
 
   pre-release:
     needs: publish
-    if: ${{ github.repository == 'homebridge-plugins/homebridge-roomba2' }}
+    if: ${{ github.repository == 'homebridge-plugins/homebridge-roomba' }}
     uses: homebridge/.github/.github/workflows/pre-release.yml@latest
     with:
       npm_version: ${{ needs.publish.outputs.NPM_VERSION }}
       body: |
         **Beta Release**
         **Version**: v${{ needs.publish.outputs.NPM_VERSION }}
-        [How To Test Beta Releases](https://github.com/homebridge-plugins/homebridge-roomba2/wiki/Beta-Version)
+        [How To Test Beta Releases](https://github.com/homebridge-plugins/homebridge-roomba/wiki/Beta-Version)
 
   github-releases-to-discord:
     name: Discord Webhooks
     needs: [build_and_test,publish]
-    if: ${{ github.repository == 'homebridge-plugins/homebridge-roomba2' }}
+    if: ${{ github.repository == 'homebridge-plugins/homebridge-roomba' }}
     uses: homebridge/.github/.github/workflows/discord-webhooks.yml@latest
     with:
       title: "Roomba2 Beta Release"
       description: |
         Version `v${{ needs.publish.outputs.NPM_VERSION }}`
-      url: "https://github.com/homebridge-plugins/homebridge-roomba2/releases/tag/v${{ needs.publish.outputs.NPM_VERSION }}"
+      url: "https://github.com/homebridge-plugins/homebridge-roomba/releases/tag/v${{ needs.publish.outputs.NPM_VERSION }}"
     secrets:
       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL_BETA || secrets.DISCORD_WEBHOOK_URL_LATEST }}

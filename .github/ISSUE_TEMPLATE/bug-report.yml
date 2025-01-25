@@ -37,7 +37,7 @@ body:
   - type: textarea
     id: Config
     attributes:
-      label: Config for homebridge-roomba2
+      label: Config for homebridge-roomba
       placeholder: Paste your homebridge config.json here. Remove any sensitive information.
       render: shell
     validations:
