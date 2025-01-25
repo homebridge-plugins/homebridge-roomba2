@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.0](https://github.com/homebridge-plugins/homebridge-roomba/releases/tag/v2.1.0) (2025-01-XX)
+
+### What's Changes
+- Added option to use iRobot credentials to get devices info.
+- Housekeeping and updated dependencies.
+
+**Full Changelog**: https://github.com/homebridge-plugins/homebridge-roomba/compare/v2.0.0...v2.1.0
+
 ## [2.0.0](https://github.com/homebridge-plugins/homebridge-roomba/releases/tag/v2.0.0) (2025-01-25)
 
 ### What's Changes
@@ -8,6 +16,7 @@
   - ***You will need to re-setup your vacuum***
     - You can reuse your config by taking your `serialnum`, `blid`, `robotpwd`, `ipaddress` from the Accessory config and input it in the Homebridge UI when adding a new device.
 - Pluging has been renamed from `homebridge-roomba2` to `homebridge-roomba` now that it is a scoped plugin.
+- Compaitable with Homebridge `v2.0.0`
 
 #### Other Changes
 - Housekeeping and updated dependencies.
