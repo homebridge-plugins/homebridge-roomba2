@@ -8,7 +8,6 @@
   - ***You will need to re-setup your vacuum***
     - You can reuse your config by taking your `serialnum`, `blid`, `robotpwd`, `ipaddress` from the Accessory config and input it in the Homebridge UI when adding a new device.
 - Pluging has been renamed from `homebridge-roomba2` to `homebridge-roomba` now that it is a scoped plugin.
-- Compaitable with Homebridge `v2.0.0`
 
 #### Other Changes
 - Housekeeping and updated dependencies.

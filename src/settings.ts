@@ -1,9 +1,9 @@
 /**
- * This is the name of the accessory that users will use to create an accessory in the Homebridge config.json
+ * This is the name of the platform that users will use to register the plugin in the Homebridge config.json
  */
-export const ACCESSORY_NAME = 'Roomba2'
+export const PLATFORM_NAME = 'Roomba'
 
 /**
  * This must match the name of your plugin as defined the package.json
  */
-export const PLUGIN_NAME = 'homebridge-roomba'
+export const PLUGIN_NAME = '@homebridge-plugins/homebridge-roomba'

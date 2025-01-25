@@ -1,7 +1,8 @@
 import type { RobotMission, RobotState, Roomba } from 'dorita980'
-import type { AccessoryConfig, AccessoryPlugin, API, CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicValue, Logging, Service } from 'homebridge'
+import type { AccessoryPlugin, API, CharacteristicGetCallback, CharacteristicSetCallback, CharacteristicValue, Logging, PlatformAccessory, Service, WithUUID } from 'homebridge'
 
-import { readFileSync } from 'node:fs'
+import type RoombaPlatform from './platform.js'
+import type { DeviceConfig, RoombaPlatformConfig } from './types.js'
 
 import dorita980 from 'dorita980'
 
@@ -140,72 +141,104 @@ export default class RoombaAccessory implements AccessoryPlugin {
    */
   private currentCipherIndex = 0
 
-  public constructor(log: Logging, config: AccessoryConfig, api: API) {
+  public constructor(
+    readonly platform: RoombaPlatform,
+    accessory: PlatformAccessory,
+    log: Logging,
+    device: DeviceConfig,
+    config: RoombaPlatformConfig,
+    api: API,
+  ) {
     this.api = api
     this.debug = !!config.debug
 
-    this.log = !this.debug
-      ? log
-      : Object.assign(log, {
-          debug: (message: string, ...parameters: unknown[]) => {
-            log.info(`DEBUG: ${message}`, ...parameters)
-          },
-        })
-    this.name = config.name
-    this.model = config.model
-    this.serialnum = config.serialnum
-    this.blid = config.blid
-    this.robotpwd = config.robotpwd
-    this.ipaddress = config.ipaddress
-    this.cleanBehaviour = config.cleanBehaviour !== undefined ? config.cleanBehaviour : 'everywhere'
-    this.mission = config.mission
-    this.stopBehaviour = config.stopBehaviour !== undefined ? config.stopBehaviour : 'home'
-    this.idlePollIntervalMillis = (config.idleWatchInterval * 60_000) || 900_000
-    this.version = getVersion()
+    this.log = !this.debug ? log : Object.assign(log, { debug: (message: string, ...parameters: unknown[]) => { log.info(`DEBUG: ${message}`, ...parameters) } })
+    this.name = device.name
+    this.model = device.model
+    this.serialnum = device.serialnum ?? device.ipaddress
+    this.blid = device.blid
+    this.robotpwd = device.robotpwd
+    this.ipaddress = device.ipaddress
+    this.version = this.platform.version ?? '0.0.0'
+    this.cleanBehaviour = device.cleanBehaviour !== undefined ? device.cleanBehaviour : 'everywhere'
+    this.mission = device.mission || { pmap_id: 'local' }
+    this.stopBehaviour = device.stopBehaviour !== undefined ? device.stopBehaviour : 'home'
+    this.idlePollIntervalMillis = (device.idleWatchInterval * 60_000) || 900_000
 
-    const showDockAsContactSensor = config.dockContactSensor === undefined ? true : config.dockContactSensor
-    const showRunningAsContactSensor = config.runningContactSensor
-    const showBinStatusAsContactSensor = config.binContactSensor
-    const showDockingAsContactSensor = config.dockingContactSensor
-    const showHomeSwitch = config.homeSwitch
-    const showTankAsFilterMaintenance = config.tankContactSensor
+    const showDockAsContactSensor = device.dockContactSensor === undefined ? true : device.dockContactSensor
+    const showRunningAsContactSensor = device.runningContactSensor
+    const showBinStatusAsContactSensor = device.binContactSensor
+    const showDockingAsContactSensor = device.dockingContactSensor
+    const showHomeSwitch = device.homeSwitch
+    const showTankAsFilterMaintenance = device.tankContactSensor
 
     const Service = api.hap.Service
-
-    this.accessoryInfo = new Service.AccessoryInformation()
-    this.filterMaintenance = new Service.FilterMaintenance(this.name)
-    this.switchService = new Service.Switch(this.name)
-    this.switchService.setPrimaryService(true)
-    this.batteryService = new Service.Battery(this.name)
-    if (showDockAsContactSensor) {
-      this.dockService = new Service.ContactSensor(`${this.name} Dock`, 'docked')
-    }
-    if (showRunningAsContactSensor) {
-      this.runningService = new Service.ContactSensor(`${this.name} Running`, 'running')
-    }
-    if (showBinStatusAsContactSensor) {
-      this.binService = new Service.ContactSensor(`${this.name} Bin Full`, 'Full')
-    }
-    if (showDockingAsContactSensor) {
-      this.dockingService = new Service.ContactSensor(`${this.name} Docking`, 'docking')
-    }
-    if (showTankAsFilterMaintenance) {
-      this.tankService = new Service.FilterMaintenance(`${this.name} Water Tank Empty`, 'Empty')
-    }
-    if (showHomeSwitch) {
-      this.homeService = new Service.Switch(`${this.name} Home`, 'returning')
-    }
-
     const Characteristic = this.api.hap.Characteristic
 
-    this.accessoryInfo.setCharacteristic(Characteristic.Manufacturer, 'iRobot')
-    this.accessoryInfo.setCharacteristic(Characteristic.SerialNumber, this.serialnum)
-    this.accessoryInfo.setCharacteristic(Characteristic.Identify, true)
-    this.accessoryInfo.setCharacteristic(Characteristic.Name, this.name)
-    this.accessoryInfo.setCharacteristic(Characteristic.Model, this.model)
-    this.accessoryInfo.setCharacteristic(Characteristic.FirmwareRevision, this.version)
+    function removeServiceIfPresent<T extends WithUUID<typeof Service>>(uuid: string | T, subType: string): void {
+      const service = accessory.getServiceById(uuid, subType)
+      if (service) {
+        accessory.removeService(service)
+      }
+    }
+
+    this.accessoryInfo = accessory.getService(Service.AccessoryInformation) || accessory.addService(Service.AccessoryInformation)
+    this.filterMaintenance = accessory.getService(Service.FilterMaintenance) || accessory.addService(Service.FilterMaintenance)
+    this.switchService = accessory.getService(this.name) || accessory.addService(Service.Switch, this.name)
+    this.switchService.setPrimaryService(true)
+    this.batteryService = accessory.getService(Service.Battery) || accessory.addService(Service.Battery)
+
+    const DOCK_SERVICE_NAME = `${this.name} Dock`
+    const RUNNING_SERVICE_NAME = `${this.name} Running`
+    const BIN_SERVICE_NAME = `${this.name} Bin Full`
+    const DOCKING_SERVICE_NAME = `${this.name} Docking`
+    const TANK_SERVICE_NAME = `${this.name} Water Tank Empty`
+    const HOME_SERVICE_NAME = `${this.name} Home`
+
+    if (showDockAsContactSensor) {
+      this.dockService = accessory.getServiceById(Service.ContactSensor, 'docked') || accessory.addService(Service.ContactSensor, DOCK_SERVICE_NAME, 'docked')
+    } else {
+      removeServiceIfPresent(Service.ContactSensor, 'docked')
+    }
+    if (showRunningAsContactSensor) {
+      this.runningService = accessory.getServiceById(Service.ContactSensor, 'running') || accessory.addService(Service.ContactSensor, RUNNING_SERVICE_NAME, 'running')
+    } else {
+      removeServiceIfPresent(Service.ContactSensor, 'running')
+    }
+    if (showBinStatusAsContactSensor) {
+      this.binService = accessory.getServiceById(Service.ContactSensor, 'Full') || accessory.addService(Service.ContactSensor, BIN_SERVICE_NAME, 'Full')
+    } else {
+      removeServiceIfPresent(Service.ContactSensor, 'Full')
+    }
+    if (showDockingAsContactSensor) {
+      this.dockingService = accessory.getServiceById(Service.ContactSensor, 'docking') || accessory.addService(Service.ContactSensor, DOCKING_SERVICE_NAME, 'docking')
+    } else {
+      removeServiceIfPresent(Service.ContactSensor, 'docking')
+    }
+    if (showTankAsFilterMaintenance) {
+      this.tankService = accessory.getServiceById(Service.FilterMaintenance, 'Empty') || accessory.addService(Service.FilterMaintenance, TANK_SERVICE_NAME, 'Empty')
+    } else {
+      removeServiceIfPresent(Service.FilterMaintenance, 'Empty')
+    }
+    if (showHomeSwitch) {
+      this.homeService = accessory.getServiceById(Service.Switch, 'returning') || accessory.addService(Service.Switch, HOME_SERVICE_NAME, 'returning')
+    } else {
+      removeServiceIfPresent(Service.Switch, 'returning')
+    }
+
+    // Set accessory information
+    this.accessoryInfo
+      .setCharacteristic(Characteristic.Manufacturer, 'iRobot')
+      .setCharacteristic(Characteristic.AppMatchingIdentifier, 'id1012014442')
+      .setCharacteristic(Characteristic.SerialNumber, this.serialnum)
+      .setCharacteristic(Characteristic.Identify, true)
+      .setCharacteristic(Characteristic.Name, this.name)
+      .setCharacteristic(Characteristic.Model, this.model)
+      .setCharacteristic(Characteristic.ProductData, this.blid)
+      .setCharacteristic(Characteristic.FirmwareRevision, this.version)
 
     this.switchService
+      .setCharacteristic(Characteristic.Name, this.name)
       .getCharacteristic(Characteristic.On)
       .on('set', this.setRunningState.bind(this))
       .on('get', this.createCharacteristicGetter('Running status', this.runningStatus))
@@ -224,32 +257,38 @@ export default class RoombaAccessory implements AccessoryPlugin {
 
     if (this.dockService) {
       this.dockService
+        .setCharacteristic(Characteristic.Name, DOCK_SERVICE_NAME)
         .getCharacteristic(Characteristic.ContactSensorState)
         .on('get', this.createCharacteristicGetter('Dock status', this.dockedStatus))
     }
     if (this.runningService) {
       this.runningService
+        .setCharacteristic(Characteristic.Name, RUNNING_SERVICE_NAME)
         .getCharacteristic(Characteristic.ContactSensorState)
         .on('get', this.createCharacteristicGetter('Running status', this.runningStatus))
     }
     if (this.binService) {
       this.binService
+        .setCharacteristic(Characteristic.Name, BIN_SERVICE_NAME)
         .getCharacteristic(Characteristic.ContactSensorState)
         .on('get', this.createCharacteristicGetter('Bin status', this.binStatus))
     }
     if (this.dockingService) {
       this.dockingService
+        .setCharacteristic(Characteristic.Name, DOCKING_SERVICE_NAME)
         .getCharacteristic(Characteristic.ContactSensorState)
         .on('get', this.createCharacteristicGetter('Docking status', this.dockingStatus))
     }
     if (this.homeService) {
       this.homeService
+        .setCharacteristic(Characteristic.Name, HOME_SERVICE_NAME)
         .getCharacteristic(Characteristic.On)
         .on('set', this.setDockingState.bind(this))
         .on('get', this.createCharacteristicGetter('Returning Home', this.dockingStatus))
     }
     if (this.tankService) {
       this.tankService
+        .setCharacteristic(Characteristic.Name, TANK_SERVICE_NAME)
         .getCharacteristic(Characteristic.FilterChangeIndication)
         .on('get', this.createCharacteristicGetter('Tank status', this.tankStatus))
       this.tankService
@@ -941,18 +980,4 @@ function shouldTryDifferentCipher(error: Error) {
     return true
   }
   return false
-}
-
-/**
- * Asynchronously retrieves the version of the plugin from the package.json file.
- *
- * This method reads the package.json file located in the parent directory,
- * parses its content to extract the version, and logs the version using the debug logger.
- * The extracted version is then assigned to the `version` property of the class.
- *
- * @returns {Promise<void>} A promise that resolves when the version has been retrieved and logged.
- */
-function getVersion(): string {
-  const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8'))
-  return version
 }

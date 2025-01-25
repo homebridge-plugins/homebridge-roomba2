@@ -1,228 +1,280 @@
 {
-    "pluginAlias": "Roomba2",
-    "pluginType": "accessory",
+    "pluginAlias": "Roomba",
+    "pluginType": "platform",
+    "customUi": true,
+    "singular": true,
+    "customUiPath": "./dist/homebridge-ui",
+    "headerDisplay": "For more information and help please consult the [README](https://github.com/homebridge-plugins/homebridge-roomba#setup).",
     "schema": {
         "type": "object",
         "properties": {
             "name": {
                 "type": "string",
                 "title": "Name",
+                "default": "NoIP",
                 "required": true
             },
-            "model": {
-                "type": "string",
-                "title": "Model",
-                "required": true
-            },
-            "serialnum": {
-                "type": "string",
-                "title": "Serial Number",
-                "required": false
-            },
-            "blid": {
-                "type": "string",
-                "title": "blid",
-                "required": true
-            },
-            "robotpwd": {
-                "type": "string",
-                "title": "Robot Password",
-                "required": true
-            },
-            "ipaddress": {
-                "type": "string",
-                "title": "IP Address",
-                "required": true
+            "devices": {
+                "type": "array",
+                "items": {
+                    "title": "Devices",
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "title": "Robot Vacuum Name",
+                            "required": true
+                        },
+                        "model": {
+                            "type": "string",
+                            "title": "Robot Vacuum Model",
+                            "required": true
+                        },
+                        "serialnum": {
+                            "type": "string",
+                            "title": "Robot Vacuum Serial Number",
+                            "required": false
+                        },
+                        "blid": {
+                            "type": "string",
+                            "title": "Robot Vacuum BLID",
+                            "required": true
+                        },
+                        "robotpwd": {
+                            "type": "string",
+                            "title": "Robot Vacuum Password",
+                            "required": true
+                        },
+                        "ipaddress": {
+                            "type": "string",
+                            "title": "Robot Vacuum IP Address",
+                            "required": true
+                        },
+                        "dockContactSensor": {
+                            "type": "boolean",
+                            "title": "Enable Dock Contact Sensor",
+                            "default": true,
+                            "required": false
+                        },
+                        "runningContactSensor": {
+                            "type": "boolean",
+                            "title": "Enable Running Contact Sensor",
+                            "required": false
+                        },
+                        "binContactSensor": {
+                            "type": "boolean",
+                            "title": "Enable Bin Full Contact Sensor",
+                            "required": false
+                        },
+                        "dockingContactSensor": {
+                            "type": "boolean",
+                            "title": "Returning Home Contact Sensor",
+                            "required": false
+                        },
+                        "tankContactSensor": {
+                            "type": "boolean",
+                            "title": "Braava Water Tank Contact Sensor",
+                            "required": false
+                        },
+                        "homeSwitch": {
+                            "type": "boolean",
+                            "title": "Home Switch",
+                            "required": false
+                        },
+                        "cleanBehaviour": {
+                            "type": "string",
+                            "title": "When Roomba is turned on",
+                            "required": true,
+                            "default": "everywhere",
+                            "oneOf": [
+                                {
+                                    "title": "Clean everywhere",
+                                    "enum": [
+                                        "everywhere"
+                                    ]
+                                },
+                                {
+                                    "title": "Clean specific rooms",
+                                    "enum": [
+                                        "rooms"
+                                    ]
+                                }
+                            ]
+                        },
+                        "mission": {
+                            "type": "object",
+                            "title": "Mission Info",
+                            "properties": {
+                                "ordered": {
+                                    "type": "number",
+                                    "title": "Clean rooms in order",
+                                    "default": 1,
+                                    "required": true,
+                                    "oneOf": [
+                                        {
+                                            "title": "Yes",
+                                            "enum": [
+                                                1
+                                            ]
+                                        },
+                                        {
+                                            "title": "No",
+                                            "enum": [
+                                                0
+                                            ]
+                                        }
+                                    ],
+                                    "condition": {
+                                        "functionBody": "return (model.devices && model.devices[arrayIndices].cleanBehaviour === 'rooms');"
+                                    }
+                                },
+                                "pmap_id": {
+                                    "type": "string",
+                                    "title": "Pmap Id",
+                                    "required": true,
+                                    "condition": {
+                                        "functionBody": "return (model.devices && model.devices[arrayIndices].cleanBehaviour === 'rooms');"
+                                    }
+                                },
+                                "regions": {
+                                    "type": "array",
+                                    "title": "Rooms to be cleaned",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "region_id": {
+                                                "type": "string",
+                                                "title": "Region Id",
+                                                "required": true
+                                            },
+                                            "type": {
+                                                "type": "string",
+                                                "title": "Type",
+                                                "default": "rid",
+                                                "required": true
+                                            },
+                                            "params": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "noAutoPasses": {
+                                                        "type": "boolean",
+                                                        "required": false,
+                                                        "default": false,
+                                                        "title": "Specify Number of Cleaning Passes"
+                                                    },
+                                                    "twoPass": {
+                                                        "type": "boolean",
+                                                        "required": false,
+                                                        "default": false,
+                                                        "title": "Two Passes"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "condition": {
+                                        "functionBody": "return (model.devices && model.devices[arrayIndices].cleanBehaviour === 'rooms');"
+                                    }
+                                },
+                                "user_pmapv_id": {
+                                    "type": "string",
+                                    "title": "User Pmapv Id",
+                                    "required": true,
+                                    "condition": {
+                                        "functionBody": "return (model.devices && model.devices[arrayIndices].cleanBehaviour === 'rooms');"
+                                    }
+                                }
+                            }
+                        },
+                        "stopBehaviour": {
+                            "type": "string",
+                            "title": "When Roomba is turned off",
+                            "required": true,
+                            "default": "home",
+                            "oneOf": [
+                                {
+                                    "title": "Home",
+                                    "enum": [
+                                        "home"
+                                    ]
+                                },
+                                {
+                                    "title": "Pause",
+                                    "enum": [
+                                        "pause"
+                                    ]
+                                }
+                            ]
+                        },
+                        "idleWatchInterval": {
+                            "type": "integer",
+                            "title": "Idle Poll Interval (minutes)",
+                            "description": "How often to poll Roomba's status when it is idle. Defaults to 15 minutes.",
+                            "required": false
+                        }
+                    }
+                }
             },
             "debug": {
                 "type": "boolean",
                 "title": "Debug logging",
                 "required": false
-            },
-            "dockContactSensor": {
-                "type": "boolean",
-                "title": "Home",
-                "default": true,
-                "required": false
-            },
-            "runningContactSensor": {
-                "type": "boolean",
-                "title": "Running",
-                "required": false
-            },
-            "binContactSensor": {
-                "type": "boolean",
-                "title": "Bin Full",
-                "required": false
-            },
-            "dockingContactSensor": {
-                "type": "boolean",
-                "title": "Returning Home",
-                "required": false
-            },
-            "tankContactSensor": {
-                "type": "boolean",
-                "title": "Braava Water Tank",
-                "required": false
-            },
-            "homeSwitch": {
-                "type": "boolean",
-                "title": "Home",
-                "required": false
-            },
-            "cleanBehaviour": {
-                "type": "string",
-                "title": "When Roomba is turned on",
-                "required": true,
-                "default": "everywhere",
-                "oneOf": [
-                    { "title": "Clean everywhere", "enum": ["everywhere"] },
-                    { "title": "Clean specific rooms", "enum": ["rooms"] }
-                ]
-            },
-            "mission": {
-                "type": "object",
-                "title": "Mission Info",
-                "properties": {
-                    "ordered": {
-                        "type": "number",
-                        "title": "Clean rooms in order",
-                        "default": 1,
-                        "required": true,
-                        "oneOf": [
-                            { "title": "Yes", "enum": [1] },
-                            { "title": "No", "enum": [0] }
-                            ],
-                        "condition": {
-                            "functionBody": "return model.cleanBehaviour === 'rooms';"
-                            }
-                    },
-                    "pmap_id": {
-                        "type": "string",
-                        "title": "Pmap Id",
-                        "required": true,
-                        "condition": {
-                            "functionBody": "return model.cleanBehaviour === 'rooms';"
-                            }
-                    },
-                    "regions": {
-                        "type": "array",
-                        "title": "Rooms to be cleaned",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "region_id": {
-                                    "type": "string",
-                                    "title": "Region Id",
-                                    "required": true
-                                },
-                                "type": {
-                                    "type": "string",
-                                    "title": "Type",
-                                    "default": "rid",
-                                    "required": true
-                                },
-                                "params":{
-                                    "type": "object",
-                                    "properties": {
-                                        "noAutoPasses": {
-                                            "type": "boolean",
-                                            "required": false,
-                                            "default": false,
-                                            "title": "Specify Number of Cleaning Passes"
-                                        },
-                                        "twoPass": {
-                                            "type": "boolean",
-                                            "required": false,
-                                            "default": false,
-                                            "title": "Two Passes"
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "condition": {
-                            "functionBody": "return model.cleanBehaviour === 'rooms';"
-                            }
-                    },
-                    "user_pmapv_id": {
-                        "type": "string",
-                        "title": "User Pmapv Id",
-                        "required": true,
-                        "condition": {
-                            "functionBody": "return model.cleanBehaviour === 'rooms';"
-                            }
-                    }
-                }
-            },
-            "stopBehaviour": {
-                "type": "string",
-                "title": "When Roomba is turned off",
-                "required": true,
-                "default": "home",
-                "oneOf": [
-                    { "title": "Home", "enum": ["home"] },
-                    { "title": "Pause", "enum": ["pause"] }
-                ]
-            },
-            "idleWatchInterval": {
-                "type": "integer",
-                "title": "Idle Poll Interval (minutes)",
-                "description": "How often to poll Roomba's status when it is idle. Defaults to 15 minutes.",
-                "required": false
             }
         }
     },
-    "headerDisplay": "For more information and help please consult the [README](https://github.com/homebridge-plugins/homebridge-roomba#setup).",
     "layout": [
-        { "type": "section", "title": "Display Details", "items": [
-            { "type": "help", "helpvalue": "<span class='help-block'>Details about your Roomba to be displayed in the Home app. You can make up the values you enter&nbsp;here.</span>" },
-            "name", "model", "serialnum"
-        ] },
-        { "type": "section", "title": "Connection", "items": [
-            { "type": "help", "helpvalue": "<span class='help-block'>Please consult the <a href='https://github.com/homebridge-plugins/homebridge-roomba#setup' target='_blank'>README</a> to obtain these connection values for your&nbsp;Roomba.</span>" },
-            "blid", "robotpwd", "ipaddress"
-        ] },
-        { "type": "section", "title": "Switches", "items": [
-            { "type": "help", "helpvalue": "<span class='help-block'>Switches add additional buttons in the Home app to control Roomba’s behaviour.</span>" },
-            "homeSwitch"
-        ] },
-        { "type": "section", "title": "Contact Sensors", "items": [
-            { "type": "help", "helpvalue": "<span class='help-block'>Contact sensors appear in the Home app and show what state Roomba is in.</span>" },
-            "dockContactSensor", "dockingContactSensor", "runningContactSensor", "binContactSensor", "tankContactSensor"
-        ] },
-        { "type": "section", "title": "Behavior", "items": [ "cleanBehaviour", "mission.pmap_id", "mission.user_pmapv_id", {
-			"key": "mission.regions",
-			"type": "array",
-			"notitle": true,
-			"items": [
-				{
-					"type": "div",
-					"displayFlex": true,
-					"flex-direction": "row",
-					"items": [
-						{
-							"key": "mission.regions[].region_id",
-							"notitle": true,
-							"placeholder": "Region Id"
-						},
-						{
-							"key": "mission.regions[].type",
-							"notitle": true,
-							"placeholder": "Type"
-						},
-						{
-						    "key": "mission.regions[].params.noAutoPasses"
-						},
-						{
-						    "key": "mission.regions[].params.twoPass",  
-						    "condition": "mission.regions[arrayIndex].params.noAutoPasses"
-						}
-					]
-				}
-			]
-		},
-		"mission.ordered", "stopBehaviour" ] },
-        { "type": "section", "title": "Additional Options", "items": [ "idleWatchInterval", "debug" ] }
+        {
+            "key": "devices",
+            "notitle": false,
+            "type": "tabarray",
+            "title": "{{ value.name || value.ipaddress || value.serialnum || 'New Vacuum' }}",
+            "expandable": true,
+            "expanded": false,
+            "orderable": false,
+            "items": [
+                "devices[].name",
+                "devices[].model",
+                "devices[].serialnum",
+                "devices[].blid",
+                "devices[].robotpwd",
+                "devices[].ipaddress",
+                "devices[].homeSwitch",
+                "devices[].dockContactSensor",
+                "devices[].dockingContactSensor",
+                "devices[].runningContactSensor",
+                "devices[].binContactSensor",
+                "devices[].tankContactSensor",
+                "devices[].idleWatchInterval",
+                "devices[].cleanBehaviour",
+                {
+                    "key": "devices[].mission",
+                    "type": "fieldset",
+                    "title": "Mission Settings",
+                    "expandable": true,
+                    "expanded": false,
+                    "items": [
+                        "devices[].mission.pmap_id",
+                        "devices[].mission.user_pmapv_id",
+                        "devices[].mission.regions",
+                        "devices[].mission.regions[].region_id",
+                        "devices[].mission.regions[].type",
+                        "devices[].mission.regions[].params.noAutoPasses",
+                        "devices[].mission.regions[].params.twoPass",
+                        "devices[].mission.ordered"
+                    ]
+                },
+                "devices[].stopBehaviour",
+                "devices[].idleWatchInterval"
+            ]
+        },
+        {
+            "type": "fieldset",
+            "title": "Advanced Settings",
+            "expandable": true,
+            "expanded": false,
+            "items": [
+                "debug"
+            ]
+        }
     ]
 }

@@ -67,7 +67,7 @@ body:
       required: true
   - type: input
     attributes:
-      label: Homebridge Roomba2 Plugin Version
+      label: Homebridge Roomba Plugin Version
       placeholder: v1.1.0
     validations:
       required: true

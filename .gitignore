@@ -1,6 +1,7 @@
 # Ignore compiled code
 
-dist
+/dist
+node_modules
 
 # ------------- Defaults -------------
 
@@ -157,3 +158,5 @@ dist
 
 persist/
 .DS_Store
+*.DS_Store
+/homebridge-roomba-*.tgz

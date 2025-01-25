@@ -14,7 +14,6 @@ export default antfu(
       'import/order': 0,
       'jsdoc/check-alignment': 'error',
       'jsdoc/check-line-alignment': 'error',
-      'no-undef': 0, // Disable as TypeScript provides this check and eslint gets it wrong for NodeJS.Timeout
       'perfectionist/sort-exports': 'error',
       'perfectionist/sort-imports': [
         'error',
@@ -42,10 +41,10 @@ export default antfu(
       'style/quote-props': ['error', 'consistent-as-needed'],
       'test/no-only-tests': 'error',
       'unicorn/no-useless-spread': 'error',
-      'unused-imports/no-unused-imports': ['error', { caughtErrors: 'none' }],
-      'unused-imports/no-unused-vars': 0, // Disable the no-unused-vars rule as it mistakenly identifies callback parameters
+      'unused-imports/no-unused-vars': ['error', { caughtErrors: 'none' }],
       'no-new': 0, // Disable the no-new rule
       'new-cap': 0, // Disable the new-cap rule
+      'no-undef': 0, // Disable the no-undef rule
     },
   },
 )

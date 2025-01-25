@@ -1,6 +1,6 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Homebridge Discord Channel for Roomba2
+  - name: Homebridge Discord Channel for Roomba
     url: https://discord.gg/8fpZA4S
     about: Please ask and answer questions here.
   - name: homebridge-roomba - Pull Requests

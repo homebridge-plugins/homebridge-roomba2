@@ -39,7 +39,7 @@ Show your homebridge config.json here
 * **Node.js Version**: <!-- node -v -->
 * **NPM Version**: <!-- npm -v -->
 * **Homebridge Version**: <!-- homebridge -V -->
-* **Homebridge Roomba2 Plugin Version**:
+* **Homebridge Roomba Plugin Version**:
 * **Homebridge Config UI X Version**:
 * **Operating System**: Raspbian / Ubuntu / Debian / Windows / macOS / Docker
 * **Process Supervisor**: Docker / Systemd / init.d / pm2 / launchctl / hb-service / other / none

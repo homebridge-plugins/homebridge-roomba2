@@ -27,7 +27,7 @@ jobs:
     if: ${{ github.repository == 'homebridge-plugins/homebridge-roomba' }}
     uses: homebridge/.github/.github/workflows/discord-webhooks.yml@latest
     with:
-      title: "Roomba2 Release"
+      title: "Roomba Release"
       description: |
         Version `v${{ needs.publish.outputs.NPM_VERSION }}`
       url: "https://github.com/homebridge-plugins/homebridge-roomba/releases/tag/v${{ needs.publish.outputs.NPM_VERSION }}"

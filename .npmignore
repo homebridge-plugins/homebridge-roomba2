@@ -1,3 +1,18 @@
+/.changeset
+/.git-blame-ignore-revs
+/.github
+/.nvmrc
+/.vscode
+/*.md
+/*.tgz
+/docs
+/eslint.*
+/homebridge-roomba-*.tgz
+/nodemon.json
+/src
+/test
+/tsconfig.json
+/typedoc.json
 # Ignore source code
 
 src
