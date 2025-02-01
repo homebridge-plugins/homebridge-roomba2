@@ -15,6 +15,7 @@ export const PLUGIN_NAME = '@homebridge-plugins/homebridge-roomba'
 export interface RoombaPlatformConfig extends PlatformConfig {
     devices: DeviceConfig[]
     disableDiscovery?: boolean
+    idleWatchInterval?: number
     debug?: boolean
 }
 
@@ -32,7 +33,7 @@ export interface DeviceConfig extends Robot {
      * Idle Poll Interval (minutes).
      * How often to poll Roomba's status when it is idle.
      */
-    idleWatchInterval: number
+    idleWatchInterval?: number
 
     dockContactSensor?: boolean
     runningContactSensor?: boolean

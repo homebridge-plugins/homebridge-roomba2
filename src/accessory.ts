@@ -165,11 +165,9 @@ export default class RoombaAccessory implements AccessoryPlugin {
         },
       })
     }
-    const deviceInfo = device.info ?? undefined
-    this.log.debug('device info: %s', JSON.stringify(deviceInfo))
     this.name = device.name
     this.model = device.model
-    this.serialnum = deviceInfo?.mac ?? device.ipaddress
+    this.serialnum = typeof device.info === 'object' ? device.info.serialNum ?? 'unknown' : device.ipaddress ?? 'unknown'
     this.blid = device.blid
     this.robotpwd = device.password
     this.ipaddress = device.ipaddress ?? device.ip
@@ -177,8 +175,7 @@ export default class RoombaAccessory implements AccessoryPlugin {
     this.cleanBehaviour = device.cleanBehaviour !== undefined ? device.cleanBehaviour : 'everywhere'
     this.mission = device.mission || { pmap_id: 'local' }
     this.stopBehaviour = device.stopBehaviour !== undefined ? device.stopBehaviour : 'home'
-    this.idlePollIntervalMillis = (device.idleWatchInterval * 60_000) || 900_000
-
+    this.idlePollIntervalMillis = device.idleWatchInterval ? (device.idleWatchInterval * 60_000) : config.idleWatchInterval ? (config.idleWatchInterval * 60_000) : 900_000
     const showDockAsContactSensor = device.dockContactSensor === undefined ? true : device.dockContactSensor
     const showRunningAsContactSensor = device.runningContactSensor
     const showBinStatusAsContactSensor = device.binContactSensor

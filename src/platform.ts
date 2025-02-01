@@ -73,7 +73,7 @@ export default class RoombaPlatform implements DynamicPlatformPlugin {
         ...device,
         cleanBehaviour: this.config.cleanBehaviour,
         stopBehaviour: this.config.stopBehaviour,
-        idleWatchInterval: this.config.idleWatchInterval,
+        idleWatchInterval: this.config.idleWatchInterval ?? 900_000,
       }))
     } else {
       this.log.error('No configuration provided for devices.')
